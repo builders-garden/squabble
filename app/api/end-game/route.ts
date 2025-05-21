@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma/client";
+import { checkAgentSecret } from "@/lib/auth/agentAuth";
 
 export async function POST(req: NextRequest) {
+  if (!checkAgentSecret(req)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { id, winner } = await req.json();
 
   if (!id || typeof winner !== "string") {
@@ -51,6 +56,6 @@ export async function POST(req: NextRequest) {
   ]);
 
   //TODO: add escrow payment logic from the Agent here
-  
+
   return NextResponse.json({ success: true });
 }

@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma/client";
 import { v4 as uuidv4 } from "uuid";
+import { checkAgentSecret } from "@/lib/auth/agentAuth";
 
 export async function POST(req: NextRequest) {
+  if (!checkAgentSecret(req)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { usernames, betAmount, creator } = await req.json();
 
   if (

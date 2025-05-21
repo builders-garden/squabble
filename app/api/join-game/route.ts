@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma/client";
+import { checkAgentSecret } from "@/lib/auth/agentAuth";
 
 export async function POST(req: NextRequest) {
+  if (!checkAgentSecret(req)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const { id, username, paymentHash } = await req.json();
 
   if (!id || typeof username !== "string") {
