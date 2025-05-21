@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma/client";
 
 export async function POST(req: NextRequest) {
-  const { id, username, paymentHash } = await req.json();
+  const { id, username } = await req.json();
 
   if (!id || typeof username !== "string") {
     return NextResponse.json(
@@ -11,7 +11,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Find the game and check status
+  // Find the game
   const game = await prisma.game.findUnique({ where: { id } });
   if (!game) {
     return NextResponse.json({ error: "Game not found" }, { status: 404 });
@@ -20,37 +20,27 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Game is not pending" }, { status: 400 });
   }
 
-  // If betAmount > 0, paymentHash is required
-  if (game.betAmount > 0 && !paymentHash) {
-    return NextResponse.json(
-      { error: "Payment hash required for this game" },
-      { status: 400 }
-    );
-  }
-
-  // Update participant
-  const participant = await prisma.gameParticipant.updateMany({
-    where: { gameId: id, username },
-    data: {
-      joined: true,
-      paymentHash: paymentHash,
-      paid: game.betAmount > 0 ? true : false,
-    },
+  // Find the participant
+  const participant = await prisma.gameParticipant.findFirst({
+    where: { gameId: id, username, joined: true },
   });
-
-  if (participant.count === 0) {
+  if (!participant) {
     return NextResponse.json(
-      { error: "Participant not found in this game" },
+      { error: "Participant not found or has not joined" },
       { status: 404 }
     );
   }
 
-  if (game.betAmount > 0) {
+  // Before deleting the participant, check if they paid
+  if (participant.paid && game.betAmount > 0) {
     await prisma.game.update({
       where: { id },
-      data: { totalFunds: { increment: game.betAmount } },
+      data: { totalFunds: { decrement: game.betAmount } },
     });
   }
+
+  // Remove the participant
+  await prisma.gameParticipant.delete({ where: { id: participant.id } });
 
   return NextResponse.json({ success: true });
 }

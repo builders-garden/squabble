@@ -3,6 +3,7 @@ model Game {
   status    GameStatus
   betAmount Float
   creator   String
+  totalFunds Float @default(0)
   participants GameParticipant[]
 }
 
