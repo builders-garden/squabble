@@ -4,6 +4,7 @@ model Game {
   betAmount Float
   creator   String
   totalFunds Float @default(0)
+  conversationId String
   participants GameParticipant[]
 }
 

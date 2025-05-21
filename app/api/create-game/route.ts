@@ -8,12 +8,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { usernames, betAmount, creator } = await req.json();
+  const { usernames, betAmount, creator, conversationId } = await req.json();
 
   if (
     !Array.isArray(usernames) ||
     typeof betAmount !== "number" ||
-    typeof creator !== "string"
+    typeof creator !== "string" ||
+    typeof conversationId !== "string"
   ) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
@@ -26,6 +27,7 @@ export async function POST(req: NextRequest) {
       status: "pending",
       betAmount,
       creator,
+      conversationId,
       participants: {
         create: usernames.map((username: string) => ({
           username,
