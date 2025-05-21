@@ -4,27 +4,36 @@ import { Metadata } from "next";
 
 const appUrl = env.NEXT_PUBLIC_URL;
 
-const frame = {
-  version: "next",
-  imageUrl: `${appUrl}/images/feed.png`,
-  button: {
-    title: "Launch App",
-    action: {
-      type: "launch_frame",
-      name: "Mini-app Starter",
-      url: appUrl,
-      splashImageUrl: `${appUrl}/images/splash.png`,
-      splashBackgroundColor: "#ffffff",
-    },
-  },
-};
+export async function generateMetadata(
+  {
+    params,
+  }: {
+    params: { id: string };
+  }
+): Promise<Metadata> {
+  const requestId = params.id;
+  const imageUrl = new URL(`${appUrl}/api/og/games/${requestId}`).toString();
 
-export async function generateMetadata(): Promise<Metadata> {
+  const frame = {
+    version: "next",
+    imageUrl,
+    button: {
+      title: "Launch App",
+      action: {
+        type: "launch_frame",
+        name: "Squabble",
+        url: `${appUrl}/games/${requestId}`,
+        splashImageUrl: `${appUrl}/images/icon.png`,
+        splashBackgroundColor: "#000000",
+      },
+    },
+  };
+
   return {
-    title: "Mini-app Starter",
+    title: "Squabble",
     openGraph: {
-      title: "Mini-app Starter",
-      description: "A starter for Farcastermini-apps",
+      title: "Squabble",
+      description: "Squabble is a game of words",
     },
     other: {
       "fc:frame": JSON.stringify(frame),
