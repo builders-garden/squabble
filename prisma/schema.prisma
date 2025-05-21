@@ -1,0 +1,24 @@
+model Game {
+  id        String   @id @default(uuid())
+  status    GameStatus
+  betAmount Float
+  creator   String
+  participants GameParticipant[]
+}
+
+model GameParticipant {
+  id        String   @id @default(uuid())
+  username  String
+  joined    Boolean  @default(false)
+  paid      Boolean  @default(false)
+  winner    Boolean  @default(false)
+  game      Game     @relation(fields: [gameId], references: [id])
+  gameId    String
+  paymentHash String?
+}
+
+enum GameStatus {
+  pending
+  ready
+  close
+}
