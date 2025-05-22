@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
 
   if (
     !Array.isArray(usernames) ||
-    typeof betAmount !== "number" ||
+    typeof betAmount !== "string" ||
     typeof creator !== "string" ||
     typeof conversationId !== "string"
   ) {
@@ -25,9 +25,10 @@ export async function POST(req: NextRequest) {
     data: {
       id: gameId,
       status: "pending",
-      betAmount,
+      betAmount: parseInt(betAmount),
       creator,
       conversationId,
+      createdAt: new Date(),
       participants: {
         create: usernames.map((username: string) => ({
           username,

@@ -6,6 +6,7 @@ model Game {
   totalFunds Float @default(0)
   conversationId String
   participants GameParticipant[]
+  createdAt DateTime @default(now())
 }
 
 model GameParticipant {
