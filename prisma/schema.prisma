@@ -23,7 +23,8 @@ model GameParticipant {
 enum GameStatus {
   pending
   ready
-  close
+  playing
+  finished
 }
 
 generator client {
