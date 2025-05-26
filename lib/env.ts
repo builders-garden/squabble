@@ -6,8 +6,6 @@ export const env = createEnv({
   server: {
     NEYNAR_API_KEY: z.string().min(1),
     JWT_SECRET: z.string().min(1),
-    REDIS_URL: z.string().min(1),
-    REDIS_TOKEN: z.string().min(1),
     TURSO_DATABASE_URL: z.string().min(1),
     TURSO_DATABASE_AUTH_TOKEN: z.string().min(1),
   },
