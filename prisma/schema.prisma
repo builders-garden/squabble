@@ -14,7 +14,9 @@ model Game {
   betAmount Float
   creator   String
   totalFunds Float @default(0)
+  conversationId String
   participants GameParticipant[]
+  createdAt DateTime @default(now())
 }
 
 model GameParticipant {
@@ -31,6 +33,7 @@ model GameParticipant {
 enum GameStatus {
   pending
   ready
-  close
+  playing
+  finished
 }
 
