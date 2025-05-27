@@ -204,7 +204,7 @@ export default function Live({
               onClick={() => handleLetterClick(l.letter)}
             >
               {l.letter}
-              <span className="absolute bottom-1 right-1 text-xs text-[#B5A16E] font-bold">
+              <span className="absolute bottom-1 right-1 text-xs text-[#B5A16E] font-medium">
                 {l.value}
               </span>
             </div>
