@@ -31,18 +31,18 @@ export async function getFarcasterManifest() {
       iconUrl: `${appUrl}/images/icon.png`,
       homeUrl: appUrl,
       imageUrl: `${appUrl}/images/feed.png`,
-      buttonTitle: `Launch App`,
+      buttonTitle: `Play Squabble`,
       splashImageUrl: `${appUrl}/images/splash.png`,
-      splashBackgroundColor: "#FFFFFF",
+      splashBackgroundColor: "#7DDAC3",
       webhookUrl: `${appUrl}/api/webhook`,
       // Metadata https://github.com/farcasterxyz/miniapps/discussions/191
-      subtitle: "Starter kit for mini-apps", // 30 characters, no emojis or special characters, short description under app name
-      description: "Starter kit for mini-apps", // 170 characters, no emojis or special characters, promotional message displayed on Mini App Page
+      subtitle: "Outspell your friends, in real time.", // 30 characters, no emojis or special characters, short description under app name
+      description: "Outspell your friends, in real time.", // 170 characters, no emojis or special characters, promotional message displayed on Mini App Page
       primaryCategory: "social",
       tags: ["mini-app", "starter"], // up to 5 tags, filtering/search tags
-      tagline: "Starter kit for mini-apps", // 30 characters, marketing tagline should be punchy and descriptive
+      tagline: "Outspell your friends, in real time.", // 30 characters, marketing tagline should be punchy and descriptive
       ogTitle: `${frameName}`, // 30 characters, app name + short tag, Title case, no emojis
-      ogDescription: "Starter kit for Farcastermini-apps", // 100 characters, summarize core benefits in 1-2 lines
+      ogDescription: "Outspell your friends, in real time.", // 100 characters, summarize core benefits in 1-2 lines
       screenshotUrls: [
         // 1284 x 2778, visual previews of the app, max 3 screenshots
         `${appUrl}/images/feed.png`,

@@ -17,13 +17,13 @@ export async function generateMetadata({
     version: "next",
     imageUrl,
     button: {
-      title: "Launch App",
+      title: "Play Squabble",
       action: {
         type: "launch_frame",
         name: "Squabble",
         url: `${appUrl}/games/${requestId}`,
         splashImageUrl: `${appUrl}/images/icon.png`,
-        splashBackgroundColor: "#000000",
+        splashBackgroundColor: "#7DDAC3",
       },
     },
   };
@@ -32,7 +32,7 @@ export async function generateMetadata({
     title: "Squabble",
     openGraph: {
       title: "Squabble",
-      description: "Squabble is a game of words and wits.",
+      description: "Outspell your friends, in real time.",
       images: [
         {
           url: imageUrl,

@@ -17,6 +17,7 @@
     "@frames.js/debugger": "^0.5.0",
     "@prisma/adapter-libsql": "^6.8.2",
     "@prisma/client": "^6.8.2",
+    "@solar-icons/react": "^1.0.1",
     "@t3-oss/env-nextjs": "^0.12.0",
     "@tanstack/react-query": "^5.64.2",
     "eruda": "^3.2.3",
