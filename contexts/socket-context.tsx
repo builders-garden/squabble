@@ -98,7 +98,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const emit = (key: string, data: any) => {
+  const emit = (key: string, data: never) => {
     if (socket.current?.connected) {
       socket.current.emit(key, data);
       console.log(`Sent message: ${key}`, data);
