@@ -111,13 +111,13 @@ export default function Live({
     <div className="min-h-screen bg-[#A0E9D9] flex flex-col items-center justify-between p-4">
       {/* Header */}
       <div className="flex flex-row items-center justify-between w-full">
-        <div className="flex flex-row items-center">
+        <div className="flex flex-row items-center justify-center">
           <Image
             src="/images/logo.png"
             alt="Squabble Logo"
-            className="w-[40px] mb-2"
-            width={40}
-            height={40}
+            className="w-[36px] mb-1"
+            width={36}
+            height={36}
           />
           <div
             className={`${luckiestGuy.className} text-xl text-white tracking-wider`}
@@ -142,7 +142,7 @@ export default function Live({
         {players.map((p, i) => (
           <div
             key={p.name}
-            className={`flex flex-row items-center bg-[#B5E9DA] rounded-xl px-1 py-1 gap-1 min-w-[70px] border-2 border-[#C8EFE3] ${
+            className={`flex flex-row items-center bg-[#B5E9DA] rounded-md px-1 py-1 gap-1 min-w-[70px] border-2 border-[#C8EFE3] ${
               i === 0 ? "ring-2 ring-yellow-200" : ""
             }`}
           >
