@@ -26,7 +26,7 @@ model Game {
   betAmount Float
   
   totalFunds Float @default(0)
-  conversationId String @unique // Add unique index since conversation IDs are unique
+  conversationId String?
   participants GameParticipant[]
   createdAt DateTime @default(now())
 
