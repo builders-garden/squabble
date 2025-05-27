@@ -1,54 +1,55 @@
 import { useSocket } from "@/contexts/socket-context";
+import { Player } from "@/types/socket-events";
 
 export default function useSocketUtils() {
-  const { emit } = useSocket();
+  const { emit, disconnect } = useSocket();
 
-  const joinRoom = (playerId: string, roomId: string) => {
-    emit("join_room", { playerId, roomId });
+  const connectToLobby = (player: Player, gameId: string) => {
+    emit("connect_to_lobby", { player, gameId });
   };
 
-  const leaveRoom = (playerId: string, roomId: string) => {
-    emit("leave_room", { playerId, roomId });
+  const disconnectFromLobby = () => {
+    disconnect();
   };
 
-  const playerReady = (playerId: string, gameId: string) => {
-    emit("player_ready", { playerId, gameId });
+  const playerReady = (player: Player, gameId: string) => {
+    emit("player_ready", { player, gameId });
   };
 
-  const startGame = (playerId: string, gameId: string) => {
-    emit("start_game", { playerId, gameId });
+  const playerStakeConfirmed = (player: Player, gameId: string, paymentHash: string) => {
+    emit("player_stake_confirmed", { player, gameId, paymentHash });
   };
 
-  const endGame = (gameId: string) => {
-    emit("end_game", { gameId });
+  const startGame = (player: Player, gameId: string) => {
+    emit("start_game", { player, gameId });
   };
 
-  const submitWord = (playerId: string, gameId: string, word: string, path: {x: number, y: number}[], isNew: boolean) => {
-    emit("submit_word", { playerId, gameId, word, path, isNew });
+  const submitWord = (player: Player, gameId: string, word: string, path: {x: number, y: number}[], isNew: boolean) => {
+    emit("submit_word", { player, gameId, word, path, isNew });
   };
 
   const placeLetter = (
-    playerId: string,
+    player: Player,
     gameId: string,
     letter: string,
     x: number,
     y: number
   ) => {
-    emit("place_letter", { playerId, gameId, letter, x, y });
+    emit("place_letter", { player, gameId, letter, x, y });
   };
 
-  const removeLetter = (playerId: string, gameId: string, x: number, y: number) => {
-    emit("remove_letter", { playerId, gameId, x, y });
+  const removeLetter = (player: Player, gameId: string, x: number, y: number) => {
+    emit("remove_letter", { player, gameId, x, y });
   };
 
   return {
     playerReady,
     startGame,
-    endGame,
     submitWord,
     placeLetter,
-    joinRoom,
-    leaveRoom,
     removeLetter,
+    connectToLobby,
+    disconnectFromLobby,
+    playerStakeConfirmed,
   };
 }

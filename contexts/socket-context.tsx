@@ -1,14 +1,26 @@
 import { env } from "@/lib/env";
+import { SocketEventMap } from "@/types/socket-events";
 import { createContext, useContext, useEffect, useRef } from "react";
 import { io, Socket } from "socket.io-client";
+
+type EventCallback<T> = (data: T) => void;
 
 interface SocketContextType {
   socket: React.RefObject<Socket | null>;
   connect: () => void;
   disconnect: () => void;
-  emit: (key: string, data: unknown) => void;
-  subscribe: (event: string, callback: (data: any) => void) => void;
-  unsubscribe: (event: string, callback: (data: any) => void) => void;
+  emit: <T extends keyof SocketEventMap>(
+    key: T,
+    data: SocketEventMap[T]
+  ) => void;
+  subscribe: <T extends keyof SocketEventMap>(
+    event: T,
+    callback: EventCallback<SocketEventMap[T]>
+  ) => void;
+  unsubscribe: <T extends keyof SocketEventMap>(
+    event: T,
+    callback: EventCallback<SocketEventMap[T]>
+  ) => void;
 }
 
 export const SocketContext = createContext<SocketContextType>({
@@ -24,30 +36,44 @@ export const useSocket = () => useContext(SocketContext);
 
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   const socket = useRef<Socket | null>(null);
-  // Registry for event listeners
-  const listeners = useRef<{ [event: string]: Array<(data: any) => void> }>({});
+  // Registry for event listeners with proper typing
+  const listeners = useRef<{
+    [K in keyof SocketEventMap]?: Array<EventCallback<SocketEventMap[K]>>;
+  }>({});
 
-  const subscribe = (event: string, callback: (data: any) => void) => {
+  const subscribe = <T extends keyof SocketEventMap>(
+    event: T,
+    callback: EventCallback<SocketEventMap[T]>
+  ) => {
     if (!listeners.current[event]) listeners.current[event] = [];
-    listeners.current[event].push(callback);
-  };
-
-  const unsubscribe = (event: string, callback: (data: any) => void) => {
-    if (!listeners.current[event]) return;
-    listeners.current[event] = listeners.current[event].filter(
-      (cb) => cb !== callback
+    (listeners.current[event] as Array<EventCallback<SocketEventMap[T]>>).push(
+      callback
     );
   };
 
-  const handleEvent = (event: string, data: any) => {
+  const unsubscribe = <T extends keyof SocketEventMap>(
+    event: T,
+    callback: EventCallback<SocketEventMap[T]>
+  ) => {
+    if (!listeners.current[event]) return;
+    (listeners.current[event] as Array<EventCallback<SocketEventMap[T]>>) = (
+      listeners.current[event] as Array<EventCallback<SocketEventMap[T]>>
+    ).filter((cb) => cb !== callback);
+  };
+
+  const handleEvent = <T extends keyof SocketEventMap>(
+    event: T,
+    data: SocketEventMap[T]
+  ) => {
     if (listeners.current[event]) {
-      listeners.current[event].forEach((cb) => cb(data));
+      (
+        listeners.current[event] as Array<EventCallback<SocketEventMap[T]>>
+      ).forEach((cb) => cb(data));
     }
   };
 
   const connect = () => {
     if (!socket.current) {
-      // Replace with your socket.io server URL
       socket.current = io(
         env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3001",
         {
@@ -71,23 +97,13 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       });
 
       // Listen to all game events and call handleEvent
-      [
-        "player_joined",
-        "player_left",
-        "lobby_update",
-        "game_started",
-        "letter_placed",
-        "letter_removed",
-        "word_submitted",
-        "conflict_resolution",
-        "score_update",
-        "timer_tick",
-        "game_ended",
-      ].forEach((event) => {
-        socket.current!.on(event, (data: any) => {
-          handleEvent(event, data);
-        });
-      });
+      (Object.keys(listeners.current) as Array<keyof SocketEventMap>).forEach(
+        (event) => {
+          socket.current!.on(event, (data: SocketEventMap[typeof event]) => {
+            handleEvent(event, data);
+          });
+        }
+      );
     }
   };
 
@@ -98,7 +114,10 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const emit = (key: string, data: unknown) => {
+  const emit = <T extends keyof SocketEventMap>(
+    key: T,
+    data: SocketEventMap[T]
+  ) => {
     if (socket.current?.connected) {
       socket.current.emit(key, data);
       console.log(`Sent message: ${key}`, data);
