@@ -1,6 +1,7 @@
 import { Logout, Shuffle } from "@solar-icons/react";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
+import { DragEvent, useState } from "react";
 import SquabbleButton from "../ui/squabble-button";
 
 const luckiestGuy = Luckiest_Guy({
@@ -51,6 +52,61 @@ export default function Live({
 }: {
   setGameState: (state: "lobby" | "live") => void;
 }) {
+  const [grid, setGrid] = useState<(string | null)[][]>(
+    Array(10)
+      .fill(null)
+      .map(() => Array(10).fill(null))
+  );
+  const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
+  const [availableLetters, setAvailableLetters] = useState(letters);
+
+  const handleDragStart = (e: DragEvent<HTMLDivElement>, letter: string) => {
+    e.dataTransfer.setData("text/plain", letter);
+    setSelectedLetter(letter);
+  };
+
+  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = (
+    e: DragEvent<HTMLDivElement>,
+    row: number,
+    col: number
+  ) => {
+    e.preventDefault();
+    const letter = e.dataTransfer.getData("text/plain");
+
+    // Only place letter if the cell is empty
+    if (!grid[row][col]) {
+      const newGrid = [...grid];
+      newGrid[row][col] = letter;
+      setGrid(newGrid);
+
+      // Remove the letter from available letters
+      setAvailableLetters((prev) => prev.filter((l) => l.letter !== letter));
+    }
+    setSelectedLetter(null);
+  };
+
+  const handleCellClick = (row: number, col: number) => {
+    if (selectedLetter && !grid[row][col]) {
+      const newGrid = [...grid];
+      newGrid[row][col] = selectedLetter;
+      setGrid(newGrid);
+
+      // Remove the letter from available letters
+      setAvailableLetters((prev) =>
+        prev.filter((l) => l.letter !== selectedLetter)
+      );
+      setSelectedLetter(null);
+    }
+  };
+
+  const handleLetterClick = (letter: string) => {
+    setSelectedLetter(letter);
+  };
+
   return (
     <div className="min-h-screen bg-[#A0E9D9] flex flex-col items-center justify-between p-4">
       {/* Header */}
@@ -110,27 +166,22 @@ export default function Live({
           {Array.from({ length: 10 * 10 }).map((_, idx) => {
             const row = Math.floor(idx / 10);
             const col = idx % 10;
-            // Center the word 'BALL' in row 4 (5th row), columns 3-6 (4th-7th columns)
-            const isWordRow = row === 4;
-            const wordStartCol = 3;
-            const word = ["B", "A", "L", "L"];
-            let letter = null;
-            if (
-              isWordRow &&
-              col >= wordStartCol &&
-              col < wordStartCol + word.length
-            ) {
-              letter = word[col - wordStartCol];
-            }
+            const letter = grid[row][col];
+
             return (
               <div
                 key={idx}
-                className={`flex items-center justify-center ${
+                className={`flex items-center justify-center cursor-pointer ${
                   letter
-                    ? "bg-[#FFFDEB]  border-2 border-[#E6E6E6] font-bold text-[#7B5A2E] text-xl"
+                    ? "bg-[#FFFDEB] border-2 border-[#E6E6E6] font-bold text-[#7B5A2E] text-xl"
                     : "bg-[#B5E9DA] border-2 border-[#C8EFE3]"
-                }`}
+                } ${selectedLetter ? "hover:bg-[#FFFDEB]/50" : ""}`}
                 style={{ width: 36, height: 36 }}
+                draggable={!!letter}
+                onDragStart={(e) => letter && handleDragStart(e, letter)}
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, row, col)}
+                onClick={() => handleCellClick(row, col)}
               >
                 {letter}
               </div>
@@ -142,10 +193,15 @@ export default function Live({
       <div className="flex flex-col items-center justify-between w-full gap-2">
         {/* Player's Letters */}
         <div className="flex gap-2 items-center">
-          {letters.map((l, i) => (
+          {availableLetters.map((l, i) => (
             <div
               key={i}
-              className="w-10 h-10 bg-[#FFFDEB] border border-[#E6E6E6] rounded-md flex flex-col items-center justify-center text-2xl font-bold text-[#B5A16E] shadow relative"
+              className={`w-10 h-10 bg-[#FFFDEB] border border-[#E6E6E6] rounded-md flex flex-col items-center justify-center text-2xl font-bold text-[#B5A16E] shadow relative cursor-pointer ${
+                selectedLetter === l.letter ? "ring-2 ring-blue-500" : ""
+              }`}
+              draggable
+              onDragStart={(e) => handleDragStart(e, l.letter)}
+              onClick={() => handleLetterClick(l.letter)}
             >
               {l.letter}
               <span className="absolute bottom-1 right-1 text-xs text-[#B5A16E] font-bold">
