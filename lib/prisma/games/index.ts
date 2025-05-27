@@ -1,6 +1,7 @@
-import { Game, GameStatus, PrismaClient } from "@prisma/client";
+import { GameStatus } from "@prisma/client";
+import { Game } from "@prisma/client";
+import { prisma } from "../client";
 
-const prisma = new PrismaClient();
 
 // Create a new game
 export async function createGame(data: {

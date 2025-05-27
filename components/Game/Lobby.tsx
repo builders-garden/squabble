@@ -1,3 +1,4 @@
+import { Player } from "@/types/socket-events";
 import { ClockCircle } from "@solar-icons/react";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
@@ -11,41 +12,12 @@ const luckiestGuy = Luckiest_Guy({
   weight: ["400"],
 });
 
-const players = [
-  {
-    name: "limone",
-    status: "ready",
-    avatar:
-      "https://imagedelivery.net/BXluQx4ige9GuW0Ia56BHw/05f5a8aa-48ee-48af-d618-c420091f3200/original",
-    isLeader: true,
-  },
-  {
-    name: "Dan Romero",
-    status: "ready",
-    avatar:
-      "https://imagedelivery.net/BXluQx4ige9GuW0Ia56BHw/bc698287-5adc-4cc5-a503-de16963ed900/original",
-    isLeader: false,
-  },
-  {
-    name: "jesse.base.eth",
-    status: "pending",
-    avatar:
-      "https://imagedelivery.net/BXluQx4ige9GuW0Ia56BHw/1013b0f6-1bf4-4f4e-15fb-34be06fede00/original",
-    isLeader: false,
-  },
-  {
-    name: "albert",
-    status: "pending",
-    avatar:
-      "https://imagedelivery.net/BXluQx4ige9GuW0Ia56BHw/7a4437ba-e141-4b1f-840d-53758f27f700/rectcrop3",
-    isLeader: false,
-  },
-];
-
 export default function Lobby({
   setGameState,
+  players,
 }: {
   setGameState: (state: "lobby" | "live") => void;
+  players: Player[];
 }) {
   return (
     <div className="min-h-screen bg-[#A0E9D9] flex flex-col items-center justify-between p-4">
@@ -80,9 +52,14 @@ export default function Lobby({
         <div className="font-medium text-xl text-white">Players in Lobby</div>
         <div className="grid grid-cols-2 grid-rows-3 gap-4">
           {players.map((p, i) => (
-            <LobbyPlayerCard key={i} {...p} />
+            <LobbyPlayerCard
+              key={i}
+              player={p}
+              status={p.ready ? "ready" : "pending"}
+              isLeader={false}
+            />
           ))}
-          {[...Array(2)].map((_, i) => (
+          {[...Array(6 - players.length)].map((_, i) => (
             <LobbySpotAvailableCard key={i} />
           ))}
         </div>

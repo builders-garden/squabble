@@ -1,6 +1,5 @@
-import { GameParticipant, PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { GameParticipant } from "@prisma/client";
+import { prisma } from "../client";
 
 // Types
 export type CreateGameParticipantInput = {
@@ -28,8 +27,8 @@ export async function createGameParticipant(
       where: {
         fid_gameId: {
           fid: input.fid,
-          gameId: input.gameId
-        }
+          gameId: input.gameId,
+        },
       },
       update: {
         paymentHash: input.paymentHash,

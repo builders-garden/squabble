@@ -100,6 +100,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       (Object.keys(listeners.current) as Array<keyof SocketEventMap>).forEach(
         (event) => {
           socket.current!.on(event, (data: SocketEventMap[typeof event]) => {
+            console.log("[SOCKET EVENT]", event, data);
             handleEvent(event, data);
           });
         }

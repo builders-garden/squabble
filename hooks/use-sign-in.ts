@@ -1,9 +1,16 @@
 import { MESSAGE_EXPIRATION_TIME } from "@/lib/constants";
 import { NeynarUser } from "@/lib/neynar";
 import { useAuthenticate, useMiniKit } from "@coinbase/onchainkit/minikit";
+import { User } from "@prisma/client";
 import { useCallback, useEffect, useState } from "react";
 
-export const useSignIn = ({ autoSignIn = false }: { autoSignIn?: boolean }) => {
+export const useSignIn = ({
+  autoSignIn = false,
+  onSuccess,
+}: {
+  autoSignIn?: boolean;
+  onSuccess?: (user: User) => void;
+}) => {
   const { context } = useMiniKit();
   // this method allows for Sign in with Farcaster (SIWF)
   const { signIn } = useAuthenticate();
@@ -57,9 +64,9 @@ export const useSignIn = ({ autoSignIn = false }: { autoSignIn?: boolean }) => {
       }
 
       const data = await res.json();
-      console.log("data", data);
       setUser(data.user);
       setIsSignedIn(true);
+      onSuccess?.(data.user);
       return data;
     } catch (err) {
       const errorMessage =

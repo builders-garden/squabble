@@ -1,12 +1,16 @@
+import { Player } from "@/types/socket-events";
 import { CheckCircle, Crown, ClockCircle } from "@solar-icons/react";
 import Image from "next/image";
 
 export default function LobbyPlayerCard({
-  name,
+  player,
   status,
-  avatar,
   isLeader,
-}: any) {
+}: {
+  player: Player;
+  status: "pending" | "ready";
+  isLeader: boolean;
+}) {
   return (
     <div
       className={`bg-[#B5E9DA] rounded-xl flex items-center gap-2 p-2 ${
@@ -17,8 +21,8 @@ export default function LobbyPlayerCard({
     >
       <div className="relative">
         <Image
-          src={avatar}
-          alt={name}
+          src={player.avatarUrl!}
+          alt={player.username!}
           className={`w-12 h-12 rounded-full border-2 border-[#C8EFE3]`}
           width={48}
           height={48}
@@ -30,7 +34,7 @@ export default function LobbyPlayerCard({
         )}
       </div>
       <div className="flex flex-col">
-        <div className={`font-bold text-white`}>{name}</div>
+        <div className={`font-bold text-white`}>{player.displayName}</div>
         <div className="flex items-center gap-1">
           {
             status === "ready" ? (

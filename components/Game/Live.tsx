@@ -1,3 +1,4 @@
+"use client";
 import { Logout, Shuffle } from "@solar-icons/react";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";

@@ -3,6 +3,7 @@ export interface Player {
   displayName?: string;
   username?: string;
   avatarUrl?: string;
+  ready?: boolean;
 }
 
 export interface PlayerJoinedEvent {
