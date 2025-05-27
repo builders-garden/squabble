@@ -7,6 +7,10 @@ const GameComponent = dynamic(() => import("@/components/Game"), {
   loading: () => <LoadingScreen />,
 });
 
-export default function Game() {
-  return <GameComponent />;
+export default function Game({
+  params,
+}: {
+  params: { id: string };
+}) {
+  return <GameComponent id={params.id} />;
 }

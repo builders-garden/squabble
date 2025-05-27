@@ -1,6 +1,6 @@
-import { Metadata } from "next";
-import { env } from "@/lib/env";
 import GamePage from "@/components/pages/game";
+import { env } from "@/lib/env";
+import { Metadata } from "next";
 
 const appUrl = env.NEXT_PUBLIC_URL;
 
@@ -45,6 +45,6 @@ export async function generateMetadata({
   };
 }
 
-export default function Game() {
-  return <GamePage />;
+export default function Game({ params }: { params: { id: string } }) {
+  return <GamePage params={params} />;
 }

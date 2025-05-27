@@ -7,6 +7,9 @@ import Chip from "../ui/chip";
 import LobbyPlayerCard from "../ui/lobby-player-card";
 import LobbySpotAvailableCard from "../ui/lobby-spot-available-card";
 import SquabbleButton from "../ui/squabble-button";
+import { useSocket } from "@/contexts/socket-context";
+import { useEffect } from "react";
+import useSocketUtils from "@/hooks/use-socket-utils";
 
 const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
@@ -44,7 +47,17 @@ const players = [
   },
 ];
 
-export default function Game() {
+export default function Game({
+  id,
+}: {
+  id: string;
+}) {
+  const { joinRoom } = useSocketUtils();
+
+  useEffect(() => {
+    joinRoom(id, id);
+  }, [id, joinRoom]);
+
   return (
     <div className="min-h-screen bg-[#A0E9D9] flex flex-col items-center justify-between p-4">
       <div className="flex flex-col items-center justify-center">
@@ -75,7 +88,7 @@ export default function Game() {
             variant="warning"
           />
         </div>
-        <div className="font-bold text-2xl text-white">Players in Lobby</div>
+        <div className="font-medium text-xl text-white">Players in Lobby</div>
         <div className="grid grid-cols-2 grid-rows-3 gap-4">
           {players.map((p, i) => (
             <LobbyPlayerCard key={i} {...p} />

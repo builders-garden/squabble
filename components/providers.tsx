@@ -1,6 +1,7 @@
 "use client";
 
 import { MiniAppProvider } from "@/contexts/miniapp-context";
+import { SocketProvider } from "@/contexts/socket-context";
 import { env } from "@/lib/env";
 import { MiniKitProvider } from "@coinbase/onchainkit/minikit";
 import dynamic from "next/dynamic";
@@ -14,13 +15,15 @@ const ErudaProvider = dynamic(
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ErudaProvider>
-      <MiniKitProvider
-        projectId={env.NEXT_PUBLIC_MINIKIT_PROJECT_ID}
-        notificationProxyUrl="/api/notification"
-        chain={base}
-      >
-        <MiniAppProvider>{children}</MiniAppProvider>
-      </MiniKitProvider>
+      <SocketProvider>
+        <MiniKitProvider
+          projectId={env.NEXT_PUBLIC_MINIKIT_PROJECT_ID}
+          notificationProxyUrl="/api/notification"
+          chain={base}
+        >
+          <MiniAppProvider>{children}</MiniAppProvider>
+        </MiniKitProvider>
+      </SocketProvider>
     </ErudaProvider>
   );
 }
