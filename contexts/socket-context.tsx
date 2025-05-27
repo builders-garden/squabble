@@ -6,7 +6,7 @@ interface SocketContextType {
   socket: React.RefObject<Socket | null>;
   connect: () => void;
   disconnect: () => void;
-  emit: (key: string, data: any) => void;
+  emit: (key: string, data: unknown) => void;
   subscribe: (event: string, callback: (data: any) => void) => void;
   unsubscribe: (event: string, callback: (data: any) => void) => void;
 }
@@ -98,7 +98,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const emit = (key: string, data: never) => {
+  const emit = (key: string, data: unknown) => {
     if (socket.current?.connected) {
       socket.current.emit(key, data);
       console.log(`Sent message: ${key}`, data);

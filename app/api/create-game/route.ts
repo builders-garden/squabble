@@ -1,17 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma/client";
-import { v4 as uuidv4 } from "uuid";
 import { checkAgentSecret } from "@/lib/auth/agentAuth";
+import { createGame } from "@/lib/prisma/games";
+import { NextRequest, NextResponse } from "next/server";
+import { v4 as uuidv4 } from "uuid";
 
 export async function POST(req: NextRequest) {
   if (!checkAgentSecret(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { usernames, betAmount, creator, conversationId } = await req.json();
+  const { fids, betAmount, creator, conversationId } = await req.json();
 
   if (
-    !Array.isArray(usernames) ||
+    !Array.isArray(fids) ||
     typeof betAmount !== "string" ||
     typeof creator !== "string" ||
     typeof conversationId !== "string"
@@ -19,24 +19,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
 
-  const gameId = uuidv4();
-
-  const game = await prisma.game.create({
-    data: {
-      id: gameId,
-      status: "pending",
-      betAmount: parseInt(betAmount),
-      creator,
-      conversationId,
-      createdAt: new Date(),
-      participants: {
-        create: usernames.map((username: string) => ({
-          username,
-          joined: false,
-        })),
-      },
-    },
-    include: { participants: true },
+  const game = await createGame({
+    betAmount: parseInt(betAmount),
+    creatorFid: parseInt(creator),
+    conversationId,
+    participants: fids,
   });
 
   return NextResponse.json({ id: game.id });

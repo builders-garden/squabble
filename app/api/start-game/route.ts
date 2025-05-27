@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma/client";
 import { checkAgentSecret } from "@/lib/auth/agentAuth";
+import { GameStatus } from "@prisma/client";
 
 export async function POST(req: NextRequest) {
   if (!checkAgentSecret(req)) {
@@ -21,7 +22,7 @@ export async function POST(req: NextRequest) {
   if (!game) {
     return NextResponse.json({ error: "Game not found" }, { status: 404 });
   }
-  if (game.status !== "pending") {
+  if (game.status !== GameStatus.PENDING) {
     return NextResponse.json({ error: "Game is not pending" }, { status: 400 });
   }
 
@@ -35,7 +36,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Update game status to 'ready'
-  await prisma.game.update({ where: { id }, data: { status: "ready" } });
+  await prisma.game.update({ where: { id }, data: { status: GameStatus.READY } });
 
   return NextResponse.json({ success: true });
 }

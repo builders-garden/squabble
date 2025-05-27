@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma/client";
 import { checkAgentSecret } from "@/lib/auth/agentAuth";
+import { GameStatus } from "@prisma/client";
 
 export async function POST(req: NextRequest) {
   if (!checkAgentSecret(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id, username, paymentHash } = await req.json();
+  const { id, fid, paymentHash } = await req.json();
 
-  if (!id || typeof username !== "string") {
+  if (!id || typeof fid !== "string") {
     return NextResponse.json(
       { error: "Missing game id or username" },
       { status: 400 }
@@ -21,7 +22,7 @@ export async function POST(req: NextRequest) {
   if (!game) {
     return NextResponse.json({ error: "Game not found" }, { status: 404 });
   }
-  if (game.status !== "pending") {
+  if (game.status !== GameStatus.PENDING) {
     return NextResponse.json({ error: "Game is not pending" }, { status: 400 });
   }
 
@@ -35,7 +36,7 @@ export async function POST(req: NextRequest) {
 
   // Update participant
   const participant = await prisma.gameParticipant.updateMany({
-    where: { gameId: id, username },
+    where: { gameId: id, fid: parseInt(fid) },
     data: {
       joined: true,
       paymentHash: paymentHash,

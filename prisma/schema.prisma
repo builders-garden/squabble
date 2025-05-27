@@ -22,7 +22,7 @@ model User {
 
 model Game {
   id        String   @id @default(uuid())
-  status    GameStatus
+  status    GameStatus @default(PENDING)
   betAmount Float
   
   totalFunds Float @default(0)
@@ -55,9 +55,9 @@ model GameParticipant {
 }
 
 enum GameStatus {
-  pending
-  ready
-  playing
-  finished
+  PENDING
+  READY
+  PLAYING
+  FINISHED
 }
 

@@ -1,5 +1,6 @@
 import { env } from "@/lib/env";
 import { fetchUser } from "@/lib/neynar";
+import { createOrUpdateUser } from "@/lib/prisma/user";
 import * as jose from "jose";
 import { NextRequest, NextResponse } from "next/server";
 import { verifyMessage } from "viem";
@@ -18,6 +19,8 @@ export const POST = async (req: NextRequest) => {
   if (!isValidSignature) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
+
+  await createOrUpdateUser(fid, user.display_name, user.username, user.pfp_url);
 
   // Generate JWT token
   const secret = new TextEncoder().encode(env.JWT_SECRET);

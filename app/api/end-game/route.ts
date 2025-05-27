@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma/client";
 import { checkAgentSecret } from "@/lib/auth/agentAuth";
+import { GameStatus } from "@prisma/client";
 
 export async function POST(req: NextRequest) {
   if (!checkAgentSecret(req)) {
@@ -11,7 +12,7 @@ export async function POST(req: NextRequest) {
 
   if (!id || typeof winner !== "string") {
     return NextResponse.json(
-      { error: "Missing game id or winner username" },
+      { error: "Missing game id or winner fid" },
       { status: 400 }
     );
   }
@@ -24,7 +25,7 @@ export async function POST(req: NextRequest) {
   if (!game) {
     return NextResponse.json({ error: "Game not found" }, { status: 404 });
   }
-  if (game.status !== "ready") {
+  if (game.status !== GameStatus.READY) {
     return NextResponse.json(
       { error: "Game is not ready to end" },
       { status: 400 }
@@ -44,13 +45,13 @@ export async function POST(req: NextRequest) {
 
   // Update game status to 'close' and set winner
   await prisma.$transaction([
-    prisma.game.update({ where: { id }, data: { status: "close" } }),
+    prisma.game.update({ where: { id }, data: { status: GameStatus.FINISHED } }),
     prisma.gameParticipant.updateMany({
       where: { gameId: id },
       data: { winner: false },
     }),
     prisma.gameParticipant.updateMany({
-      where: { gameId: id, username: winner },
+      where: { gameId: id, fid: parseInt(winner) },
       data: { winner: true },
     }),
   ]);
