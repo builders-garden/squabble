@@ -49,7 +49,7 @@ export default function LobbyPlayerCard({
               status === "pending" ? "text-yellow-200" : "text-emerald-400"
             }`}
           >
-            {status === "ready" ? "Ready!" : "Waiting"}
+            {status === "ready" ? "Ready!" : "Not staked"}
           </div>
         </div>
       </div>
