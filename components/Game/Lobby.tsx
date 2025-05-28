@@ -1,5 +1,5 @@
 import { Player } from "@/types/socket-events";
-import { ClockCircle } from "@solar-icons/react";
+import { CheckCircle, ClockCircle } from "@solar-icons/react";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
 import Chip from "../ui/chip";
@@ -14,11 +14,14 @@ const luckiestGuy = Luckiest_Guy({
 
 export default function Lobby({
   setGameState,
+  gameLeaderFid,
   players,
 }: {
   setGameState: (state: "lobby" | "live") => void;
+  gameLeaderFid: number;
   players: Player[];
 }) {
+  const pendingStakes = players.filter((p) => !p.ready).length;
   return (
     <div className="min-h-screen bg-[#A0E9D9] flex flex-col items-center justify-between p-4">
       <div className="flex flex-col items-center justify-center">
@@ -41,13 +44,22 @@ export default function Lobby({
 
       <div className="flex flex-col gap-2 items-center">
         <div className="flex gap-2">
-          <Chip text="4/6 Players" variant="info" />
+          <Chip text={`${players.length}/6 Players`} variant="info" />
+          {/* TODO: add from game data */}
           <Chip text="$1 Stake" variant="info" />
-          <Chip
-            text="2 Pending stakes"
-            icon={<ClockCircle size={14} />}
-            variant="warning"
-          />
+          {pendingStakes > 0 ? (
+            <Chip
+              text={`${pendingStakes} Pending stakes`}
+              icon={<ClockCircle size={14} />}
+              variant="warning"
+            />
+          ) : players?.length > 0 ? (
+            <Chip
+              text="Ready"
+              icon={<CheckCircle size={14} />}
+              variant="success"
+            />
+          ) : null}
         </div>
         <div className="font-medium text-xl text-white">Players in Lobby</div>
         <div className="grid grid-cols-2 grid-rows-3 gap-4">
@@ -56,7 +68,7 @@ export default function Lobby({
               key={i}
               player={p}
               status={p.ready ? "ready" : "pending"}
-              isLeader={false}
+              isLeader={p.fid?.toString() === gameLeaderFid?.toString()}
             />
           ))}
           {[...Array(6 - players.length)].map((_, i) => (
@@ -65,7 +77,7 @@ export default function Lobby({
         </div>
       </div>
       <div className="flex flex-col gap-2 items-center w-full">
-        <div className="text-white/75">Waiting for all players to join...</div>
+        <div className="text-white/75">Waiting for players to join...</div>
         <SquabbleButton
           text="Start Game"
           variant="primary"

@@ -14,6 +14,7 @@ import Lobby from "./Lobby";
 
 export default function Game({ id }: { id: string }) {
   const { subscribe } = useSocket();
+  const { connectToLobby } = useSocketUtils();
   const [players, setPlayers] = useState<Player[]>([]);
   const { user } = useSignIn({
     autoSignIn: true,
@@ -39,11 +40,16 @@ export default function Game({ id }: { id: string }) {
     });
   }, []);
 
-  const { connectToLobby } = useSocketUtils();
   const [gameState, setGameState] = useState<"lobby" | "live">("lobby");
 
   if (gameState === "lobby") {
-    return <Lobby setGameState={setGameState} players={players} />;
+    return (
+      <Lobby
+        setGameState={setGameState}
+        players={players}
+        gameLeaderFid={4461}
+      />
+    );
   }
 
   return <Live setGameState={setGameState} />;

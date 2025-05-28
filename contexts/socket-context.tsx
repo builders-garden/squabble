@@ -73,6 +73,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const connect = () => {
+    
     if (!socket.current) {
       socket.current = io(
         env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3001",
@@ -83,6 +84,8 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
           reconnectionDelay: 1000,
         }
       );
+
+      console.log("Socket connected", env.NEXT_PUBLIC_SOCKET_URL);
 
       socket.current.on("connect", () => {
         console.log("Socket connected");
@@ -123,11 +126,24 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
       socket.current.emit(key, data);
       console.log(`Sent message: ${key}`, data);
     } else {
-      console.warn("Socket not connected. Cannot send message.");
+      console.log("Socket not connected. Attempting to reconnect...");
+      connect();
+      // Wait a short moment for connection to establish
+      setTimeout(() => {
+        if (socket.current?.connected) {
+          socket.current.emit(key, data);
+          console.log(`Sent message after reconnect: ${key}`, data);
+        } else {
+          console.warn(
+            "Socket still not connected after reconnect attempt. Cannot send message."
+          );
+        }
+      }, 1000);
     }
   };
 
   useEffect(() => {
+    console.log("Connecting socket");
     connect();
 
     return () => {
