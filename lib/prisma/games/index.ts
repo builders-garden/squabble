@@ -7,6 +7,7 @@ import { prisma } from "../client";
 export async function createGame(data: {
   betAmount: number;
   creatorFid: number;
+  creatorAddress: string;
   conversationId?: string;
   participants: number[]
 }): Promise<Game> {

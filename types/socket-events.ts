@@ -1,9 +1,12 @@
 export interface Player {
+  id?: number;
   fid: number;
   displayName?: string;
   username?: string;
   avatarUrl?: string;
   ready?: boolean;
+  staked?: boolean;
+  score?: number;
 }
 
 export interface PlayerJoinedEvent {

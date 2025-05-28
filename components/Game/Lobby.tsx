@@ -6,6 +6,12 @@ import Chip from "../ui/chip";
 import LobbyPlayerCard from "../ui/lobby-player-card";
 import LobbySpotAvailableCard from "../ui/lobby-spot-available-card";
 import SquabbleButton from "../ui/squabble-button";
+import { DaimoPayButton } from "@daimo/pay";
+import { encodeFunctionData } from "viem";
+import { NeynarUser } from "@/lib/neynar";
+import { joinGameCalldata } from "@/lib/daimo";
+import { SQUABBLE_CONTRACT_ADDRESS } from "@/lib/constants";
+import useSocketUtils from "@/hooks/use-socket-utils";
 
 const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
@@ -15,10 +21,54 @@ const luckiestGuy = Luckiest_Guy({
 export default function Lobby({
   setGameState,
   players,
+  currentUser,
+  userAddress,
+  gameId,
+  stakeAmount,
 }: {
   setGameState: (state: "lobby" | "live") => void;
   players: Player[];
+  currentUser: NeynarUser | null;
+  userAddress: string;
+  gameId: string;
+  stakeAmount: string;
 }) {
+  const { playerStakeConfirmed } = useSocketUtils();
+
+  console.log("currentUser", currentUser);
+  console.log("userAddress", userAddress);
+
+  // Find current user in players list to check their status
+  const currentPlayer = currentUser
+    ? players.find((p) => {
+        // Handle both string and number fids
+        const currentUserFid =
+          typeof currentUser.fid === "string"
+            ? parseInt(currentUser.fid)
+            : currentUser.fid;
+        // Player objects may use 'id' or 'fid'
+        return p.id === currentUserFid || p.fid === currentUserFid;
+      })
+    : null;
+  const isCurrentUserPending = currentPlayer && !currentPlayer.ready;
+
+  const handlePaymentCompleted = (event: any) => {
+    console.log("Payment completed:", event);
+    if (currentUser && event.transactionHash) {
+      // Emit socket event to confirm stake payment
+      playerStakeConfirmed(
+        {
+          fid: parseInt(currentUser.fid),
+          displayName: currentUser.display_name,
+          username: currentUser.username,
+          avatarUrl: currentUser.pfp_url,
+        },
+        gameId,
+        event.transactionHash
+      );
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#A0E9D9] flex flex-col items-center justify-between p-4">
       <div className="flex flex-col items-center justify-center">
@@ -65,6 +115,39 @@ export default function Lobby({
         </div>
       </div>
       <div className="flex flex-col gap-2 items-center w-full">
+        {isCurrentUserPending && currentUser && (
+          <>
+            <div className="text-white/75 mb-2">
+              Pay your stake to join the game
+            </div>
+            <DaimoPayButton
+              appId={process.env.NEXT_PUBLIC_DAIMO_PAY_ID!}
+              toAddress={SQUABBLE_CONTRACT_ADDRESS}
+              toChain={8453} // Base
+              toUnits={stakeAmount} 
+              toToken="0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913" // Base USDC
+              intent="Join Squabble Game"
+              toCallData={joinGameCalldata(gameId, userAddress)}
+              preferredChains={[8453]} // Prefer Base
+              preferredTokens={[
+                {
+                  chain: 8453,
+                  address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                }, // Base USDC
+              ]}
+              externalId={`${gameId}-${currentUser.fid}`}
+              metadata={{
+                gameId,
+                playerFid: currentUser.fid.toString(),
+                playerName: currentUser.display_name,
+              }}
+              onPaymentStarted={(e) => console.log("Payment started:", e)}
+              onPaymentCompleted={handlePaymentCompleted}
+              onPaymentBounced={(e) => console.log("Payment bounced:", e)}
+            />
+          </>
+        )}
+
         <div className="text-white/75">Waiting for all players to join...</div>
         <SquabbleButton
           text="Start Game"
