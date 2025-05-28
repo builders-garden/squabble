@@ -61,7 +61,7 @@ export default function Game({ id }: { id: string }) {
         currentUser={user}
         userAddress={address as `0x${string}`}
         gameId={id}
-        stakeAmount={stakeAmount}
+        stakeAmount={stakeAmount!}
       />
     )
     );
