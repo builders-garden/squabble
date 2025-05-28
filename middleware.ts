@@ -1,5 +1,6 @@
 import * as jose from "jose";
 import { NextRequest, NextResponse } from "next/server";
+import { checkAgentSecret } from "./lib/auth/agentAuth";
 import { env } from "./lib/env";
 
 export const config = {
@@ -11,10 +12,16 @@ export default async function middleware(req: NextRequest) {
   if (
     req.nextUrl.pathname === "/api/auth/sign-in" ||
     req.nextUrl.pathname.includes("/api/og") ||
-    req.nextUrl.pathname.includes("/api/webhook") ||
-    req.nextUrl.pathname.includes("/api/create-game") ||
-    req.nextUrl.pathname.includes("/api/get-game")
+    req.nextUrl.pathname.includes("/api/webhook")
   ) {
+    return NextResponse.next();
+  }
+
+  if (req.nextUrl.pathname.includes("/api/agent")) {
+    const isAgent = await checkAgentSecret(req);
+    if (!isAgent) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     return NextResponse.next();
   }
 

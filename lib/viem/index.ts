@@ -11,9 +11,10 @@ import {
 import { base, baseSepolia } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
 import { SQUABBLE_CONTRACT_ABI, SQUABBLE_CONTRACT_ADDRESS } from "../constants";
+import { env } from "../env";
 
 export async function createNewGame(gameId: bigint, creator: Address, stakeAmount: number) {
-    const account = privateKeyToAccount(process.env.BACKEND_PRIVATE_KEY as `0x${string}`);
+    const account = privateKeyToAccount(env.BACKEND_PRIVATE_KEY as `0x${string}`);
     if (!account) {
         throw new Error("No account found");
     }

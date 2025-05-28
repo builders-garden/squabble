@@ -1,3 +1,4 @@
+"use client";
 import { UserPlus } from "@solar-icons/react";
 
 export default function LobbySpotAvailableCard() {

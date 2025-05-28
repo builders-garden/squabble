@@ -1,3 +1,4 @@
+"use client";
 import { Player } from "@/types/socket-events";
 import { CheckCircle, Crown, ClockCircle } from "@solar-icons/react";
 import Image from "next/image";

@@ -1,13 +1,8 @@
-import { checkAgentSecret } from "@/lib/auth/agentAuth";
 import { createGame } from "@/lib/prisma/games";
 import { createNewGame } from "@/lib/viem";
 import { NextRequest, NextResponse } from "next/server";
-import { v4 as uuidv4 } from "uuid";
 
 export async function POST(req: NextRequest) {
-  if (!checkAgentSecret(req)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
 
   const { fids, betAmount, creatorAddress, creatorFid, conversationId } = await req.json();
 

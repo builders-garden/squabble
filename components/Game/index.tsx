@@ -13,13 +13,13 @@ import { useAccount } from "wagmi";
 
 import Live from "./Live";
 import Lobby from "./Lobby";
-import { getGameById } from "@/lib/prisma/games";
+import useFetchGame from "@/hooks/use-fetch-game";
 
 export default function Game({ id }: { id: string }) {
+  const { data: game } = useFetchGame(id);
   const { subscribe } = useSocket();
   const { connectToLobby } = useSocketUtils();
   const [players, setPlayers] = useState<Player[]>([]);
-  const [game, setGame] = useState<any>(null);
   const { user } = useSignIn({
     autoSignIn: true,
     onSuccess: (user) => {
@@ -34,10 +34,6 @@ export default function Game({ id }: { id: string }) {
       );
     },
   });
-
-  useEffect(() => {
-    getGameById(id).then(setGame);
-  }, [id]);
 
   const stakeAmount = game?.betAmount.toString();
 

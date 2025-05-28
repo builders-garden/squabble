@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma/client";
-import { checkAgentSecret } from "@/lib/auth/agentAuth";
 
 export async function GET(req: NextRequest) {
-  if (!checkAgentSecret(req)) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
 

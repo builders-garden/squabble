@@ -1,4 +1,11 @@
+"use client";
+import useSocketUtils from "@/hooks/use-socket-utils";
+import { SQUABBLE_CONTRACT_ADDRESS } from "@/lib/constants";
+import { joinGameCalldata } from "@/lib/daimo";
+import { env } from "@/lib/env";
+import { NeynarUser } from "@/lib/neynar";
 import { Player } from "@/types/socket-events";
+import { DaimoPayButton } from "@daimo/pay";
 import { CheckCircle, ClockCircle } from "@solar-icons/react";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
@@ -6,12 +13,6 @@ import Chip from "../ui/chip";
 import LobbyPlayerCard from "../ui/lobby-player-card";
 import LobbySpotAvailableCard from "../ui/lobby-spot-available-card";
 import SquabbleButton from "../ui/squabble-button";
-import { DaimoPayButton } from "@daimo/pay";
-import { encodeFunctionData } from "viem";
-import { NeynarUser } from "@/lib/neynar";
-import { joinGameCalldata } from "@/lib/daimo";
-import { SQUABBLE_CONTRACT_ADDRESS } from "@/lib/constants";
-import useSocketUtils from "@/hooks/use-socket-utils";
 
 const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
@@ -133,10 +134,10 @@ export default function Lobby({
               Pay your stake to join the game
             </div>
             <DaimoPayButton
-              appId={process.env.NEXT_PUBLIC_DAIMO_PAY_ID!}
+              appId={env.NEXT_PUBLIC_DAIMO_PAY_ID!}
               toAddress={SQUABBLE_CONTRACT_ADDRESS}
               toChain={8453} // Base
-              toUnits={stakeAmount} 
+              toUnits={stakeAmount}
               toToken="0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913" // Base USDC
               intent="Join Squabble Game"
               toCallData={joinGameCalldata(gameId, userAddress)}
