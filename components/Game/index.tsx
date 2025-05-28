@@ -35,7 +35,7 @@ export default function Game({ id }: { id: string }) {
     },
   });
 
-  const stakeAmount = game?.betAmount.toString();
+  const stakeAmount = game?.betAmount?.toString();
 
   useEffect(() => {
     subscribe("player_joined", (event: PlayerJoinedEvent) => {
@@ -54,10 +54,8 @@ export default function Game({ id }: { id: string }) {
       <Lobby
        
         setGameState={setGameState}
-       
         players={players}
         gameLeaderFid={4461}
-     
         currentUser={user}
         userAddress={address as `0x${string}`}
         gameId={id}
