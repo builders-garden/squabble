@@ -52,7 +52,6 @@ export default function Game({ id }: { id: string }) {
     return (
       (
       <Lobby
-       
         setGameState={setGameState}
         players={players}
         gameLeaderFid={4461}

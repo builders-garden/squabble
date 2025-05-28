@@ -128,12 +128,14 @@ export default function Lobby({
         </div>
       </div>
       <div className="flex flex-col gap-2 items-center w-full">
-        {isCurrentUserPending && currentUser && (
-          <>
+        {isCurrentUserPending && currentUser ? (
+          <div className="flex flex-col gap-2 items-center w-full">
             <div className="text-white/75 mb-2">
-              Pay your stake to join the game
+              {currentUser.fid.toString() === gameLeaderFid.toString()
+                ? "Pay your stake to init the game"
+                : "Pay your stake to join the game"}
             </div>
-            <DaimoPayButton
+            <DaimoPayButton.Custom
               appId={env.NEXT_PUBLIC_DAIMO_PAY_ID!}
               toAddress={SQUABBLE_CONTRACT_ADDRESS}
               toChain={8453} // Base
@@ -157,19 +159,30 @@ export default function Lobby({
               onPaymentStarted={(e) => console.log("Payment started:", e)}
               onPaymentCompleted={handlePaymentCompleted}
               onPaymentBounced={(e) => console.log("Payment bounced:", e)}
+            >
+              {({ show, hide }) => (
+                <SquabbleButton
+                  text={`Stake $${stakeAmount}`}
+                  variant="primary"
+                  disabled={false}
+                  onClick={show}
+                />
+              )}
+            </DaimoPayButton.Custom>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2 items-center w-full">
+            <div className="text-white/75">Waiting for players to join...</div>
+            <SquabbleButton
+              text="Start Game"
+              variant="primary"
+              disabled={false}
+              onClick={() => {
+                setGameState("live");
+              }}
             />
-          </>
+          </div>
         )}
-
-        <div className="text-white/75">Waiting for players to join...</div>
-        <SquabbleButton
-          text="Start Game"
-          variant="primary"
-          disabled={false}
-          onClick={() => {
-            setGameState("live");
-          }}
-        />
       </div>
     </div>
   );
