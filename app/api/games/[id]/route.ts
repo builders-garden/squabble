@@ -17,8 +17,16 @@ export async function GET(
       return NextResponse.json({ error: "Game not found" }, { status: 404 });
     }
 
-    return NextResponse.json(game);
+    // Convert BigInt values to strings for JSON serialization
+    const serializedGame = JSON.parse(
+      JSON.stringify(game, (key, value) =>
+        typeof value === "bigint" ? value.toString() : value
+      )
+    );
+
+    return NextResponse.json(serializedGame);
   } catch (error) {
+    console.error("Game fetch error:", error);
     return NextResponse.json(
       { error: "Failed to fetch game" },
       { status: 500 }

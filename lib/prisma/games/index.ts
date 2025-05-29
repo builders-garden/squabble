@@ -2,14 +2,14 @@ import { GameStatus } from "@prisma/client";
 import { Game } from "@prisma/client";
 import { prisma } from "../client";
 
-
 // Create a new game
 export async function createGame(data: {
   betAmount: number;
   creatorFid: number;
   creatorAddress: string;
   conversationId?: string;
-  participants: number[]
+  participants: number[];
+  contractGameId?: number;
 }): Promise<Game> {
   return prisma.game.create({
     data: {
@@ -69,6 +69,7 @@ export async function updateGame(
     betAmount?: number;
     totalFunds?: number;
     conversationId?: string;
+    contractGameId?: number;
   }
 ): Promise<Game> {
   return prisma.game.update({

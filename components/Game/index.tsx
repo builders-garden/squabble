@@ -76,6 +76,7 @@ export default function Game({ id }: { id: string }) {
     "lobby"
   );
   const { address } = useAccount();
+  console.log(address, "address");
   if (!address) {
     return <div>No wallet connected</div>;
   }
@@ -88,6 +89,7 @@ export default function Game({ id }: { id: string }) {
         currentUser={user}
         userAddress={address as `0x${string}`}
         gameId={id}
+        contractGameId={game?.contractGameId?.toString()!}
         stakeAmount={stakeAmount!}
       />
     );
