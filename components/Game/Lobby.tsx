@@ -26,6 +26,7 @@ export default function Lobby({
   currentUser,
   userAddress,
   gameId,
+  contractGameId,
   stakeAmount,
 }: {
   setGameState: (state: "lobby" | "live") => void;
@@ -34,6 +35,7 @@ export default function Lobby({
   currentUser: NeynarUser | null;
   userAddress: string;
   gameId: string;
+  contractGameId: string;
   stakeAmount: string;
 }) {
   const { playerStakeConfirmed } = useSocketUtils();
@@ -139,7 +141,7 @@ export default function Lobby({
               toUnits={stakeAmount}
               toToken="0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913" // Base USDC
               intent="Join Squabble Game"
-              toCallData={joinGameCalldata(gameId, userAddress)}
+              toCallData={joinGameCalldata(contractGameId, userAddress)}
               preferredChains={[8453]} // Prefer Base
               preferredTokens={[
                 {
