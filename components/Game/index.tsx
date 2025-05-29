@@ -11,9 +11,9 @@ import {
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 
+import useFetchGame from "@/hooks/use-fetch-game";
 import Live from "./Live";
 import Lobby from "./Lobby";
-import useFetchGame from "@/hooks/use-fetch-game";
 
 export default function Game({ id }: { id: string }) {
   const { data: game } = useFetchGame(id);
@@ -44,13 +44,15 @@ export default function Game({ id }: { id: string }) {
     subscribe("game_update", (event: GameUpdateEvent) => {
       setPlayers(event.players);
     });
-  }, []);
+  }, [subscribe]);
 
   const [gameState, setGameState] = useState<"lobby" | "live">("lobby");
   const { address } = useAccount();
+  if (!address) {
+    return <div>No wallet connected</div>;
+  }
   if (gameState === "lobby") {
     return (
-      (
       <Lobby
         setGameState={setGameState}
         players={players}
@@ -60,7 +62,6 @@ export default function Game({ id }: { id: string }) {
         gameId={id}
         stakeAmount={stakeAmount!}
       />
-    )
     );
   }
 

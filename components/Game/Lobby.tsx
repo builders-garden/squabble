@@ -38,9 +38,6 @@ export default function Lobby({
 }) {
   const { playerStakeConfirmed } = useSocketUtils();
 
-  console.log("currentUser", currentUser);
-  console.log("userAddress", userAddress);
-
   // Find current user in players list to check their status
   const currentPlayer = currentUser
     ? players.find((p) => {
