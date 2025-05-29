@@ -23,10 +23,11 @@ export default function Game({ id }: { id: string }) {
   const { subscribe } = useSocket();
   const { connectToLobby } = useSocketUtils();
   const [players, setPlayers] = useState<Player[]>([]);
-  const [isGameLoading, setIsGameLoading] = useState(false);
 
   const [board, setBoard] = useState<string[][]>([]);
-  const [availableLetters, setAvailableLetters] = useState<{ letter: string; value: number }[]>([]);
+  const [availableLetters, setAvailableLetters] = useState<
+    { letter: string; value: number }[]
+  >([]);
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
 
   const { user } = useSignIn({
@@ -38,7 +39,7 @@ export default function Game({ id }: { id: string }) {
           displayName: user.displayName,
           username: user.username,
           avatarUrl: user.avatarUrl || "",
-          ready: true,
+          // ready: true,
         },
         id
       );
@@ -62,8 +63,7 @@ export default function Game({ id }: { id: string }) {
     subscribe(
       "refreshed_available_letters",
       (event: RefreshedAvailableLettersEvent) => {
-        if (!user || (event.playerId && event.playerId !== user.fid))
-          return;
+        if (!user || (event.playerId && event.playerId !== user.fid)) return;
         const availableLetters = event.players.find(
           (p) => p.fid.toString() === user.fid.toString()
         )?.availableLetters;

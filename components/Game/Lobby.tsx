@@ -2,9 +2,11 @@
 import useSocketUtils from "@/hooks/use-socket-utils";
 import { SQUABBLE_CONTRACT_ADDRESS } from "@/lib/constants";
 import { joinGameCalldata } from "@/lib/daimo";
+import { PaymentCompletedEvent } from "@daimo/pay-common";
 import { env } from "@/lib/env";
 import { Player } from "@/types/socket-events";
 import { DaimoPayButton } from "@daimo/pay";
+import { User } from "@prisma/client";
 import { CheckCircle, ClockCircle } from "@solar-icons/react";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
@@ -12,7 +14,6 @@ import Chip from "../ui/chip";
 import LobbyPlayerCard from "../ui/lobby-player-card";
 import LobbySpotAvailableCard from "../ui/lobby-spot-available-card";
 import SquabbleButton from "../ui/squabble-button";
-import { User } from "@prisma/client";
 
 const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
@@ -54,8 +55,9 @@ export default function Lobby({
     : null;
   const isCurrentUserPending = currentPlayer && !currentPlayer.ready;
 
-  const handlePaymentCompleted = (event: any) => {
-    if (currentUser && event.transactionHash) {
+  const handlePaymentCompleted = (event: PaymentCompletedEvent) => {
+    console.log("Payment completed:", event);
+    if (currentUser && event.txHash) {
       // Emit socket event to confirm stake payment
       playerStakeConfirmed(
         {
@@ -65,7 +67,7 @@ export default function Lobby({
           avatarUrl: currentUser.avatarUrl,
         },
         gameId,
-        event.transactionHash
+        event.txHash as string
       );
     }
   };
@@ -145,7 +147,10 @@ export default function Lobby({
               toUnits={stakeAmount}
               toToken="0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913" // Base USDC
               intent="Join Squabble Game"
-              toCallData={joinGameCalldata(contractGameId, userAddress)}
+              toCallData={joinGameCalldata(
+                contractGameId,
+                "0x08DA75FEbd2098293DFF36C71020C5945B13E234"
+              )}
               preferredChains={[8453]} // Prefer Base
               preferredTokens={[
                 {
