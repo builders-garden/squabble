@@ -2,14 +2,15 @@
 import useSocketUtils from "@/hooks/use-socket-utils";
 import { SQUABBLE_CONTRACT_ADDRESS } from "@/lib/constants";
 import { joinGameCalldata } from "@/lib/daimo";
-import { PaymentCompletedEvent } from "@daimo/pay-common";
 import { env } from "@/lib/env";
 import { Player } from "@/types/socket-events";
 import { DaimoPayButton } from "@daimo/pay";
+import { PaymentCompletedEvent } from "@daimo/pay-common";
 import { User } from "@prisma/client";
 import { CheckCircle, ClockCircle } from "@solar-icons/react";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
+import { base } from "viem/chains";
 import Chip from "../ui/chip";
 import LobbyPlayerCard from "../ui/lobby-player-card";
 import LobbySpotAvailableCard from "../ui/lobby-spot-available-card";
@@ -151,14 +152,14 @@ export default function Lobby({
                 contractGameId,
                 "0x08DA75FEbd2098293DFF36C71020C5945B13E234"
               )}
-              preferredChains={[8453]} // Prefer Base
+              preferredChains={[base.id]} // Prefer Base
               preferredTokens={[
                 {
-                  chain: 8453,
+                  chain: base.id,
                   address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
                 }, // Base USDC
               ]}
-              externalId={`${gameId}-${currentUser.fid}`}
+              externalId={`${gameId}-${currentUser.fid}-${Date.now()}`}
               metadata={{
                 gameId,
                 playerFid: currentUser.fid.toString(),
@@ -167,8 +168,9 @@ export default function Lobby({
               onPaymentStarted={(e) => console.log("Payment started:", e)}
               onPaymentCompleted={handlePaymentCompleted}
               onPaymentBounced={(e) => console.log("Payment bounced:", e)}
+              closeOnSuccess={true}
             >
-              {({ show, hide }) => (
+              {({ show }) => (
                 <SquabbleButton
                   text={`Stake $${stakeAmount}`}
                   variant="primary"
@@ -180,11 +182,15 @@ export default function Lobby({
           </div>
         ) : (
           <div className="flex flex-col gap-2 items-center w-full">
-            <div className="text-white/75">Waiting for players to join...</div>
+            <div className="text-white/75">
+              {pendingStakes
+                ? "Waiting for everyone to pay their stake..."
+                : "Click to start game"}
+            </div>
             <SquabbleButton
               text="Start Game"
               variant="primary"
-              disabled={false}
+              disabled={pendingStakes > 0}
               onClick={handleStartGame}
             />
           </div>

@@ -7,5 +7,6 @@ export const config = createConfig(
   getDefaultConfig({
     appName: "Squabble Game",
     connectors: [miniAppConnector()],
+    chains: [base],
   })
 );
