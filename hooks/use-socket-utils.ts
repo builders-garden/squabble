@@ -41,6 +41,10 @@ export default function useSocketUtils() {
   const removeLetter = (player: Player, gameId: string, x: number, y: number) => {
     emit("remove_letter", { player, gameId, x, y });
   };
+  
+  const refreshAvailableLetters = (playerId: number, gameId: string) => {
+    emit("refresh_available_letters", { playerId, gameId });
+  };
 
   return {
     playerReady,
@@ -51,5 +55,6 @@ export default function useSocketUtils() {
     connectToLobby,
     disconnectFromLobby,
     playerStakeConfirmed,
+    refreshAvailableLetters,
   };
 }

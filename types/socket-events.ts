@@ -7,6 +7,7 @@ export interface Player {
   ready?: boolean;
   staked?: boolean;
   score?: number;
+  availableLetters?: { letter: string; value: number }[];
 }
 
 export interface PlayerJoinedEvent {
@@ -15,7 +16,7 @@ export interface PlayerJoinedEvent {
 }
 
 export interface PlayerLeftEvent {
-  playerId: string;
+  playerId: number;
   gameId: string;
 }
 
@@ -27,10 +28,22 @@ export interface GameUpdateEvent {
 
 export interface GameStartedEvent {
   gameId: string;
-  seed: string;
+  board: string[][];
+  timeRemaining: number;
   players: Array<Player>;
   startTime: number;
   endTime: number;
+}
+
+export interface RefreshedAvailableLettersEvent {
+  gameId: string;
+  players: Array<Player>;
+  playerId: number;
+}
+
+export interface RefreshAvailableLettersEvent {
+  gameId: string;
+  playerId: number;
 }
 
 export interface LetterPlacedEvent {
@@ -162,4 +175,6 @@ export type SocketEventMap = {
   submit_word: SubmitWordEvent;
   place_letter: PlaceLetterEvent;
   remove_letter: RemoveLetterEvent;
+  refreshed_available_letters: RefreshedAvailableLettersEvent;
+  refresh_available_letters: RefreshAvailableLettersEvent;
 };

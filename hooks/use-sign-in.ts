@@ -14,7 +14,7 @@ export const useSignIn = ({
   const { context } = useMiniKit();
   // this method allows for Sign in with Farcaster (SIWF)
   const { signIn } = useAuthenticate();
-  const [user, setUser] = useState<NeynarUser | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

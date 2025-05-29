@@ -3,7 +3,6 @@ import useSocketUtils from "@/hooks/use-socket-utils";
 import { SQUABBLE_CONTRACT_ADDRESS } from "@/lib/constants";
 import { joinGameCalldata } from "@/lib/daimo";
 import { env } from "@/lib/env";
-import { NeynarUser } from "@/lib/neynar";
 import { Player } from "@/types/socket-events";
 import { DaimoPayButton } from "@daimo/pay";
 import { CheckCircle, ClockCircle } from "@solar-icons/react";
@@ -13,6 +12,7 @@ import Chip from "../ui/chip";
 import LobbyPlayerCard from "../ui/lobby-player-card";
 import LobbySpotAvailableCard from "../ui/lobby-spot-available-card";
 import SquabbleButton from "../ui/squabble-button";
+import { User } from "@prisma/client";
 
 const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
@@ -28,15 +28,15 @@ export default function Lobby({
   gameId,
   stakeAmount,
 }: {
-  setGameState: (state: "lobby" | "live") => void;
+  setGameState: (state: "lobby" | "loading" | "live") => void;
   gameLeaderFid: number;
   players: Player[];
-  currentUser: NeynarUser | null;
+  currentUser: User | null;
   userAddress: string;
   gameId: string;
   stakeAmount: string;
 }) {
-  const { playerStakeConfirmed } = useSocketUtils();
+  const { playerStakeConfirmed, startGame } = useSocketUtils();
 
   // Find current user in players list to check their status
   const currentPlayer = currentUser
@@ -53,20 +53,24 @@ export default function Lobby({
   const isCurrentUserPending = currentPlayer && !currentPlayer.ready;
 
   const handlePaymentCompleted = (event: any) => {
-    console.log("Payment completed:", event);
     if (currentUser && event.transactionHash) {
       // Emit socket event to confirm stake payment
       playerStakeConfirmed(
         {
-          fid: parseInt(currentUser.fid),
-          displayName: currentUser.display_name,
+          fid: currentUser.fid,
+          displayName: currentUser.displayName,
           username: currentUser.username,
-          avatarUrl: currentUser.pfp_url,
+          avatarUrl: currentUser.avatarUrl,
         },
         gameId,
         event.transactionHash
       );
     }
+  };
+
+  const handleStartGame = () => {
+    setGameState("loading");
+    startGame(currentPlayer!, gameId);
   };
 
   const pendingStakes = players.filter((p) => !p.ready).length;
@@ -151,7 +155,7 @@ export default function Lobby({
               metadata={{
                 gameId,
                 playerFid: currentUser.fid.toString(),
-                playerName: currentUser.display_name,
+                playerName: currentUser.displayName,
               }}
               onPaymentStarted={(e) => console.log("Payment started:", e)}
               onPaymentCompleted={handlePaymentCompleted}
@@ -174,9 +178,7 @@ export default function Lobby({
               text="Start Game"
               variant="primary"
               disabled={false}
-              onClick={() => {
-                setGameState("live");
-              }}
+              onClick={handleStartGame}
             />
           </div>
         )}

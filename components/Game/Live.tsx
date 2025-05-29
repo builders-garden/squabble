@@ -1,9 +1,16 @@
 "use client";
+import { useSocket } from "@/contexts/socket-context";
+import {
+  GameStartedEvent,
+  RefreshAvailableLettersEvent,
+} from "@/types/socket-events";
+import { User } from "@prisma/client";
 import { Logout, Shuffle } from "@solar-icons/react";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
-import { DragEvent, useState } from "react";
+import { DragEvent, useEffect, useState } from "react";
 import SquabbleButton from "../ui/squabble-button";
+import useSocketUtils from "@/hooks/use-socket-utils";
 
 const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
@@ -37,29 +44,26 @@ const players = [
   },
 ];
 
-const boardWord = ["B", "A", "L", "L"];
-const letters = [
-  { letter: "B", value: 2 },
-  { letter: "C", value: 2 },
-  { letter: "F", value: 4 },
-  { letter: "X", value: 8 },
-  { letter: "A", value: 1 },
-  { letter: "O", value: 1 },
-  { letter: "T", value: 3 },
-];
-
 export default function Live({
-  setGameState,
+  user,
+  gameId,
+  board,
+  timeRemaining,
+  availableLetters,
+  setAvailableLetters,
+  setBoard,
 }: {
-  setGameState: (state: "lobby" | "live") => void;
+  user: User;
+  gameId: string;
+  board: string[][];
+  timeRemaining: number;
+  availableLetters: { letter: string; value: number }[];
+  setAvailableLetters: (letters: { letter: string; value: number }[]) => void;
+  setBoard: (board: string[][]) => void;
+  setTimeRemaining: (time: number) => void;
 }) {
-  const [grid, setGrid] = useState<(string | null)[][]>(
-    Array(10)
-      .fill(null)
-      .map(() => Array(10).fill(null))
-  );
+  const { refreshAvailableLetters } = useSocketUtils();
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
-  const [availableLetters, setAvailableLetters] = useState(letters);
 
   const handleDragStart = (e: DragEvent<HTMLDivElement>, letter: string) => {
     e.dataTransfer.setData("text/plain", letter);
@@ -79,33 +83,34 @@ export default function Live({
     const letter = e.dataTransfer.getData("text/plain");
 
     // Only place letter if the cell is empty
-    if (!grid[row][col]) {
-      const newGrid = [...grid];
-      newGrid[row][col] = letter;
-      setGrid(newGrid);
+    if (!board[row][col]) {
+      const newBoard = [...board];
+      newBoard[row][col] = letter;
 
       // Remove the letter from available letters
-      setAvailableLetters((prev) => prev.filter((l) => l.letter !== letter));
+      setAvailableLetters(availableLetters.filter((l) => l.letter !== letter));
     }
     setSelectedLetter(null);
   };
 
   const handleCellClick = (row: number, col: number) => {
-    if (selectedLetter && !grid[row][col]) {
-      const newGrid = [...grid];
-      newGrid[row][col] = selectedLetter;
-      setGrid(newGrid);
+    if (selectedLetter && !board[row][col]) {
+      const newBoard = [...board];
+      newBoard[row][col] = selectedLetter;
+      setBoard(newBoard);
 
       // Remove the letter from available letters
-      setAvailableLetters((prev) =>
-        prev.filter((l) => l.letter !== selectedLetter)
-      );
+      setAvailableLetters(availableLetters.filter((l) => l.letter !== selectedLetter));
       setSelectedLetter(null);
     }
   };
 
   const handleLetterClick = (letter: string) => {
     setSelectedLetter(letter);
+  };
+
+  const handleShuffle = () => {
+    refreshAvailableLetters(user.fid, gameId);
   };
 
   return (
@@ -133,7 +138,7 @@ export default function Live({
           </div>
 
           <p className="text-black bg-white py-1 px-4 rounded-full text-xs">
-            5:00
+            {timeRemaining}
           </p>
         </div>
       </div>
@@ -164,30 +169,30 @@ export default function Live({
       {/* Game Board */}
       <div className="bg-[#B5E9DA] rounded-xl p-2 flex flex-col items-center">
         <div className="gap-0 grid grid-cols-10 grid-rows-10 w-[360px] h-[360px] bg-[#A0E9D9] rounded-lg border-2 border-[#C8EFE3]">
-          {Array.from({ length: 10 * 10 }).map((_, idx) => {
-            const row = Math.floor(idx / 10);
-            const col = idx % 10;
-            const letter = grid[row][col];
+          {Array.from({ length: 10 }, (_, rowIndex) =>
+            Array.from({ length: 10 }, (_, colIndex) => {
+              const letter = board[rowIndex][colIndex];
 
-            return (
-              <div
-                key={idx}
-                className={`flex items-center justify-center cursor-pointer ${
-                  letter
-                    ? "bg-[#FFFDEB] border-2 border-[#E6E6E6] font-bold text-[#7B5A2E] text-xl"
-                    : "bg-[#B5E9DA] border-2 border-[#C8EFE3]"
-                } ${selectedLetter ? "hover:bg-[#FFFDEB]/50" : ""}`}
-                style={{ width: 36, height: 36 }}
-                draggable={!!letter}
-                onDragStart={(e) => letter && handleDragStart(e, letter)}
-                onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, row, col)}
-                onClick={() => handleCellClick(row, col)}
-              >
-                {letter}
-              </div>
-            );
-          })}
+              return (
+                <div
+                  key={`${rowIndex}-${colIndex}`}
+                  className={`flex items-center justify-center uppercase cursor-pointer ${
+                    letter
+                      ? "bg-[#FFFDEB] border-2 border-[#E6E6E6] font-bold text-[#7B5A2E] text-xl"
+                      : "bg-[#B5E9DA] border-2 border-[#C8EFE3]"
+                  } ${selectedLetter ? "hover:bg-[#FFFDEB]/50" : ""}`}
+                  style={{ width: 36, height: 36 }}
+                  draggable={!!letter}
+                  onDragStart={(e) => letter && handleDragStart(e, letter)}
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, rowIndex, colIndex)}
+                  onClick={() => handleCellClick(rowIndex, colIndex)}
+                >
+                  {letter}
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
 
@@ -197,21 +202,23 @@ export default function Live({
           {availableLetters.map((l, i) => (
             <div
               key={i}
-              className={`w-10 h-10 bg-[#FFFDEB] border border-[#E6E6E6] rounded-md flex flex-col items-center justify-center text-2xl font-bold text-[#B5A16E] shadow relative cursor-pointer ${
+              className={`w-10 h-10 bg-[#FFFDEB] border border-[#E6E6E6] rounded-md uppercase flex flex-col items-center justify-center text-2xl font-bold text-[#B5A16E] shadow relative cursor-pointer ${
                 selectedLetter === l.letter ? "ring-2 ring-blue-500" : ""
               }`}
               draggable
               onDragStart={(e) => handleDragStart(e, l.letter)}
               onClick={() => handleLetterClick(l.letter)}
             >
-              {l.letter}
-              <span className="absolute bottom-1 right-1 text-xs text-[#B5A16E] font-medium">
+              <span className={`text-2xl text-[#B5A16E] font-bold uppercase ${l.value >= 10 ? 'mr-1' : ''}`}>
+                {l.letter}
+              </span>
+              <span className={`absolute text-xs text-[#B5A16E] font-medium uppercase bottom-0 right-0.5`}>
                 {l.value}
               </span>
             </div>
           ))}
           <button
-            onClick={() => {}}
+            onClick={handleShuffle}
             className="w-10 h-10 bg-[#C8EFE3] border-2 border-[#B5E9DA] rounded-md flex items-center justify-center text-[#B5A16E] hover:bg-[#B5E9DA] transition-colors shadow-sm"
           >
             <Shuffle className="w-6 h-6" />
