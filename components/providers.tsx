@@ -1,5 +1,6 @@
 "use client";
 
+import { AudioProvider } from "@/contexts/audio-context";
 import { MiniAppProvider } from "@/contexts/miniapp-context";
 import { SocketProvider } from "@/contexts/socket-context";
 import { env } from "@/lib/env";
@@ -30,7 +31,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
                 notificationProxyUrl="/api/notification"
                 chain={base}
               >
-                <MiniAppProvider>{children}</MiniAppProvider>
+                <MiniAppProvider>
+                  <AudioProvider>{children}</AudioProvider>
+                </MiniAppProvider>
               </MiniKitProvider>
             </DaimoPayProvider>
           </QueryClientProvider>

@@ -18,10 +18,12 @@ import {
   WordNotValidEvent,
   WordSubmittedEvent,
 } from "@/types/socket-events";
+import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useAccount } from "wagmi";
 
+import { useAudio } from "@/contexts/audio-context";
 import useFetchGame from "@/hooks/use-fetch-game";
 import Ended from "./Ended";
 import Live from "./Live";
@@ -30,9 +32,14 @@ import Lobby from "./Lobby";
 
 export default function Game({ id }: { id: string }) {
   const { data: game } = useFetchGame(id);
+  const { playSound } = useAudio();
   const { subscribe } = useSocket();
   const { connectToLobby, refreshAvailableLetters } = useSocketUtils();
   const [players, setPlayers] = useState<Player[]>([]);
+  const [highlightedCells, setHighlightedCells] = useState<
+    Array<{ row: number; col: number }>
+  >([]);
+  const [highlightedWord, setHighlightedWord] = useState("");
 
   // where key is "x-y" position and value is player
   const [letterPlacers, setLetterPlacers] = useState<{
@@ -123,14 +130,49 @@ export default function Game({ id }: { id: string }) {
         });
         return newLetterPlacers;
       });
-      if (event.player.fid === user?.fid) {
-        toast.success(
-            `"${event.words.map((w) => w.toUpperCase()).join(", ")}" ${event.words.length > 1 ? "are valid words" : "is a valid word"}! (+${event.score} points)`,
-          {
-            position: "top-center",
-          }
-        );
-      }
+
+      // Set the highlighted cells and word for all users
+      setHighlightedCells(
+        event.path.map((pos) => ({ row: pos.y, col: pos.x }))
+      );
+      setHighlightedWord(event.words.map((w) => w.toUpperCase()).join(", "));
+
+      // Clear the highlight after animation
+      setTimeout(() => {
+        setHighlightedCells([]);
+        setHighlightedWord("");
+      }, 2000);
+
+      playSound("wordSubmitted");
+
+      // Show toast to all users
+      toast.custom(
+        (id) => (
+          <div className="flex items-center gap-3 p-2">
+            <img
+              src={require("@/lib/utils").formatAvatarUrl(
+                event.player.avatarUrl || ""
+              )}
+              alt={event.player.displayName || event.player.username || ""}
+              className="w-10 h-10 rounded-full border border-[#C8EFE3] object-cover"
+            />
+            <div className="flex flex-col">
+              <span className="font-bold text-lg text-[#7B5A2E]">
+                {event.words.map((w) => w.toUpperCase()).join(", ")}
+              </span>
+              <span className="text-sm text-[#B5A16E] font-medium">
+                +{event.score} points
+              </span>
+            </div>
+          </div>
+        ),
+        {
+          position: "top-center",
+          duration: 3500,
+          className:
+            "bg-[#B5E9DA] border-2 border-[#C8EFE3] rounded-lg shadow-lg",
+        }
+      );
     });
     subscribe("word_not_valid", (event: WordNotValidEvent) => {
       setBoard(event.board);
@@ -161,16 +203,21 @@ export default function Game({ id }: { id: string }) {
         });
         refreshAvailableLetters(user?.fid!, id);
         if (event.player.fid === user?.fid) {
-          toast.error(`"${event.word.toUpperCase()}" is valid but adjacent words are not!`, {
-            position: "top-center",
-          });
+          toast.error(
+            `"${event.word.toUpperCase()}" is valid but adjacent words are not!`,
+            {
+              position: "top-center",
+            }
+          );
         }
       }
     );
     subscribe("score_update", (event: ScoreUpdateEvent) => {
       setPlayers((prev) => {
         const newPlayers = [...prev];
-        const playerIndex = newPlayers.findIndex((p) => p.fid === event.player.fid);
+        const playerIndex = newPlayers.findIndex(
+          (p) => p.fid === event.player.fid
+        );
         if (playerIndex !== -1) {
           newPlayers[playerIndex].score = event.newScore;
         }
@@ -217,17 +264,76 @@ export default function Game({ id }: { id: string }) {
   }
 
   return (
-    <Live
-      user={user!}
-      gameId={id}
-      board={board}
-      timeRemaining={timeRemaining}
-      availableLetters={availableLetters}
-      setAvailableLetters={setAvailableLetters}
-      setBoard={setBoard}
-      setTimeRemaining={setTimeRemaining}
-      letterPlacers={letterPlacers}
-      players={players}
-    />
+    <>
+      <AnimatePresence>
+        {highlightedWord && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.8 }}
+            animate={{
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              transition: {
+                type: "spring",
+                stiffness: 300,
+                damping: 20,
+              },
+            }}
+            exit={{
+              opacity: 0,
+              y: -20,
+              scale: 0.8,
+              transition: {
+                duration: 0.2,
+              },
+            }}
+            className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-[#B5E9DA] rounded-lg px-6 py-3 shadow-lg border-2 border-[#C8EFE3] z-50"
+          >
+            <motion.div
+              initial={{ scale: 0.9, rotate: -2 }}
+              animate={{
+                scale: 1,
+                rotate: 0,
+                transition: {
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 20,
+                },
+              }}
+              className="text-xl font-bold text-white flex items-center gap-2"
+            >
+              <motion.span
+                initial={{ scale: 0 }}
+                animate={{
+                  scale: 1,
+                  transition: {
+                    delay: 0.1,
+                    type: "spring",
+                    stiffness: 300,
+                  },
+                }}
+                className="text-[#7B5A2E]"
+              >
+                ✓
+              </motion.span>
+              {highlightedWord}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <Live
+        user={user!}
+        gameId={id}
+        board={board}
+        timeRemaining={timeRemaining}
+        availableLetters={availableLetters}
+        setAvailableLetters={setAvailableLetters}
+        setBoard={setBoard}
+        setTimeRemaining={setTimeRemaining}
+        letterPlacers={letterPlacers}
+        players={players}
+        highlightedCells={highlightedCells}
+      />
+    </>
   );
 }

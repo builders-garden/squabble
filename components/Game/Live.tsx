@@ -27,6 +27,7 @@ export default function Live({
   setAvailableLetters,
   setBoard,
   players,
+  highlightedCells,
 }: {
   user: User;
   gameId: string;
@@ -40,6 +41,7 @@ export default function Live({
     [key: string]: Player[];
   };
   players: Player[];
+  highlightedCells: Array<{ row: number; col: number }>;
 }) {
   const { refreshAvailableLetters, placeLetter, submitWord } = useSocketUtils();
   const [selectedLetter, setSelectedLetter] = useState<{
@@ -406,8 +408,11 @@ export default function Live({
             Array.from({ length: 10 }, (_, colIndex) => {
               const letter = board[rowIndex][colIndex];
               const isPlaced = letterPlacers[`${rowIndex}-${colIndex}`];
+              const isHighlighted = highlightedCells.some(
+                (cell) => cell.row === rowIndex && cell.col === colIndex
+              );
               return (
-                <div
+                <motion.div
                   key={`${rowIndex}-${colIndex}`}
                   className={`flex items-center justify-center uppercase cursor-pointer relative ${
                     letter
@@ -417,13 +422,30 @@ export default function Live({
                   style={{ width: 36, height: 36 }}
                   draggable={!!letter}
                   onDragStart={(e) =>
-                    letter && handleDragStart(e, { letter, value: 1 }, 0)
+                    letter && handleDragStart(e as any, { letter, value: 1 }, 0)
                   }
                   onDragOver={handleDragOver}
                   onDrop={(e) => handleDrop(e, rowIndex, colIndex)}
                   onClick={() => handleCellClick(rowIndex, colIndex)}
                 >
-                  {letter}
+                  <motion.div
+                    animate={
+                      isHighlighted
+                        ? {
+                            scale: [1, 1.2, 1],
+                            color: ["#7B5A2E", "#FFD700", "#7B5A2E"],
+                            transition: {
+                              duration: 1.5,
+                              times: [0, 0.5, 1],
+                              repeat: 0,
+                            },
+                          }
+                        : {}
+                    }
+                    className="text-xl font-bold"
+                  >
+                    {letter}
+                  </motion.div>
                   {isPlaced && !letter && isPlaced.length > 0 && (
                     <div className="absolute bottom-0.5 left-0.5 flex -space-x-1">
                       {isPlaced
@@ -443,7 +465,7 @@ export default function Live({
                         ))}
                     </div>
                   )}
-                </div>
+                </motion.div>
               );
             })
           )}
