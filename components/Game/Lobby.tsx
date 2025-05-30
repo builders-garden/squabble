@@ -8,6 +8,7 @@ import { DaimoPayButton } from "@daimo/pay";
 import { PaymentCompletedEvent } from "@daimo/pay-common";
 import { User } from "@prisma/client";
 import { CheckCircle, ClockCircle } from "@solar-icons/react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
 import { base } from "viem/chains";
@@ -120,17 +121,35 @@ export default function Lobby({
         </div>
         <div className="font-medium text-xl text-white">Players in Lobby</div>
         <div className="grid grid-cols-2 grid-rows-3 gap-4">
-          {players.map((p, i) => (
-            <LobbyPlayerCard
-              key={i}
-              player={p}
-              status={p.ready ? "ready" : "pending"}
-              isLeader={p.fid?.toString() === gameLeaderFid?.toString()}
-            />
-          ))}
-          {[...Array(6 - players.length)].map((_, i) => (
-            <LobbySpotAvailableCard key={i} />
-          ))}
+          <AnimatePresence mode="popLayout">
+            {players.map((p, i) => (
+              <motion.div
+                key={p.fid || p.id}
+                className="w-full h-full"
+                initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.8, y: -20 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+              >
+                <LobbyPlayerCard
+                  player={p}
+                  status={p.ready ? "ready" : "pending"}
+                  isLeader={p.fid?.toString() === gameLeaderFid?.toString()}
+                />
+              </motion.div>
+            ))}
+            {[...Array(6 - players.length)].map((_, i) => (
+              <motion.div
+                key={`empty-${i}`}
+                className="w-full h-full"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.2 }}
+              >
+                <LobbySpotAvailableCard />
+              </motion.div>
+            ))}
+          </AnimatePresence>
         </div>
       </div>
       <div className="flex flex-col gap-2 items-center w-full">
@@ -163,7 +182,8 @@ export default function Lobby({
               metadata={{
                 gameId,
                 playerFid: currentUser.fid.toString(),
-                playerName: currentUser.displayName || currentUser.username || "",
+                playerName:
+                  currentUser.displayName || currentUser.username || "",
               }}
               onPaymentStarted={(e) => console.log("Payment started:", e)}
               onPaymentCompleted={handlePaymentCompleted}
@@ -185,7 +205,7 @@ export default function Lobby({
             <div className="text-white/75">
               {pendingStakes
                 ? "Waiting for everyone to pay their stake..."
-                : "Click to start game"}
+                : "Everyone is ready, start the game!"}
             </div>
             <SquabbleButton
               text="Start Game"

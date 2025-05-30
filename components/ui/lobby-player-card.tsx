@@ -1,7 +1,7 @@
 "use client";
 import { formatAvatarUrl } from "@/lib/utils";
 import { Player } from "@/types/socket-events";
-import { CheckCircle, Crown, ClockCircle } from "@solar-icons/react";
+import { CheckCircle, ClockCircle, Crown } from "@solar-icons/react";
 import Image from "next/image";
 
 export default function LobbyPlayerCard({
@@ -15,7 +15,7 @@ export default function LobbyPlayerCard({
 }) {
   return (
     <div
-      className={`bg-[#B5E9DA] rounded-xl flex items-center gap-2 p-2 ${
+      className={`w-full h-full bg-[#B5E9DA] rounded-xl flex items-center gap-2 p-2 ${
         status === "pending"
           ? "border-2 border-[#FFE59E]"
           : "border-2 border-[#C8EFE3]"
@@ -36,15 +36,15 @@ export default function LobbyPlayerCard({
         )}
       </div>
       <div className="flex flex-col">
-        <div className={`font-bold text-white text-sm truncate max-w-[120px]`}>{player.displayName || player.username || ""}</div>
+        <div className={`font-bold text-white text-sm truncate max-w-[120px]`}>
+          {player.displayName || player.username || ""}
+        </div>
         <div className="flex items-center gap-1">
-          {
-            status === "ready" ? (
-              <CheckCircle className="text-emerald-400" size={14} />
-            ) : (
-              <ClockCircle className="text-yellow-200" size={14} />
-            )
-          }
+          {status === "ready" ? (
+            <CheckCircle className="text-emerald-400" size={14} />
+          ) : (
+            <ClockCircle className="text-yellow-200" size={14} />
+          )}
           <div
             className={`font-medium text-sm ${
               status === "pending" ? "text-yellow-200" : "text-emerald-400"
