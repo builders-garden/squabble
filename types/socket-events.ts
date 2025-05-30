@@ -68,12 +68,13 @@ export interface LetterRemovedEvent {
 export interface WordSubmittedEvent {
   gameId: string;
   player: Player;
-  word: string;
+  words: string[];
   score: number;
-  positions: Array<{
+  path: Array<{
     x: number;
     y: number;
   }>;
+  board: string[][];
 }
 
 export interface ConflictResolutionEvent {
@@ -103,12 +104,7 @@ export interface TimerTickEvent {
 
 export interface GameEndedEvent {
   gameId: string;
-  winner: Player;
-  winnerScore: number;
-  finalScores: Array<{
-    playerId: string;
-    score: number;
-  }>;
+  players: Array<Player>;
 }
 
 export interface ConnectToLobbyEvent {
@@ -138,6 +134,7 @@ export interface SubmitWordEvent {
   word: string;
   path: Array<{ x: number; y: number }>;
   isNew: boolean;
+  placedLetters: Array<{ letter: string; x: number; y: number }>;
 }
 
 export interface PlaceLetterEvent {
@@ -153,6 +150,22 @@ export interface RemoveLetterEvent {
   gameId: string;
   x: number;
   y: number;
+}
+
+export interface WordNotValidEvent {
+  gameId: string;
+  player: Player;
+  word: string;
+  board: string[][];
+  path: Array<{ x: number; y: number }>;
+}
+
+export interface AdjacentWordsNotValidEvent {
+  gameId: string;
+  player: Player;
+  word: string;
+  board: string[][];
+  path: Array<{ x: number; y: number }>;
 }
 
 // Type map for all events
@@ -177,4 +190,6 @@ export type SocketEventMap = {
   remove_letter: RemoveLetterEvent;
   refreshed_available_letters: RefreshedAvailableLettersEvent;
   refresh_available_letters: RefreshAvailableLettersEvent;
+  word_not_valid: WordNotValidEvent;
+  adjacent_words_not_valid: AdjacentWordsNotValidEvent;
 };

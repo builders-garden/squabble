@@ -1,8 +1,9 @@
 import { MESSAGE_EXPIRATION_TIME } from "@/lib/constants";
-import { NeynarUser } from "@/lib/neynar";
 import { useAuthenticate, useMiniKit } from "@coinbase/onchainkit/minikit";
 import { User } from "@prisma/client";
 import { useCallback, useEffect, useState } from "react";
+import { useApiQuery } from "./use-api-query";
+import { useAuthCheck } from "./use-auth-check";
 
 export const useSignIn = ({
   autoSignIn = false,
@@ -12,9 +13,21 @@ export const useSignIn = ({
   onSuccess?: (user: User) => void;
 }) => {
   const { context } = useMiniKit();
+  const { data: authCheck, isLoading: isCheckingAuth } = useAuthCheck();
+  const {
+    data: user,
+    isLoading: isLoadingNeynarUser,
+    refetch: refetchUser,
+  } = useApiQuery<User>({
+    url: "/api/users/me",
+    method: "GET",
+    isProtected: true,
+    queryKey: ["user"],
+    enabled: !!authCheck,
+  });
+
   // this method allows for Sign in with Farcaster (SIWF)
   const { signIn } = useAuthenticate();
-  const [user, setUser] = useState<User | null>(null);
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -64,7 +77,7 @@ export const useSignIn = ({
       }
 
       const data = await res.json();
-      setUser(data.user);
+      refetchUser();
       setIsSignedIn(true);
       onSuccess?.(data.user);
       return data;
@@ -76,14 +89,32 @@ export const useSignIn = ({
     } finally {
       setIsLoading(false);
     }
-  }, [context, signIn]);
+  }, [context, onSuccess, refetchUser, signIn]);
 
   useEffect(() => {
     // if autoSignIn is true, sign in automatically on mount
     if (autoSignIn) {
-      handleSignIn();
+      if (authCheck && !isCheckingAuth) {
+        setIsSignedIn(true);
+        if (!user) {
+          refetchUser().then(() => {
+            onSuccess?.(user!);
+          });
+        } else {
+          onSuccess?.(user);
+        }
+      } else if (!authCheck && !isCheckingAuth) {
+        handleSignIn();
+      }
     }
-  }, [autoSignIn, handleSignIn]);
+  }, [
+    autoSignIn,
+    handleSignIn,
+    authCheck,
+    isCheckingAuth,
+    refetchUser,
+    onSuccess,
+  ]);
 
   return { signIn: handleSignIn, isSignedIn, isLoading, error, user };
 };

@@ -11,7 +11,6 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const requestId = params.id;
 
-  //const imageUrl = new URL(`${appUrl}/api/og/songs/${requestId}`).toString();
   const imageUrl = `${appUrl}/images/feed.png`;
   const frame = {
     version: "next",

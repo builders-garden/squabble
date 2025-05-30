@@ -163,7 +163,7 @@ export default function Lobby({
               metadata={{
                 gameId,
                 playerFid: currentUser.fid.toString(),
-                playerName: currentUser.displayName,
+                playerName: currentUser.displayName || currentUser.username || "",
               }}
               onPaymentStarted={(e) => console.log("Payment started:", e)}
               onPaymentCompleted={handlePaymentCompleted}

@@ -24,8 +24,8 @@ export default function useSocketUtils() {
     emit("start_game", { player, gameId });
   };
 
-  const submitWord = (player: Player, gameId: string, word: string, path: {x: number, y: number}[], isNew: boolean) => {
-    emit("submit_word", { player, gameId, word, path, isNew });
+  const submitWord = (player: Player, gameId: string, word: string, path: {x: number, y: number}[], isNew: boolean, placedLetters: {letter: string, x: number, y: number}[]) => {
+    emit("submit_word", { player, gameId, word, path, isNew, placedLetters });
   };
 
   const placeLetter = (
