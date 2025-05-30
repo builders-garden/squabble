@@ -5,6 +5,7 @@ import { Player } from "@/types/socket-events";
 import sdk from "@farcaster/frame-sdk";
 import { User } from "@prisma/client";
 import { Logout, Shuffle } from "@solar-icons/react";
+import { AnimatePresence, motion } from "framer-motion";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
 import { DragEvent, useState } from "react";
@@ -314,7 +315,14 @@ export default function Live({
     const word = sortedLetters.map((l) => l.letter).join("");
     const path = sortedLetters.map((l) => ({ x: l.col, y: l.row }));
 
-    submitWord(user, gameId, word, path, true, placedLetters.map((l) => ({ letter: l.letter, x: l.col, y: l.row })));
+    submitWord(
+      user,
+      gameId,
+      word,
+      path,
+      true,
+      placedLetters.map((l) => ({ letter: l.letter, x: l.col, y: l.row }))
+    );
 
     // Reset the placed letters and direction after submission
     setPlacedLetters([]);
@@ -357,31 +365,38 @@ export default function Live({
 
       {/* Scoreboard */}
       <div className="grid grid-cols-3 grid-rows-2 gap-2 w-full max-w-3xl mx-auto">
-        {players.sort((a, b) => (b.score || 0) - (a.score || 0)).map((p, i) => (
-          <div
-            key={p.fid}
-            className={`flex flex-row items-center bg-[#B5E9DA] rounded-md px-1 py-1 gap-1 min-w-[70px] border-2 border-[#C8EFE3] ${
-              i === 0 ? "ring-2 ring-yellow-200" : ""
-            }`}
-          >
-            <div className="text-xs text-white rounded-full font-bold">
-              {i + 1}
-            </div>
-            <Image
-              src={formatAvatarUrl(p.avatarUrl || "")}
-              className="w-6 h-6 rounded-full object-cover"
-              alt={p.displayName || p.username || ""}
-              width={32}
-              height={32}
-            />
-            <div className="flex flex-col items-start">
-              <div className="text-xs text-white truncate max-w-[60px]">
-                {p.displayName || p.username || ""}
+        {players
+          .sort((a, b) => (b.score || 0) - (a.score || 0))
+          .map((p, i) => (
+            <motion.div
+              key={`${p.fid}-${p.score}`}
+              initial={{ scale: 1.05 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 0.3, type: "spring", stiffness: 200 }}
+              className={`flex flex-row items-center bg-[#B5E9DA] rounded-md px-1 py-1 gap-1 min-w-[70px] border-2 border-[#C8EFE3]  ${
+                p.fid === user?.fid ? "ring-2 ring-blue-400" : ""
+              }`}
+            >
+              <div className="text-xs text-white rounded-full font-bold">
+                {i + 1}
               </div>
-              <div className="text-xs text-white font-bold">{p.score || 0}</div>
-            </div>
-          </div>
-        ))}
+              <Image
+                src={formatAvatarUrl(p.avatarUrl || "")}
+                className="w-6 h-6 rounded-full object-cover"
+                alt={p.displayName || p.username || ""}
+                width={32}
+                height={32}
+              />
+              <div className="flex flex-col items-start">
+                <div className="text-xs text-white truncate max-w-[60px]">
+                  {p.displayName || p.username || ""}
+                </div>
+                <div className="text-xs text-white font-bold">
+                  {p.score || 0}
+                </div>
+              </div>
+            </motion.div>
+          ))}
       </div>
 
       {/* Game Board */}
@@ -438,36 +453,48 @@ export default function Live({
       <div className="flex flex-col items-center justify-between w-full gap-2">
         {/* Player's Letters */}
         <div className="flex gap-2 items-center">
-          {availableLetters.map((l, i) => (
-            <div
-              key={i}
-              className={`w-10 h-10 bg-[#FFFDEB] border border-[#E6E6E6] rounded-md uppercase flex flex-col items-center justify-center text-2xl font-bold text-[#B5A16E] shadow relative cursor-pointer ${
-                selectedLetter?.index === i ? "ring-2 ring-blue-500" : ""
-              }`}
-              draggable
-              onDragStart={(e) => handleDragStart(e, l, i)}
-              onClick={() => handleLetterClick(l, i)}
-            >
-              <span
-                className={`text-2xl text-[#B5A16E] font-bold uppercase ${
-                  l.value >= 10 ? "mr-1" : ""
-                }`}
+          <AnimatePresence mode="popLayout">
+            {availableLetters.map((l, i) => (
+              <motion.div
+                key={`${l.letter}-${i}`}
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+                transition={{ duration: 0.2, delay: i * 0.05 }}
+                layout
               >
-                {l.letter}
-              </span>
-              <span
-                className={`absolute text-xs text-[#B5A16E] font-medium uppercase bottom-0 right-0.5`}
-              >
-                {l.value}
-              </span>
-            </div>
-          ))}
-          <button
+                <div
+                  className={`w-10 h-10 bg-[#FFFDEB] border border-[#E6E6E6] rounded-md uppercase flex flex-col items-center justify-center text-2xl font-bold text-[#B5A16E] shadow relative cursor-pointer ${
+                    selectedLetter?.index === i ? "ring-2 ring-blue-500" : ""
+                  }`}
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, l, i)}
+                  onClick={() => handleLetterClick(l, i)}
+                >
+                  <span
+                    className={`text-2xl text-[#B5A16E] font-bold uppercase ${
+                      l.value >= 10 ? "mr-1" : ""
+                    }`}
+                  >
+                    {l.letter}
+                  </span>
+                  <span
+                    className={`absolute text-xs text-[#B5A16E] font-medium uppercase bottom-0 right-0.5`}
+                  >
+                    {l.value}
+                  </span>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             onClick={handleShuffle}
             className="w-10 h-10 bg-[#C8EFE3] border-2 border-[#B5E9DA] rounded-md flex items-center justify-center text-[#B5A16E] hover:bg-[#B5E9DA] transition-colors shadow-sm"
           >
             <Shuffle className="w-6 h-6" />
-          </button>
+          </motion.button>
         </div>
 
         {/* Submit Button */}
