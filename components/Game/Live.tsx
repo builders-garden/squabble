@@ -348,6 +348,67 @@ export default function Live({
     setPlacementDirection(null);
   };
 
+  // Helper to check for gaps in the word being formed
+  const hasGapInWord = () => {
+    if (placedLetters.length === 0 || !placementDirection) return false;
+
+    // Get all connected letters in the same direction (copied from handleSubmitWord)
+    const connectedLetters: Array<{
+      letter: string;
+      row: number;
+      col: number;
+    }> = [];
+    const visited = new Set<string>();
+    const getConnectedLetters = (
+      row: number,
+      col: number,
+      direction: "horizontal" | "vertical"
+    ) => {
+      const key = `${row}-${col}`;
+      if (visited.has(key)) return;
+      visited.add(key);
+      const letter = board[row][col];
+      if (!letter) return;
+      if (!placedLetters.some((l) => l.row === row && l.col === col)) {
+        connectedLetters.push({ letter, row, col });
+      }
+      if (direction === "horizontal") {
+        if (col > 0) getConnectedLetters(row, col - 1, direction);
+        if (col < 9) getConnectedLetters(row, col + 1, direction);
+      } else {
+        if (row > 0) getConnectedLetters(row - 1, col, direction);
+        if (row < 9) getConnectedLetters(row + 1, col, direction);
+      }
+    };
+    placedLetters.forEach(({ row, col }) => {
+      if (placementDirection === "horizontal") {
+        getConnectedLetters(row, col, "horizontal");
+      } else {
+        getConnectedLetters(row, col, "vertical");
+      }
+    });
+    const allLetters = [...placedLetters, ...connectedLetters];
+    if (allLetters.length === 0) return false;
+    // Find min/max in the direction
+    let min: number, max: number, fixed: number;
+    if (placementDirection === "horizontal") {
+      min = Math.min(...allLetters.map((l) => l.col));
+      max = Math.max(...allLetters.map((l) => l.col));
+      fixed = allLetters[0].row;
+      for (let c = min; c <= max; c++) {
+        if (!board[fixed][c]) return true;
+      }
+    } else {
+      min = Math.min(...allLetters.map((l) => l.row));
+      max = Math.max(...allLetters.map((l) => l.row));
+      fixed = allLetters[0].col;
+      for (let r = min; r <= max; r++) {
+        if (!board[r][fixed]) return true;
+      }
+    }
+    return false;
+  };
+
   return (
     <div className="min-h-screen bg-[#A0E9D9] flex flex-col items-center justify-between p-4">
       {/* Header */}
@@ -541,7 +602,7 @@ export default function Live({
           <SquabbleButton
             text="Submit word"
             variant="primary"
-            disabled={false}
+            disabled={placedLetters.length === 0 || hasGapInWord()}
             onClick={handleSubmitWord}
           />
         </div>

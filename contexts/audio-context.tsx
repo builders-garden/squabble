@@ -31,7 +31,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
       //const stored = localStorage.getItem("soundVolume");
       //return stored === null ? 0.5 : parseFloat(stored);
     }
-    return 0.1;
+    return 0.05;
   });
   const [musicVolume, setMusicVolume] = useState(() => {
     if (typeof window !== "undefined") {
@@ -55,7 +55,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     if (!musicRef.current) {
       musicRef.current = new Audio("/sounds/background-music.mp3");
       musicRef.current.loop = true;
-      musicRef.current.volume = 0.03;
+      musicRef.current.volume = 0.02;
     }
   }, []);
 
