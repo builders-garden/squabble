@@ -189,14 +189,14 @@ export default function Game({ id }: { id: string }) {
         playSound("wordNotValid");
         toast.custom(
           (t) => (
-            <div className="w-fit flex items-center gap-2 p-2 bg-white border border-red-400 rounded-lg shadow animate-shake">
+            <div className="w-fit flex items-center gap-2 p-2 bg-white rounded-lg shadow animate-shake">
               <div className="text-red-600 font-medium text-sm">
                 ❌ &quot;{event.word.toUpperCase()}&quot; is not a valid word! 🚫
               </div>
             </div>
           ),
           {
-            position: "bottom-left",
+            position: "top-left",
             duration: 1500,
           }
         );
@@ -218,14 +218,14 @@ export default function Game({ id }: { id: string }) {
           playSound("wordNotValid");
           toast.custom(
             (t) => (
-              <div className="w-fit flex items-center gap-2 p-2 bg-white border border-red-400 rounded-lg shadow animate-shake">
+              <div className="w-fit flex items-center gap-2 p-2 bg-white  rounded-lg shadow animate-shake">
                 <div className="text-red-600 font-medium text-sm">
                   ❌ &quot;{event.word.toUpperCase()}&quot; is valid but adjacent words are not! 🚫
                 </div>
               </div>
             ),
             {
-              position: "bottom-left",
+              position: "top-left",
               duration: 1500,
             }
           );

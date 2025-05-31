@@ -9,7 +9,7 @@ import { Logout, Shuffle } from "@solar-icons/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
-import { DragEvent, useState } from "react";
+import { DragEvent, useEffect, useState } from "react";
 import { toast } from "sonner";
 import SquabbleButton from "../ui/squabble-button";
 
@@ -56,6 +56,9 @@ export default function Live({
   const [placementDirection, setPlacementDirection] = useState<
     "horizontal" | "vertical" | null
   >(null);
+  const [validPlacementCells, setValidPlacementCells] = useState<
+    Array<{ row: number; col: number }>
+  >([]);
 
   const handleDragStart = (
     e: DragEvent<HTMLDivElement>,
@@ -93,6 +96,96 @@ export default function Live({
     });
   };
 
+  const calculateValidPlacementCells = () => {
+    if (placedLetters.length === 0) {
+      // If no letters placed yet, all cells adjacent to existing letters are valid
+      const validCells: Array<{ row: number; col: number }> = [];
+      for (let row = 0; row < 10; row++) {
+        for (let col = 0; col < 10; col++) {
+          if (!board[row][col] && isAdjacentToExistingLetter(row, col, board)) {
+            validCells.push({ row, col });
+          }
+        }
+      }
+      setValidPlacementCells(validCells);
+    } else if (placementDirection) {
+      // Find the full extent of the word in the current direction (including board and placedLetters)
+      // Start from any placed letter, then walk in both directions to collect all connected letters
+      let startRow = placedLetters[0].row;
+      let startCol = placedLetters[0].col;
+      let min: number, max: number, fixed: number;
+      if (placementDirection === "horizontal") {
+        fixed = startRow;
+        // Walk left
+        min = startCol;
+        while (min > 0 && board[fixed][min - 1]) {
+          min--;
+        }
+        // Walk right
+        max = startCol;
+        while (max < 9 && board[fixed][max + 1]) {
+          max++;
+        }
+        const validCells: Array<{ row: number; col: number }> = [];
+        // Check cell before min
+        if (min > 0 && !board[fixed][min - 1]) {
+          validCells.push({ row: fixed, col: min - 1 });
+        }
+        // Check cell after max
+        if (max < 9 && !board[fixed][max + 1]) {
+          validCells.push({ row: fixed, col: max + 1 });
+        }
+        setValidPlacementCells(validCells);
+      } else {
+        fixed = startCol;
+        // Walk up
+        min = startRow;
+        while (min > 0 && board[min - 1][fixed]) {
+          min--;
+        }
+        // Walk down
+        max = startRow;
+        while (max < 9 && board[max + 1][fixed]) {
+          max++;
+        }
+        const validCells: Array<{ row: number; col: number }> = [];
+        // Check cell before min
+        if (min > 0 && !board[min - 1][fixed]) {
+          validCells.push({ row: min - 1, col: fixed });
+        }
+        // Check cell after max
+        if (max < 9 && !board[max + 1][fixed]) {
+          validCells.push({ row: max + 1, col: fixed });
+        }
+        setValidPlacementCells(validCells);
+      }
+    } else {
+      // No direction yet, allow placement adjacent to last placed letter (both directions)
+      const validCells: Array<{ row: number; col: number }> = [];
+      const lastLetter = placedLetters[placedLetters.length - 1];
+      // Check horizontal positions
+      if (lastLetter.col > 0 && !board[lastLetter.row][lastLetter.col - 1]) {
+        validCells.push({ row: lastLetter.row, col: lastLetter.col - 1 });
+      }
+      if (lastLetter.col < 9 && !board[lastLetter.row][lastLetter.col + 1]) {
+        validCells.push({ row: lastLetter.row, col: lastLetter.col + 1 });
+      }
+      // Check vertical positions
+      if (lastLetter.row > 0 && !board[lastLetter.row - 1][lastLetter.col]) {
+        validCells.push({ row: lastLetter.row - 1, col: lastLetter.col });
+      }
+      if (lastLetter.row < 9 && !board[lastLetter.row + 1][lastLetter.col]) {
+        validCells.push({ row: lastLetter.row + 1, col: lastLetter.col });
+      }
+      setValidPlacementCells(validCells);
+    }
+  };
+
+  // Update valid placement cells whenever placedLetters or board changes
+  useEffect(() => {
+    calculateValidPlacementCells();
+  }, [placedLetters, board]);
+
   const handleDrop = (
     e: DragEvent<HTMLDivElement>,
     row: number,
@@ -104,25 +197,30 @@ export default function Live({
 
     // Only place letter if the cell is empty
     if (!board[row][col]) {
+      // Check if this is a valid placement cell
+      const isValidPlacement = validPlacementCells.some(
+        (cell) => cell.row === row && cell.col === col
+      );
+
+      if (!isValidPlacement) {
+        toast.custom(
+          (t) => (
+            <div className="w-fit flex items-center gap-2 p-2 bg-white rounded-lg shadow animate-shake">
+              <div className="text-red-600 font-medium text-sm">
+                ❌ Invalid placement!
+              </div>
+            </div>
+          ),
+          {
+            position: "top-left",
+            duration: 1500,
+          }
+        );
+        return;
+      }
+
       // Check if this is the first letter placement
       if (placedLetters.length === 0) {
-        // For first letter, check if it's adjacent to any existing letter on the board
-        if (!isAdjacentToExistingLetter(row, col, board)) {
-          toast.custom(
-            (t) => (
-              <div className="w-fit flex items-center gap-2 p-2 bg-white border border-red-400 rounded-lg shadow animate-shake">
-                <div className="text-red-600 font-medium text-sm">
-                  ❌ Letters must be placed next to existing ones!
-                </div>
-              </div>
-            ),
-            {
-              position: "bottom-left",
-              duration: 1500,
-            }
-          );
-          return;
-        }
         setPlacementDirection(null);
       } else {
         // Check if the new placement follows the same direction as previous letters
@@ -162,6 +260,42 @@ export default function Live({
   const handleCellClick = (row: number, col: number) => {
     const existingLetter = board[row][col];
 
+    // If we have a selected letter and click on a placed letter, swap them
+    if (selectedLetter && existingLetter) {
+      // Find if this letter was placed in current turn
+      const placedLetterIndex = placedLetters.findIndex(
+        (l) => l.row === row && l.col === col
+      );
+
+      // Only allow replacing letters placed in current turn
+      if (placedLetterIndex !== -1) {
+        const newBoard = [...board];
+        newBoard[row][col] = selectedLetter.letter;
+        setBoard(newBoard);
+
+        // Update placedLetters array
+        const newPlacedLetters = [...placedLetters];
+        newPlacedLetters[placedLetterIndex] = {
+          letter: selectedLetter.letter,
+          row,
+          col,
+        };
+        setPlacedLetters(newPlacedLetters);
+
+        // Update available letters: add the old letter and remove the selected one
+        const newAvailableLetters = availableLetters.filter(
+          (_, i) => i !== selectedLetter.index
+        );
+        newAvailableLetters.push({ letter: existingLetter, value: 1 });
+        setAvailableLetters(newAvailableLetters);
+
+        placeLetter(user, gameId, selectedLetter.letter, row, col);
+        setSelectedLetter(null);
+        playSound("letterPlaced");
+        return;
+      }
+    }
+
     // If no letter is selected and we click on a placed letter, remove it
     if (!selectedLetter && existingLetter) {
       // Only allow removing letters that were placed in the current turn
@@ -191,32 +325,36 @@ export default function Live({
         }
 
         playSound("letterRemoved");
-
         return;
       }
     }
 
     // Handle placing a new letter
     if (selectedLetter && !existingLetter) {
+      // Check if this is a valid placement cell
+      const isValidPlacement = validPlacementCells.some(
+        (cell) => cell.row === row && cell.col === col
+      );
+
+      if (!isValidPlacement) {
+        toast.custom(
+          (t) => (
+            <div className="w-fit flex items-center gap-2 p-2 bg-white rounded-lg shadow animate-shake">
+              <div className="text-red-600 font-medium text-sm">
+                ❌ Invalid placement!
+              </div>
+            </div>
+          ),
+          {
+            position: "top-left",
+            duration: 1500,
+          }
+        );
+        return;
+      }
+
       // Check if this is the first letter placement
       if (placedLetters.length === 0) {
-        // For first letter, check if it's adjacent to any existing letter on the board
-        if (!isAdjacentToExistingLetter(row, col, board)) {
-          toast.custom(
-            (t) => (
-              <div className="w-fit flex items-center gap-2 p-2 bg-white border border-red-400 rounded-lg shadow animate-shake">
-                <div className="text-red-600 font-medium text-sm">
-                  ❌ Letters must be placed next to existing ones!
-                </div>
-              </div>
-            ),
-            {
-              position: "bottom-left",
-              duration: 1500,
-            }
-          );
-          return;
-        }
         setPlacementDirection(null);
       } else {
         // Check if the new placement follows the same direction as previous letters
@@ -263,7 +401,12 @@ export default function Live({
     letter: { letter: string; value: number },
     index: number
   ) => {
-    setSelectedLetter({ letter: letter.letter, index });
+    // If clicking the same letter that's already selected, deselect it
+    if (selectedLetter?.index === index) {
+      setSelectedLetter(null);
+    } else {
+      setSelectedLetter({ letter: letter.letter, index });
+    }
   };
 
   const handleShuffle = () => {
@@ -431,6 +574,35 @@ export default function Live({
     return false;
   };
 
+  // Checks if any placed letter is adjacent to an existing letter on the board (not part of placedLetters)
+  const isWordConnectedToBoard = () => {
+    if (placedLetters.length === 0) return false;
+    // Create a set of placed letter positions for quick lookup
+    const placedSet = new Set(placedLetters.map((l) => `${l.row}-${l.col}`));
+    for (const { row, col } of placedLetters) {
+      const adjacentPositions = [
+        [row - 1, col],
+        [row + 1, col],
+        [row, col - 1],
+        [row, col + 1],
+      ];
+      for (const [r, c] of adjacentPositions) {
+        if (r >= 0 && r < 10 && c >= 0 && c < 10) {
+          if (board[r][c] !== "" && !placedSet.has(`${r}-${c}`)) {
+            return true;
+          }
+        }
+      }
+    }
+    // Special case: if the board is empty except for placedLetters, allow the first word
+    const boardHasOtherLetters = board.some((rowArr, rIdx) =>
+      rowArr.some(
+        (cell, cIdx) => cell !== "" && !placedSet.has(`${rIdx}-${cIdx}`)
+      )
+    );
+    return !boardHasOtherLetters;
+  };
+
   return (
     <div className="min-h-screen bg-[#A0E9D9] flex flex-col items-center justify-between p-4">
       {/* Header */}
@@ -517,6 +689,11 @@ export default function Live({
                   className={`flex items-center justify-center uppercase cursor-pointer relative ${
                     letter
                       ? "bg-[#FFFDEB] border-2 border-[#E6E6E6] font-bold text-[#7B5A2E] text-xl"
+                      : validPlacementCells.some(
+                          (cell) =>
+                            cell.row === rowIndex && cell.col === colIndex
+                        )
+                      ? "bg-[#FFFDEB]/50 border-2 border-[#C8EFE3] hover:bg-[#FFFDEB]"
                       : "bg-[#B5E9DA] border-2 border-[#C8EFE3]"
                   } ${selectedLetter ? "hover:bg-[#FFFDEB]/50" : ""}`}
                   style={{ width: 36, height: 36 }}
@@ -546,7 +723,7 @@ export default function Live({
                   >
                     {letter}
                   </motion.div>
-                  {isPlaced && !letter && isPlaced.length > 0 && (
+                  {isPlaced && isPlaced.length > 0 && (
                     <div className="absolute bottom-0.5 left-0.5 flex -space-x-1">
                       {isPlaced
                         .filter((p) => p.fid !== user.fid)
@@ -558,8 +735,8 @@ export default function Live({
                             <Image
                               src={formatAvatarUrl(player.avatarUrl || "")}
                               alt={player.displayName || player.username || ""}
-                              width={12}
-                              height={12}
+                              width={14}
+                              height={14}
                             />
                           </div>
                         ))}
@@ -624,7 +801,11 @@ export default function Live({
           <SquabbleButton
             text="Submit word"
             variant="primary"
-            disabled={placedLetters.length === 0 || hasGapInWord()}
+            disabled={
+              placedLetters.length === 0 ||
+              hasGapInWord() ||
+              !isWordConnectedToBoard()
+            }
             onClick={handleSubmitWord}
           />
         </div>

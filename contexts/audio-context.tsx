@@ -31,7 +31,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
       //const stored = localStorage.getItem("soundVolume");
       //return stored === null ? 0.5 : parseFloat(stored);
     }
-    return 0.03;
+    return 0.04;
   });
   const [musicVolume, setMusicVolume] = useState(() => {
     if (typeof window !== "undefined") {
