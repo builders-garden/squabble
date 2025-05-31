@@ -160,22 +160,202 @@ export default function Live({
         setValidPlacementCells(validCells);
       }
     } else {
-      // No direction yet, allow placement adjacent to last placed letter (both directions)
-      const validCells: Array<{ row: number; col: number }> = [];
-      const lastLetter = placedLetters[placedLetters.length - 1];
-      // Check horizontal positions
-      if (lastLetter.col > 0 && !board[lastLetter.row][lastLetter.col - 1]) {
-        validCells.push({ row: lastLetter.row, col: lastLetter.col - 1 });
+      // If only one letter placed this turn
+      if (placedLetters.length === 1) {
+        const { row, col } = placedLetters[0];
+        const directions = [
+          [0, 1], // right
+          [0, -1], // left
+          [1, 0], // down
+          [-1, 0], // up
+        ];
+        // Check if adjacent to any existing letter
+        let isAdjacentToExisting = false;
+        for (const [dr, dc] of directions) {
+          const nr = row + dr;
+          const nc = col + dc;
+          if (nr >= 0 && nr < 10 && nc >= 0 && nc < 10) {
+            if (board[nr][nc]) {
+              isAdjacentToExisting = true;
+              break;
+            }
+          }
+        }
+        if (isAdjacentToExisting) {
+          // Try both directions: horizontal and vertical
+          let validCells: Array<{ row: number; col: number }> = [];
+          // Horizontal
+          let minCol = col,
+            maxCol = col;
+          while (
+            minCol > 0 &&
+            (board[row][minCol - 1] ||
+              (placedLetters[0].col === minCol - 1 &&
+                placedLetters[0].row === row))
+          )
+            minCol--;
+          while (
+            maxCol < 9 &&
+            (board[row][maxCol + 1] ||
+              (placedLetters[0].col === maxCol + 1 &&
+                placedLetters[0].row === row))
+          )
+            maxCol++;
+          if (
+            minCol > 0 &&
+            !board[row][minCol - 1] &&
+            !placedLetters.some((l) => l.row === row && l.col === minCol - 1)
+          ) {
+            validCells.push({ row, col: minCol - 1 });
+          }
+          if (
+            maxCol < 9 &&
+            !board[row][maxCol + 1] &&
+            !placedLetters.some((l) => l.row === row && l.col === maxCol + 1)
+          ) {
+            validCells.push({ row, col: maxCol + 1 });
+          }
+          // Vertical
+          let minRow = row,
+            maxRow = row;
+          while (
+            minRow > 0 &&
+            (board[minRow - 1][col] ||
+              (placedLetters[0].row === minRow - 1 &&
+                placedLetters[0].col === col))
+          )
+            minRow--;
+          while (
+            maxRow < 9 &&
+            (board[maxRow + 1][col] ||
+              (placedLetters[0].row === maxRow + 1 &&
+                placedLetters[0].col === col))
+          )
+            maxRow++;
+          if (
+            minRow > 0 &&
+            !board[minRow - 1][col] &&
+            !placedLetters.some((l) => l.row === minRow - 1 && l.col === col)
+          ) {
+            validCells.push({ row: minRow - 1, col });
+          }
+          if (
+            maxRow < 9 &&
+            !board[maxRow + 1][col] &&
+            !placedLetters.some((l) => l.row === maxRow + 1 && l.col === col)
+          ) {
+            validCells.push({ row: maxRow + 1, col });
+          }
+          setValidPlacementCells(validCells);
+          return;
+        } else {
+          // Not adjacent to any existing letter: allow all four adjacent cells
+          const validCells: Array<{ row: number; col: number }> = [];
+          directions.forEach(([dr, dc]) => {
+            const nr = row + dr;
+            const nc = col + dc;
+            if (nr >= 0 && nr < 10 && nc >= 0 && nc < 10) {
+              if (
+                !board[nr][nc] &&
+                !placedLetters.some((l) => l.row === nr && l.col === nc)
+              ) {
+                validCells.push({ row: nr, col: nc });
+              }
+            }
+          });
+          setValidPlacementCells(validCells);
+          return;
+        }
       }
-      if (lastLetter.col < 9 && !board[lastLetter.row][lastLetter.col + 1]) {
-        validCells.push({ row: lastLetter.row, col: lastLetter.col + 1 });
-      }
-      // Check vertical positions
-      if (lastLetter.row > 0 && !board[lastLetter.row - 1][lastLetter.col]) {
-        validCells.push({ row: lastLetter.row - 1, col: lastLetter.col });
-      }
-      if (lastLetter.row < 9 && !board[lastLetter.row + 1][lastLetter.col]) {
-        validCells.push({ row: lastLetter.row + 1, col: lastLetter.col });
+      // Otherwise, allow placement only at the ends of the contiguous word (including placed and existing letters)
+      // 1. Find all connected letters (placed this turn + already on the board, contiguous)
+      const connectedSet = new Set<string>();
+      const visited = new Set<string>();
+      const directions = [
+        [0, 1], // right
+        [0, -1], // left
+        [1, 0], // down
+        [-1, 0], // up
+      ];
+      // Helper to walk and collect all connected letters
+      const walk = (row: number, col: number) => {
+        const key = `${row}-${col}`;
+        if (visited.has(key)) return;
+        visited.add(key);
+        if (
+          !board[row][col] &&
+          !placedLetters.some((l) => l.row === row && l.col === col)
+        )
+          return;
+        connectedSet.add(key);
+        for (const [dr, dc] of directions) {
+          const nr = row + dr;
+          const nc = col + dc;
+          if (nr >= 0 && nr < 10 && nc >= 0 && nc < 10) {
+            if (
+              board[nr][nc] ||
+              placedLetters.some((l) => l.row === nr && l.col === nc)
+            ) {
+              walk(nr, nc);
+            }
+          }
+        }
+      };
+      // Start from each placed letter
+      placedLetters.forEach(({ row, col }) => walk(row, col));
+      // Convert connectedSet to array of {row, col}
+      const connectedArr = Array.from(connectedSet).map((key) => {
+        const [row, col] = key.split("-").map(Number);
+        return { row, col };
+      });
+      // Determine if the word is horizontal or vertical
+      let validCells: Array<{ row: number; col: number }> = [];
+      const allRows = connectedArr.map((l) => l.row);
+      const allCols = connectedArr.map((l) => l.col);
+      const isHorizontal = allRows.every((r) => r === allRows[0]);
+      const isVertical = allCols.every((c) => c === allCols[0]);
+      if (isHorizontal) {
+        // Find min and max col
+        const row = allRows[0];
+        const minCol = Math.min(...allCols);
+        const maxCol = Math.max(...allCols);
+        // Check cell before minCol
+        if (
+          minCol > 0 &&
+          !board[row][minCol - 1] &&
+          !placedLetters.some((l) => l.row === row && l.col === minCol - 1)
+        ) {
+          validCells.push({ row, col: minCol - 1 });
+        }
+        // Check cell after maxCol
+        if (
+          maxCol < 9 &&
+          !board[row][maxCol + 1] &&
+          !placedLetters.some((l) => l.row === row && l.col === maxCol + 1)
+        ) {
+          validCells.push({ row, col: maxCol + 1 });
+        }
+      } else if (isVertical) {
+        // Find min and max row
+        const col = allCols[0];
+        const minRow = Math.min(...allRows);
+        const maxRow = Math.max(...allRows);
+        // Check cell before minRow
+        if (
+          minRow > 0 &&
+          !board[minRow - 1][col] &&
+          !placedLetters.some((l) => l.row === minRow - 1 && l.col === col)
+        ) {
+          validCells.push({ row: minRow - 1, col });
+        }
+        // Check cell after maxRow
+        if (
+          maxRow < 9 &&
+          !board[maxRow + 1][col] &&
+          !placedLetters.some((l) => l.row === maxRow + 1 && l.col === col)
+        ) {
+          validCells.push({ row: maxRow + 1, col });
+        }
       }
       setValidPlacementCells(validCells);
     }
