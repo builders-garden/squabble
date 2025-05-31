@@ -149,19 +149,19 @@ export default function Game({ id }: { id: string }) {
       // Show toast to all users
       toast.custom(
         (id) => (
-          <div className="flex items-center gap-3 p-2">
+          <div className="flex items-center gap-4 p-3 bg-white rounded-2xl shadow-lg animate-bounce">
             <img
               src={require("@/lib/utils").formatAvatarUrl(
                 event.player.avatarUrl || ""
               )}
               alt={event.player.displayName || event.player.username || ""}
-              className="w-10 h-10 rounded-full border border-[#C8EFE3] object-cover"
+              className="w-12 h-12 rounded-full border-4 border-[#C8EFE3] object-cover shadow-sm"
             />
             <div className="flex flex-col">
-              <span className="font-bold text-lg text-[#7B5A2E]">
+              <span className="font-bold text-xl text-[#7B5A2E]">
                 {event.words.map((w) => w.toUpperCase()).join(", ")}
               </span>
-              <span className="text-sm text-[#B5A16E] font-medium">
+              <span className="text-base text-[#B5A16E] font-semibold">
                 +{event.score} points
               </span>
             </div>
@@ -187,9 +187,19 @@ export default function Game({ id }: { id: string }) {
       refreshAvailableLetters(user?.fid!, id);
       if (event.player.fid === user?.fid) {
         playSound("wordNotValid");
-        toast.error(`"${event.word.toUpperCase()}" is not a valid word!`, {
-          position: "top-center",
-        });
+        toast.custom(
+          (t) => (
+            <div className="w-fit flex items-center gap-2 p-2 bg-white border border-red-400 rounded-lg shadow animate-shake">
+              <div className="text-red-600 font-medium text-sm">
+                ❌ &quot;{event.word.toUpperCase()}&quot; is not a valid word! 🚫
+              </div>
+            </div>
+          ),
+          {
+            position: "bottom-left",
+            duration: 1500,
+          }
+        );
       }
     });
     subscribe(
@@ -206,10 +216,17 @@ export default function Game({ id }: { id: string }) {
         refreshAvailableLetters(user?.fid!, id);
         if (event.player.fid === user?.fid) {
           playSound("wordNotValid");
-          toast.error(
-            `"${event.word.toUpperCase()}" is valid but adjacent words are not!`,
+          toast.custom(
+            (t) => (
+              <div className="w-fit flex items-center gap-2 p-2 bg-white border border-red-400 rounded-lg shadow animate-shake">
+                <div className="text-red-600 font-medium text-sm">
+                  ❌ &quot;{event.word.toUpperCase()}&quot; is valid but adjacent words are not! 🚫
+                </div>
+              </div>
+            ),
             {
-              position: "top-center",
+              position: "bottom-left",
+              duration: 1500,
             }
           );
         }

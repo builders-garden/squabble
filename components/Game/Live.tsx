@@ -108,9 +108,19 @@ export default function Live({
       if (placedLetters.length === 0) {
         // For first letter, check if it's adjacent to any existing letter on the board
         if (!isAdjacentToExistingLetter(row, col, board)) {
-          toast.error("Letters must be placed adjacent to existing letters!", {
-            position: "top-center",
-          });
+          toast.custom(
+            (t) => (
+              <div className="w-fit flex items-center gap-2 p-2 bg-white border border-red-400 rounded-lg shadow animate-shake">
+                <div className="text-red-600 font-medium text-sm">
+                  ❌ Letters must be placed next to existing ones!
+                </div>
+              </div>
+            ),
+            {
+              position: "bottom-left",
+              duration: 1500,
+            }
+          );
           return;
         }
         setPlacementDirection(null);
@@ -192,7 +202,19 @@ export default function Live({
       if (placedLetters.length === 0) {
         // For first letter, check if it's adjacent to any existing letter on the board
         if (!isAdjacentToExistingLetter(row, col, board)) {
-          toast.error("Letters must be placed adjacent to existing letters!");
+          toast.custom(
+            (t) => (
+              <div className="w-fit flex items-center gap-2 p-2 bg-white border border-red-400 rounded-lg shadow animate-shake">
+                <div className="text-red-600 font-medium text-sm">
+                  ❌ Letters must be placed next to existing ones!
+                </div>
+              </div>
+            ),
+            {
+              position: "bottom-left",
+              duration: 1500,
+            }
+          );
           return;
         }
         setPlacementDirection(null);
