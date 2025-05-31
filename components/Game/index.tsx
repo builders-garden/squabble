@@ -29,6 +29,7 @@ import Ended from "./Ended";
 import Live from "./Live";
 import Loading from "./Loading";
 import Lobby from "./Lobby";
+import NoWallet from "./NoWallet";
 
 export default function Game({ id }: { id: string }) {
   const { data: game } = useFetchGame(id);
@@ -185,6 +186,7 @@ export default function Game({ id }: { id: string }) {
       });
       refreshAvailableLetters(user?.fid!, id);
       if (event.player.fid === user?.fid) {
+        playSound("wordNotValid");
         toast.error(`"${event.word.toUpperCase()}" is not a valid word!`, {
           position: "top-center",
         });
@@ -203,6 +205,7 @@ export default function Game({ id }: { id: string }) {
         });
         refreshAvailableLetters(user?.fid!, id);
         if (event.player.fid === user?.fid) {
+          playSound("wordNotValid");
           toast.error(
             `"${event.word.toUpperCase()}" is valid but adjacent words are not!`,
             {
@@ -231,7 +234,7 @@ export default function Game({ id }: { id: string }) {
   >("lobby");
   const { address } = useAccount();
   if (!address) {
-    return <div>No wallet connected</div>;
+    return <NoWallet />;
   }
   if (gameState === "lobby") {
     return (

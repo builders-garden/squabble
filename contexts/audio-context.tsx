@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useRef, useState, useEffect } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 
 interface AudioContextType {
   playSound: (soundName: string) => void;
@@ -28,15 +28,15 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   });
   const [volume, setVolume] = useState(() => {
     if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("soundVolume");
-      return stored === null ? 0.8 : parseFloat(stored);
+      //const stored = localStorage.getItem("soundVolume");
+      //return stored === null ? 0.5 : parseFloat(stored);
     }
-    return 0.8;
+    return 0.1;
   });
   const [musicVolume, setMusicVolume] = useState(() => {
     if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("musicVolume");
-      return stored === null ? 0.02 : parseFloat(stored);
+      // const stored = localStorage.getItem("musicVolume");
+      // return stored === null ? 0.02 : parseFloat(stored);
     }
     return 0.02;
   });
@@ -55,7 +55,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     if (!musicRef.current) {
       musicRef.current = new Audio("/sounds/background-music.mp3");
       musicRef.current.loop = true;
-      musicRef.current.volume = 0.05;
+      musicRef.current.volume = 0.03;
     }
   }, []);
 
@@ -81,8 +81,10 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   const initAudio = () => {
     audioRefs.current = {
       wordSubmitted: new Audio("/sounds/word-submitted.mp3"),
+      wordNotValid: new Audio("/sounds/word-not-valid.mp3"),
       letterPlaced: new Audio("/sounds/letter-placed.mp3"),
       letterRemoved: new Audio("/sounds/letter-removed.mp3"),
+      shuffleLetters: new Audio("/sounds/shuffle-letters.mp3"),
     };
   };
 
@@ -93,12 +95,10 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
       initAudio();
     }
 
-    const audio = audioRefs.current[soundName];
-    if (audio) {
-      audio.volume = volume;
-      audio.currentTime = 0;
-      audio.play().catch(console.error);
-    }
+    // Create a new audio element for each play
+    const audio = new Audio(audioRefs.current[soundName].src);
+    audio.volume = volume;
+    audio.play().catch(console.error);
   };
 
   const toggleMusic = () => {

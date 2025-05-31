@@ -1,4 +1,5 @@
 "use client";
+import { useAudio } from "@/contexts/audio-context";
 import useSocketUtils from "@/hooks/use-socket-utils";
 import { formatAvatarUrl } from "@/lib/utils";
 import { Player } from "@/types/socket-events";
@@ -43,6 +44,7 @@ export default function Live({
   players: Player[];
   highlightedCells: Array<{ row: number; col: number }>;
 }) {
+  const { playSound } = useAudio();
   const { refreshAvailableLetters, placeLetter, submitWord } = useSocketUtils();
   const [selectedLetter, setSelectedLetter] = useState<{
     letter: string;
@@ -143,6 +145,7 @@ export default function Live({
       setAvailableLetters(availableLetters.filter((_, i) => i !== index));
       placeLetter(user, gameId, letter, row, col);
       setSelectedLetter(null);
+      playSound("letterPlaced");
     }
   };
 
@@ -176,6 +179,8 @@ export default function Live({
         if (newPlacedLetters.length === 0) {
           setPlacementDirection(null);
         }
+
+        playSound("letterRemoved");
 
         return;
       }
@@ -228,6 +233,7 @@ export default function Live({
       );
       placeLetter(user, gameId, selectedLetter.letter, row, col);
       setSelectedLetter(null);
+      playSound("letterPlaced");
     }
   };
 
@@ -247,7 +253,18 @@ export default function Live({
     setBoard(newBoard);
     setPlacedLetters([]);
     setPlacementDirection(null);
-    refreshAvailableLetters(user.fid, gameId);
+
+    // Start sounds slightly before the animation
+    for (let i = 0; i < 7; i++) {
+      setTimeout(() => {
+        playSound("shuffleLetters");
+      }, i * 75); // Reduced to 50ms between sounds for snappier feedback
+    }
+
+    // Start the animation
+    setTimeout(() => {
+      refreshAvailableLetters(user.fid, gameId);
+    }, 125); // Small delay to let sounds start first
   };
 
   const handleExitGame = async () => {
