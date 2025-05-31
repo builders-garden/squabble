@@ -630,10 +630,47 @@ export default function Live({
             <Logout size={12} />
           </div>
 
-          <p className="text-black bg-white py-1 px-4 rounded-full text-xs w-16 text-center">
+          <motion.div
+            key={timeRemaining}
+            initial={
+              timeRemaining === 60
+                ? { backgroundColor: "#ffffff", color: "#000000" }
+                : false
+            }
+            animate={
+              timeRemaining === 60
+                ? {
+                    backgroundColor: [
+                      "#ffffff",
+                      "#ffdddd",
+                      "#ff0000",
+                      "#ff0000",
+                      "#ffdddd",
+                      "#ffffff",
+                    ],
+                    color: [
+                      "#000000",
+                      "#ffffff",
+                      "#ffffff",
+                      "#ffffff",
+                      "#ffffff",
+                      "#000000",
+                    ],
+                    transition: {
+                      duration: 3,
+                      times: [0, 0.15, 0.3, 0.7, 0.85, 1],
+                      ease: [0.4, 0, 0.2, 1],
+                    },
+                  }
+                : {}
+            }
+            className={`text-black bg-white py-1 px-4 rounded-full text-xs w-16 text-center ${
+              timeRemaining <= 60 ? "text-red-600" : ""
+            }`}
+          >
             {Math.floor(timeRemaining / 60)}:
             {String(timeRemaining % 60).padStart(2, "0")}
-          </p>
+          </motion.div>
         </div>
       </div>
 

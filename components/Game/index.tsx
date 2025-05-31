@@ -126,8 +126,9 @@ export default function Game({ id }: { id: string }) {
       setBoard(event.board);
       setLetterPlacers((prev) => {
         const newLetterPlacers = { ...prev };
+        console.log("newLetterPlacers", event.path);
         event.path.forEach((position) => {
-          delete newLetterPlacers[`${position.x}-${position.y}`];
+          newLetterPlacers[`${position.y}-${position.x}`] = []
         });
         return newLetterPlacers;
       });
