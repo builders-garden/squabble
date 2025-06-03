@@ -52,14 +52,14 @@ export default function Home() {
             {user && (
               <div className="flex flex-col items-center space-y-2">
                 <Image
-                  src={user.pfp_url}
+                  src={user.avatarUrl}
                   alt="Profile"
                   className="w-20 h-20 rounded-full"
                   width={80}
                   height={80}
                 />
                 <div className="text-center">
-                  <p className="font-semibold">{user.display_name}</p>
+                  <p className="font-semibold">{user.displayName}</p>
                   <p className="text-sm text-muted-foreground">
                     @{user.username}
                   </p>

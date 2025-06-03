@@ -15,7 +15,6 @@ import { env } from "../env";
 
 export async function createNewGame(
   gameId: bigint,
-  creator: Address,
   stakeAmount: number
 ) {
   const privateKey = env.BACKEND_PRIVATE_KEY as `0x${string}`;

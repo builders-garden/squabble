@@ -19,21 +19,14 @@ export async function POST(req: NextRequest) {
   try {
     console.log("Agent create-game endpoint called");
 
-    const { betAmount, creatorAddress, participantsAddresses, conversationId } =
-      await req.json();
+    const { betAmount, conversationId } = await req.json();
 
     console.log("Request data:", {
       betAmount,
-      creatorAddress,
-      participantsAddresses,
       conversationId,
     });
 
-    if (
-      typeof betAmount !== "string" ||
-      typeof creatorAddress !== "string" ||
-      typeof conversationId !== "string"
-    ) {
+    if (typeof betAmount !== "string" || typeof conversationId !== "string") {
       console.log("Validation failed");
       return NextResponse.json({ error: "Invalid input" }, { status: 400 });
     }
@@ -41,9 +34,7 @@ export async function POST(req: NextRequest) {
     console.log("Creating game...");
     const game = await createGame({
       betAmount: parseInt(betAmount),
-      creatorAddress,
       conversationId,
-      participantsAddresses: participantsAddresses,
     });
 
     console.log("Game created successfully:", game.id);
@@ -64,7 +55,6 @@ export async function POST(req: NextRequest) {
     console.log("Calling smart contract...");
     const txHash = await createNewGame(
       BigInt(contractGameIdNumber),
-      creatorAddress as `0x${string}`,
       stakeAmount
     );
 

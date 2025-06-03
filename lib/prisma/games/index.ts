@@ -1,19 +1,15 @@
-import { GameStatus } from "@prisma/client";
-import { Game } from "@prisma/client";
+import { Game, GameStatus } from "@prisma/client";
 import { prisma } from "../client";
 
 // Create a new game
 export async function createGame(data: {
   betAmount: number;
-  creatorAddress: string;
   conversationId?: string;
-  participantsAddresses: string[];
   contractGameId?: number;
 }): Promise<Game> {
   // Build the game data object explicitly to avoid undefined values
   const gameData: any = {
     betAmount: data.betAmount,
-    creatorAddress: data.creatorAddress,
     status: GameStatus.PENDING,
   };
 
@@ -29,12 +25,6 @@ export async function createGame(data: {
   return prisma.game.create({
     data: {
       ...gameData,
-      participants: {
-        create: data.participantsAddresses.map((address) => ({
-          address,
-          joined: false,
-        })),
-      },
     },
   });
 }
@@ -49,7 +39,6 @@ export async function getGameById(id: string): Promise<Game | null> {
           user: true,
         },
       },
-      creator: true,
     },
   });
 }
@@ -57,7 +46,6 @@ export async function getGameById(id: string): Promise<Game | null> {
 // Get all games with optional filters
 export async function getGames(filters?: {
   status?: GameStatus;
-  creatorFid?: number;
 }): Promise<Game[]> {
   return prisma.game.findMany({
     where: filters,
@@ -67,7 +55,6 @@ export async function getGames(filters?: {
           user: true,
         },
       },
-      creator: true,
     },
     orderBy: {
       createdAt: "desc",
@@ -99,23 +86,6 @@ export async function deleteGame(id: string): Promise<Game> {
   });
 }
 
-// Get games by creator
-export async function getGamesByCreator(creatorFid: number): Promise<Game[]> {
-  return prisma.game.findMany({
-    where: { creatorFid },
-    include: {
-      participants: {
-        include: {
-          user: true,
-        },
-      },
-      creator: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
-}
 
 // Get games by status
 export async function getGamesByStatus(status: GameStatus): Promise<Game[]> {
@@ -127,7 +97,7 @@ export async function getGamesByStatus(status: GameStatus): Promise<Game[]> {
           user: true,
         },
       },
-      creator: true,
+      
     },
     orderBy: {
       createdAt: "desc",
