@@ -5,16 +5,14 @@ import { prisma } from "../client";
 // Create a new game
 export async function createGame(data: {
   betAmount: number;
-  creatorFid: number;
   creatorAddress: string;
   conversationId?: string;
-  participants: number[];
+  participantsAddresses: string[];
   contractGameId?: number;
 }): Promise<Game> {
   // Build the game data object explicitly to avoid undefined values
   const gameData: any = {
     betAmount: data.betAmount,
-    creatorFid: data.creatorFid,
     creatorAddress: data.creatorAddress,
     status: GameStatus.PENDING,
   };
@@ -32,8 +30,8 @@ export async function createGame(data: {
     data: {
       ...gameData,
       participants: {
-        create: data.participants.map((fid) => ({
-          fid,
+        create: data.participantsAddresses.map((address) => ({
+          address,
           joined: false,
         })),
       },

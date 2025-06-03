@@ -19,22 +19,19 @@ export async function POST(req: NextRequest) {
   try {
     console.log("Agent create-game endpoint called");
 
-    const { fids, betAmount, creatorAddress, creatorFid, conversationId } =
+    const { betAmount, creatorAddress, participantsAddresses, conversationId } =
       await req.json();
 
     console.log("Request data:", {
-      fids,
       betAmount,
       creatorAddress,
-      creatorFid,
+      participantsAddresses,
       conversationId,
     });
 
     if (
-      !Array.isArray(fids) ||
       typeof betAmount !== "string" ||
       typeof creatorAddress !== "string" ||
-      typeof creatorFid !== "string" ||
       typeof conversationId !== "string"
     ) {
       console.log("Validation failed");
@@ -44,10 +41,9 @@ export async function POST(req: NextRequest) {
     console.log("Creating game...");
     const game = await createGame({
       betAmount: parseInt(betAmount),
-      creatorFid: parseInt(creatorFid),
       creatorAddress,
       conversationId,
-      participants: fids,
+      participantsAddresses: participantsAddresses,
     });
 
     console.log("Game created successfully:", game.id);
