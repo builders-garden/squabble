@@ -11,10 +11,26 @@ export async function createGame(data: {
   participants: number[];
   contractGameId?: number;
 }): Promise<Game> {
+  // Build the game data object explicitly to avoid undefined values
+  const gameData: any = {
+    betAmount: data.betAmount,
+    creatorFid: data.creatorFid,
+    creatorAddress: data.creatorAddress,
+    status: GameStatus.PENDING,
+  };
+
+  // Only add optional fields if they have values
+  if (data.conversationId !== undefined) {
+    gameData.conversationId = data.conversationId;
+  }
+
+  if (data.contractGameId !== undefined) {
+    gameData.contractGameId = data.contractGameId;
+  }
+
   return prisma.game.create({
     data: {
-      ...data,
-      status: GameStatus.PENDING,
+      ...gameData,
       participants: {
         create: data.participants.map((fid) => ({
           fid,

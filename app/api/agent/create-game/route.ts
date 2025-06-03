@@ -7,56 +7,86 @@ function uuidToBigInt(uuid: string): bigint {
   // Remove hyphens to get full hex string
   const hex = uuid.replace(/-/g, "");
 
-  // Take only the first 8 hex characters (32 bits) to ensure safe range
-  // This gives us ~4 billion possible values, which is still very unique
-  const safeHex = hex.substring(0, 8);
+  // Take only the first 6 hex characters (24 bits) to ensure safe range
+  // This gives us ~16 million possible values, which is still very unique
+  // and fits comfortably within 32-bit signed integer range (max: 2,147,483,647)
+  const safeHex = hex.substring(0, 6);
 
   return BigInt("0x" + safeHex);
 }
 
 export async function POST(req: NextRequest) {
-  const { fids, betAmount, creatorAddress, creatorFid, conversationId } =
-    await req.json();
+  try {
+    console.log("Agent create-game endpoint called");
 
-  if (
-    !Array.isArray(fids) ||
-    typeof betAmount !== "string" ||
-    typeof creatorAddress !== "string" ||
-    typeof creatorFid !== "string" ||
-    typeof conversationId !== "string"
-  ) {
-    return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+    const { fids, betAmount, creatorAddress, creatorFid, conversationId } =
+      await req.json();
+
+    console.log("Request data:", {
+      fids,
+      betAmount,
+      creatorAddress,
+      creatorFid,
+      conversationId,
+    });
+
+    if (
+      !Array.isArray(fids) ||
+      typeof betAmount !== "string" ||
+      typeof creatorAddress !== "string" ||
+      typeof creatorFid !== "string" ||
+      typeof conversationId !== "string"
+    ) {
+      console.log("Validation failed");
+      return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+    }
+
+    console.log("Creating game...");
+    const game = await createGame({
+      betAmount: parseInt(betAmount),
+      creatorFid: parseInt(creatorFid),
+      creatorAddress,
+      conversationId,
+      participants: fids,
+    });
+
+    console.log("Game created successfully:", game.id);
+
+    const gameId = game.id;
+    const stakeAmount = game.betAmount;
+
+    // Convert UUID to integer for database (ensure it's a proper integer)
+    const contractGameIdBigInt = uuidToBigInt(gameId);
+    const contractGameIdNumber = Math.floor(Number(contractGameIdBigInt));
+
+    console.log("Updating game with contractGameId:", contractGameIdNumber);
+    // Update the game with the contractGameId as a proper integer
+    await updateGame(gameId, {
+      contractGameId: contractGameIdNumber,
+    });
+
+    console.log("Calling smart contract...");
+    const txHash = await createNewGame(
+      BigInt(contractGameIdNumber),
+      creatorAddress as `0x${string}`,
+      stakeAmount
+    );
+
+    console.log("Smart contract call successful:", txHash);
+
+    return NextResponse.json({
+      id: game.id,
+      contractGameId: contractGameIdNumber.toString(),
+      txHash,
+    });
+  } catch (error) {
+    console.error("Error in create-game:", error);
+    return NextResponse.json(
+      {
+        error: "Internal server error",
+        details: (error as Error).message,
+      },
+      { status: 500 }
+    );
   }
-
-  const game = await createGame({
-    betAmount: parseInt(betAmount),
-    creatorFid: parseInt(creatorFid),
-    creatorAddress,
-    conversationId,
-    participants: fids,
-  });
-
-  const gameId = game.id;
-  const stakeAmount = game.betAmount;
-
-  // Convert UUID to integer for database (ensure it's a proper integer)
-  const contractGameIdBigInt = uuidToBigInt(gameId);
-  const contractGameIdNumber = Math.floor(Number(contractGameIdBigInt));
-
-  // Update the game with the contractGameId as a proper integer
-  await updateGame(gameId, {
-    contractGameId: contractGameIdNumber,
-  });
-
-  const txHash = await createNewGame(
-    BigInt(contractGameIdNumber),
-    creatorAddress as `0x${string}`,
-    stakeAmount
-  );
-
-  return NextResponse.json({
-    id: game.id,
-    contractGameId: contractGameIdNumber.toString(),
-    txHash,
-  });
 }
