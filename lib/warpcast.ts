@@ -6,7 +6,7 @@ import { env } from "@/lib/env";
  * @returns The farcaster manifest for the frame
  */
 export async function getFarcasterManifest() {
-  let frameName = "Mini-app Starter";
+  let frameName = "Squabble";
   let noindex = false;
   const appUrl = env.NEXT_PUBLIC_URL;
   if (appUrl.includes("localhost")) {
@@ -39,7 +39,7 @@ export async function getFarcasterManifest() {
       subtitle: "Outspell your friends, in real time.", // 30 characters, no emojis or special characters, short description under app name
       description: "Outspell your friends, in real time.", // 170 characters, no emojis or special characters, promotional message displayed on Mini App Page
       primaryCategory: "social",
-      tags: ["mini-app", "starter"], // up to 5 tags, filtering/search tags
+      tags: ["words", "game", "word-game"], // up to 5 tags, filtering/search tags
       tagline: "Outspell your friends, in real time.", // 30 characters, marketing tagline should be punchy and descriptive
       ogTitle: `${frameName}`, // 30 characters, app name + short tag, Title case, no emojis
       ogDescription: "Outspell your friends, in real time.", // 100 characters, summarize core benefits in 1-2 lines
