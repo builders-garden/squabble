@@ -59,7 +59,6 @@ export const useSignIn = ({
       }
 
       const context = await sdk.context;
-      console.log("calling sign in api");
       const res = await fetch("/api/auth/sign-in", {
         method: "POST",
         headers: {
