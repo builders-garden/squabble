@@ -292,10 +292,10 @@
     "@types/tough-cookie" "^4.0.5"
     tough-cookie "^4.1.4"
 
-"@coinbase/onchainkit@^0.38.8":
-  version "0.38.8"
-  resolved "https://registry.yarnpkg.com/@coinbase/onchainkit/-/onchainkit-0.38.8.tgz#44960242757d2204b65ed662138450b627e77ce8"
-  integrity sha512-aEZD+wizvpCJzsgQ4yy5W5fSXSrcQp5JxuZ3RMgu2NM1Jp//lCDRXKSZrIqPvYHlbAzGt87Rgcxx56zNieHqBA==
+"@coinbase/onchainkit@^0.38.13":
+  version "0.38.13"
+  resolved "https://registry.yarnpkg.com/@coinbase/onchainkit/-/onchainkit-0.38.13.tgz#ad62e7c40f275c631e717b2a2c7f76a7804ee128"
+  integrity sha512-TfRKX13nAZ1DTCtHG4TFRrkW+ACyAPNJA0YudImrdnrNM/eXNEqk9yBbMBfycKMscRzypvnX2hc2eQdo2Calxw==
   dependencies:
     "@farcaster/frame-sdk" "^0.0.28"
     "@farcaster/frame-wagmi-connector" "^0.0.16"
