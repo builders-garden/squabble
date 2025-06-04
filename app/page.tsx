@@ -1,77 +1,49 @@
-import { Metadata } from "next";
-import dynamic from "next/dynamic";
+import HomePage from "@/components/pages/home";
 import { env } from "@/lib/env";
-import { OG_IMAGE_SIZE } from "@/lib/constants";
-
-const Home = dynamic(() => import("@/components/Home"), {
-  ssr: false,
-});
+import { Metadata } from "next";
 
 const appUrl = env.NEXT_PUBLIC_URL;
 
-type Props = {
-  params: Promise<{ id: string }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-};
+export async function generateMetadata({
+  params,
+}: {
+  params: { id: string };
+}): Promise<Metadata> {
+  const requestId = params.id;
 
-const frame = (_searchParams: {
-  [key: string]: string | string[] | undefined;
-}) => {
-  const searchParamsString = Object.entries(_searchParams)
-    .map(([key, value]) => `${key}=${value}`)
-    .join("&");
-  const { userId } = _searchParams;
-  const buttonTitle = "Play Squabble";
-
-  const imageUrl = userId
-    ? `${appUrl}/api/og/share/${userId}`
-    : `${appUrl}/images/feed.png`;
-
-  return {
+  const imageUrl = `${appUrl}/images/feed.png`;
+  const frame = {
     version: "next",
     imageUrl,
     button: {
-      title: buttonTitle,
+      title: "Play Squabble",
       action: {
         type: "launch_frame",
         name: "Squabble",
-        url: `${appUrl}/${searchParamsString ? `?${searchParamsString}` : ""}`,
-        splashImageUrl: `${appUrl}/images/splash.png`,
-        splashBackgroundColor: "#0d0d0d",
+        url: `${appUrl}/games/${requestId}`,
+        splashImageUrl: `${appUrl}/images/icon.png`,
+        splashBackgroundColor: "#7DDAC3",
       },
     },
   };
-};
-
-export async function generateMetadata({
-  searchParams,
-}: Props): Promise<Metadata> {
-  const _searchParams = await searchParams;
-  const { userId } = _searchParams;
-  const ogTitle = "Play Squabble";
-  const imageUrl = userId
-    ? `${appUrl}/api/og/share/${userId}`
-    : `${appUrl}/images/feed.png`;
 
   return {
-    title: ogTitle,
+    title: "Squabble",
     openGraph: {
-      title: ogTitle,
-      description: "Play Squabble! 🎲",
-      type: "website",
+      title: "Squabble",
+      description: "Outspell your friends, in real time.",
       images: [
         {
           url: imageUrl,
-          width: OG_IMAGE_SIZE.width,
-          height: OG_IMAGE_SIZE.height,
         },
       ],
     },
     other: {
-      "fc:frame": JSON.stringify(frame(_searchParams)),
+      "fc:frame": JSON.stringify(frame),
     },
   };
 }
-export default function HomePage() {
-  return <Home />;
+
+export default function Home() {
+  return <HomePage />;
 }

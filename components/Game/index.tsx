@@ -102,6 +102,8 @@ export default function Game({ id }: { id: string }) {
     });
     subscribe("game_loading", (event: GameLoadingEvent) => {
       setGameState("loading");
+      setLoadingTitle(event.title);
+      setLoadingBody(event.body);
     });
     subscribe("game_ended", (event: GameEndedEvent) => {
       setGameState("ended");
