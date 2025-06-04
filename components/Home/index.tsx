@@ -16,35 +16,32 @@ export default function Home() {
           <Image
             src="/images/logo.png"
             alt="Squabble Logo"
-            className="w-[48px] mb-1"
-            width={48}
-            height={48}
+            className="w-[64px] mb-1"
+            width={64}
+            height={64}
           />
           <div
-            className={`${luckiestGuy.className} text-2xl text-white tracking-wider`}
+            className={`${luckiestGuy.className} text-4xl text-white tracking-wider`}
           >
             SQUABBLE
           </div>
         </div>
 
         <div className="text-center space-y-4">
-          <h1 className={`${luckiestGuy.className} text-4xl text-white`}>
-            Welcome to Squabble
-          </h1>
-          <p className="text-white text-lg max-w-md">
-            The ultimate word game where strategy meets vocabulary. Challenge
-            your friends and show off your word skills!
+          <p className="text-white text-lg max-w-4xl">
+            a fast-paced, social word game designed for private friend groups on
+            Farcaster. Compete on the same randomized letter grid in real-time,
+            racing against the clock to create many words as possible on the
+            grid.
           </p>
         </div>
 
-        <button
+        {/* <button
           className="bg-white text-[#A0E9D9] px-8 py-3 rounded-full font-semibold hover:bg-opacity-90 transition-all"
-          onClick={() => {
-            /* Add your game start logic here */
-          }}
+          onClick={() => {}}
         >
           Start Playing
-        </button>
+        </button> */}
       </div>
     </div>
   );
