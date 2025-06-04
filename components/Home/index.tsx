@@ -29,7 +29,7 @@ export default function Home() {
 
         <div className="text-center space-y-4">
           <p className="text-white text-lg max-w-4xl">
-            a fast-paced, social word game designed for private friend groups on
+            A fast-paced, social word game designed for private friend groups on
             Farcaster. Compete on the same randomized letter grid in real-time,
             racing against the clock to create many words as possible on the
             grid.
