@@ -103,7 +103,7 @@ export const useSignIn = ({
         } else {
           onSuccess?.(user);
         }
-      } else if (!authCheck && !isCheckingAuth) {
+      } else if (!authCheck && !isCheckingAuth && !isSignedIn) {
         handleSignIn();
       }
     }
