@@ -47,7 +47,7 @@ export async function createNewGame(
     address: SQUABBLE_CONTRACT_ADDRESS,
     abi: SQUABBLE_CONTRACT_ABI as Abi,
     functionName: "createGame",
-    args: [gameId, creator, stakeAmountBigInt],
+    args: [gameId, stakeAmountBigInt],
   });
   console.log("tx", tx);
 
