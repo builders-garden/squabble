@@ -4,7 +4,13 @@ const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
   weight: ["400"],
 });
-export default function Loading() {
+export default function Loading({
+  title,
+  body,
+}: {
+  title?: string;
+  body?: string;
+}) {
   return (
     <div className="min-h-screen bg-[#A0E9D9] flex flex-col items-center justify-center p-4">
       <div className="flex flex-col items-center gap-4">
@@ -23,7 +29,10 @@ export default function Loading() {
           </div>
         </div>
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-        <div className="text-white font-medium">Loading</div>
+        <div className="text-white font-medium">
+          {title || "Loading"}
+          {body && <div className="text-white font-medium">{body}</div>}
+        </div>
       </div>
     </div>
   );

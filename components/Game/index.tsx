@@ -6,6 +6,7 @@ import useSocketUtils from "@/hooks/use-socket-utils";
 import {
   AdjacentWordsNotValidEvent,
   GameEndedEvent,
+  GameLoadingEvent,
   GameStartedEvent,
   GameUpdateEvent,
   LetterPlacedEvent,
@@ -36,6 +37,8 @@ export default function Game({ id }: { id: string }) {
   const { playSound } = useAudio();
   const { subscribe } = useSocket();
   const { connectToLobby, refreshAvailableLetters } = useSocketUtils();
+  const [loadingTitle, setLoadingTitle] = useState("");
+  const [loadingBody, setLoadingBody] = useState("");
   const [players, setPlayers] = useState<Player[]>([]);
   const [highlightedCells, setHighlightedCells] = useState<
     Array<{ row: number; col: number }>
@@ -96,6 +99,9 @@ export default function Game({ id }: { id: string }) {
     );
     subscribe("timer_tick", (event: TimerTickEvent) => {
       setTimeRemaining(event.timeRemaining);
+    });
+    subscribe("game_loading", (event: GameLoadingEvent) => {
+      setGameState("loading");
     });
     subscribe("game_ended", (event: GameEndedEvent) => {
       setGameState("ended");
@@ -270,7 +276,7 @@ export default function Game({ id }: { id: string }) {
   }
 
   if (gameState === "loading") {
-    return <Loading />;
+    return <Loading title={loadingTitle} body={loadingBody} />;
   }
 
   if (gameState === "ended") {

@@ -107,6 +107,12 @@ export interface GameEndedEvent {
   players: Array<Player>;
 }
 
+export interface GameLoadingEvent {
+  gameId: string;
+  title: string;
+  body: string;
+}
+
 export interface ConnectToLobbyEvent {
   player: Player;
   gameId: string;
@@ -192,4 +198,5 @@ export type SocketEventMap = {
   refresh_available_letters: RefreshAvailableLettersEvent;
   word_not_valid: WordNotValidEvent;
   adjacent_words_not_valid: AdjacentWordsNotValidEvent;
+  game_loading: GameLoadingEvent;
 };
