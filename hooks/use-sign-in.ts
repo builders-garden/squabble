@@ -1,11 +1,11 @@
 import { MESSAGE_EXPIRATION_TIME } from "@/lib/constants";
-import { useAuthenticate, useMiniKit } from "@coinbase/onchainkit/minikit";
+import { useAuthenticate } from "@coinbase/onchainkit/minikit";
+import sdk from "@farcaster/frame-sdk";
 import { User } from "@prisma/client";
 import { useCallback, useEffect, useState } from "react";
 import { useApiQuery } from "./use-api-query";
 import { useAuthCheck } from "./use-auth-check";
-import sdk from "@farcaster/frame-sdk";
-
+import { useAccount } from "wagmi";
 
 export const useSignIn = ({
   autoSignIn = false,
@@ -32,6 +32,7 @@ export const useSignIn = ({
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { address } = useAccount();
 
   const handleSignIn = useCallback(async () => {
     try {
@@ -40,32 +41,35 @@ export const useSignIn = ({
 
       const isMiniApp = await sdk.isInMiniApp();
       if (!isMiniApp) {
+        console.error("Not in mini app");
         throw new Error("Not in mini app");
       }
       let referrerFid: number | null = null;
-      const result = await signIn({
+      const result = await sdk.actions.signIn({
         nonce: Math.random().toString(36).substring(2),
         notBefore: new Date().toISOString(),
         expirationTime: new Date(
           Date.now() + MESSAGE_EXPIRATION_TIME
         ).toISOString(),
+        acceptAuthAddress: true,
       });
       if (!result) {
+        console.error("Sign in failed");
         throw new Error("Sign in failed");
       }
 
       const context = await sdk.context;
-
+      console.log("calling sign in api");
       const res = await fetch("/api/auth/sign-in", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",
         body: JSON.stringify({
           signature: result.signature,
           message: result.message,
           fid: context?.user?.fid,
+          walletAddress: address,
           // referrerFid,
         }),
       });
@@ -104,6 +108,8 @@ export const useSignIn = ({
           onSuccess?.(user);
         }
       } else if (!authCheck && !isCheckingAuth && !isSignedIn) {
+        console.log("Signing in");
+        console.log(authCheck, isCheckingAuth, isSignedIn);
         handleSignIn();
       }
     }

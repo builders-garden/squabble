@@ -6,12 +6,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyMessage } from "viem";
 
 export const POST = async (req: NextRequest) => {
-  let { fid, signature, message } = await req.json();
-  const neynarUser = await fetchUser(fid);
+  let { fid, signature, message, walletAddress } = await req.json();
 
   // Verify signature matches custody address
   const isValidSignature = await verifyMessage({
-    address: neynarUser.custody_address as `0x${string}`,
+    address: walletAddress as `0x${string}`,
     message,
     signature,
   });
@@ -20,13 +19,20 @@ export const POST = async (req: NextRequest) => {
     return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
   }
 
-  const user = await createOrUpdateUser(fid, neynarUser.display_name, neynarUser.username, neynarUser.pfp_url);
+  const neynarUser = await fetchUser(fid);
+
+  const user = await createOrUpdateUser(
+    fid,
+    neynarUser.display_name,
+    neynarUser.username,
+    neynarUser.pfp_url
+  );
 
   // Generate JWT token
   const secret = new TextEncoder().encode(env.JWT_SECRET);
   const token = await new jose.SignJWT({
     fid,
-    walletAddress: neynarUser.custody_address as `0x${string}`,
+    walletAddress: walletAddress as `0x${string}`,
   })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
