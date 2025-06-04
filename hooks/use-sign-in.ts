@@ -4,6 +4,8 @@ import { User } from "@prisma/client";
 import { useCallback, useEffect, useState } from "react";
 import { useApiQuery } from "./use-api-query";
 import { useAuthCheck } from "./use-auth-check";
+import sdk from "@farcaster/frame-sdk";
+
 
 export const useSignIn = ({
   autoSignIn = false,
@@ -12,7 +14,6 @@ export const useSignIn = ({
   autoSignIn?: boolean;
   onSuccess?: (user: User) => void;
 }) => {
-  const { context } = useMiniKit();
   const { data: authCheck, isLoading: isCheckingAuth } = useAuthCheck();
   const {
     data: user,
@@ -37,8 +38,9 @@ export const useSignIn = ({
       setIsLoading(true);
       setError(null);
 
-      if (!context) {
-        throw new Error("No context found");
+      const isMiniApp = await sdk.isInMiniApp();
+      if (!isMiniApp) {
+        throw new Error("Not in mini app");
       }
       let referrerFid: number | null = null;
       const result = await signIn({
@@ -51,10 +53,8 @@ export const useSignIn = ({
       if (!result) {
         throw new Error("Sign in failed");
       }
-      referrerFid =
-        context.location?.type === "cast_embed"
-          ? context.location.cast.fid
-          : null;
+
+      const context = await sdk.context;
 
       const res = await fetch("/api/auth/sign-in", {
         method: "POST",
@@ -65,8 +65,8 @@ export const useSignIn = ({
         body: JSON.stringify({
           signature: result.signature,
           message: result.message,
-          fid: context.user.fid,
-          referrerFid,
+          fid: context?.user?.fid,
+          // referrerFid,
         }),
       });
 
@@ -89,7 +89,7 @@ export const useSignIn = ({
     } finally {
       setIsLoading(false);
     }
-  }, [context, onSuccess, refetchUser, signIn]);
+  }, [onSuccess, refetchUser, signIn]);
 
   useEffect(() => {
     // if autoSignIn is true, sign in automatically on mount

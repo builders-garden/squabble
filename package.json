@@ -16,7 +16,7 @@
     "@daimo/pay": "^1.8.6",
     "@farcaster/auth-client": "^0.3.0",
     "@farcaster/frame-node": "^0.0.31",
-    "@farcaster/frame-sdk": "^0.0.53",
+    "@farcaster/frame-sdk": "^0.0.55",
     "@farcaster/frame-wagmi-connector": "^0.0.42",
     "@frames.js/debugger": "^0.5.0",
     "@prisma/adapter-libsql": "^6.8.2",
