@@ -58,8 +58,14 @@ export default function Game({ id }: { id: string }) {
   const { user } = useSignIn({
     autoSignIn: true,
     onSuccess: (user) => {
-      if (!user) return;
-      if (players.find((p) => p.fid === user.fid)) return;
+      if (!user) {
+        console.error("No user found");
+        return;
+      }
+      if (players.find((p) => p.fid === user.fid)) {
+        console.log("User already in game");
+        return;
+      }
       connectToLobby(
         {
           fid: user.fid,
