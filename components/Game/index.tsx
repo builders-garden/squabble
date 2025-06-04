@@ -22,7 +22,7 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useAccount } from "wagmi";
+import { useAccount, useConnect } from "wagmi";
 
 import { useAudio } from "@/contexts/audio-context";
 import useFetchGame from "@/hooks/use-fetch-game";
