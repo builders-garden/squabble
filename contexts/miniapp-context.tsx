@@ -1,29 +1,64 @@
 "use client";
-
-import { useAddFrame, useMiniKit } from "@coinbase/onchainkit/minikit";
+import { FrameContext } from "@farcaster/frame-core/dist/context";
+import { sdk } from "@farcaster/frame-sdk";
 import {
   createContext,
   useCallback,
   useContext,
   useEffect,
+  useState,
   type ReactNode,
 } from "react";
+import FrameWalletProvider from "./frame-wallet-context";
 
 interface MiniAppContextType {
-  isFrameReady: boolean;
-  setFrameReady: () => void;
-  addFrame: () => Promise<{ url: string; token: string } | null>;
+  isMiniAppReady: boolean;
+  context: FrameContext | null;
+  setMiniAppReady: () => void;
+  addMiniApp: () => Promise<unknown>;
 }
 
 const MiniAppContext = createContext<MiniAppContextType | undefined>(undefined);
 
-export function MiniAppProvider({ children }: { children: ReactNode }) {
-  const { isFrameReady, setFrameReady, context } = useMiniKit();
-  const addFrame = useAddFrame();
+export function MiniAppProvider({
+  addMiniAppOnLoad,
+  children,
+}: {
+  addMiniAppOnLoad?: boolean;
+  children: ReactNode;
+}) {
+  const [context, setContext] = useState<FrameContext | null>(null);
+  const [isMiniAppReady, setIsMiniAppReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleAddFrame = useCallback(async () => {
+  const setMiniAppReady = useCallback(async () => {
     try {
-      const result = await addFrame();
+      const context = await sdk.context;
+      if (context) {
+        setContext(context as FrameContext);
+      } else {
+        setError("Failed to load Farcaster context");
+      }
+      await sdk.actions.ready();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to initialize SDK");
+      console.error("SDK initialization error:", err);
+    } finally {
+      setIsMiniAppReady(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isMiniAppReady) {
+      setMiniAppReady().then(() => {
+        console.log("MiniApp loaded");
+      });
+    }
+  }, [isMiniAppReady, setMiniAppReady]);
+
+  const handleAddMiniApp = useCallback(async () => {
+    try {
+      const result = await sdk.actions.addFrame();
       if (result) {
         return result;
       }
@@ -32,31 +67,30 @@ export function MiniAppProvider({ children }: { children: ReactNode }) {
       console.error("[error] adding frame", error);
       return null;
     }
-  }, [addFrame]);
+  }, []);
 
   useEffect(() => {
     // on load, set the frame as ready
-    if (!isFrameReady) {
-      setFrameReady();
+    if (isMiniAppReady && !context?.client?.added && addMiniAppOnLoad) {
+      handleAddMiniApp();
     }
-  }, [isFrameReady, setFrameReady]);
-
-  useEffect(() => {
-    // when the frame is ready, if the frame is not added, prompt the user to add the frame
-    if (isFrameReady && !context?.client?.added) {
-      handleAddFrame();
-    }
-  }, [context?.client?.added, handleAddFrame, isFrameReady]);
+  }, [
+    isMiniAppReady,
+    context?.client?.added,
+    handleAddMiniApp,
+    addMiniAppOnLoad,
+  ]);
 
   return (
     <MiniAppContext.Provider
       value={{
-        isFrameReady,
-        setFrameReady,
-        addFrame: handleAddFrame,
+        isMiniAppReady,
+        setMiniAppReady,
+        addMiniApp: handleAddMiniApp,
+        context,
       }}
     >
-      {children}
+      <FrameWalletProvider>{children}</FrameWalletProvider>
     </MiniAppContext.Provider>
   );
 }

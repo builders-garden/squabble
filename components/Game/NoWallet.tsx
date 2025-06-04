@@ -1,8 +1,6 @@
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
 
-import { ConnectWallet } from "@coinbase/onchainkit/wallet";
-
 const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
   weight: ["400"],
@@ -29,7 +27,6 @@ export default function NoWallet() {
         <div className="text-white font-medium text-center">
           Please connect your wallet to continue
         </div>
-        <ConnectWallet />
       </div>
     </div>
   );

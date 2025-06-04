@@ -1,5 +1,4 @@
 import { MESSAGE_EXPIRATION_TIME } from "@/lib/constants";
-import { useAuthenticate } from "@coinbase/onchainkit/minikit";
 import sdk from "@farcaster/frame-sdk";
 import { User } from "@prisma/client";
 import { useCallback, useEffect, useState } from "react";
@@ -27,8 +26,6 @@ export const useSignIn = ({
     enabled: !!authCheck,
   });
 
-  // this method allows for Sign in with Farcaster (SIWF)
-  const { signIn } = useAuthenticate();
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,7 +41,6 @@ export const useSignIn = ({
         console.error("Not in mini app");
         throw new Error("Not in mini app");
       }
-      let referrerFid: number | null = null;
       const result = await sdk.actions.signIn({
         nonce: Math.random().toString(36).substring(2),
         notBefore: new Date().toISOString(),
@@ -92,7 +88,7 @@ export const useSignIn = ({
     } finally {
       setIsLoading(false);
     }
-  }, [onSuccess, refetchUser, signIn]);
+  }, [onSuccess, refetchUser, address]);
 
   useEffect(() => {
     // if autoSignIn is true, sign in automatically on mount
