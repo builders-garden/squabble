@@ -69,9 +69,9 @@ export const useSignIn = ({
         },
         body: JSON.stringify({
           signature: result.signature,
-            message: result.message,
-            fid: context.user.fid,
-            nonce: result,
+          message: result.message,
+          fid: context.user.fid,
+          nonce,
           // referrerFid,
         }),
       });
