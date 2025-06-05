@@ -22,7 +22,7 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useAccount, useConnect } from "wagmi";
+import { useAccount } from "wagmi";
 
 import { useAudio } from "@/contexts/audio-context";
 import useFetchGame from "@/hooks/use-fetch-game";
@@ -55,7 +55,11 @@ export default function Game({ id }: { id: string }) {
   >([]);
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
 
-  const { user } = useSignIn({
+  const {
+    user,
+    isSignedIn,
+    isLoading: isSignInLoading,
+  } = useSignIn({
     autoSignIn: true,
     onSuccess: (user) => {
       if (!user) {
@@ -142,7 +146,7 @@ export default function Game({ id }: { id: string }) {
         const newLetterPlacers = { ...prev };
         console.log("newLetterPlacers", event.path);
         event.path.forEach((position) => {
-          newLetterPlacers[`${position.y}-${position.x}`] = []
+          newLetterPlacers[`${position.y}-${position.x}`] = [];
         });
         return newLetterPlacers;
       });
@@ -206,7 +210,8 @@ export default function Game({ id }: { id: string }) {
           (t) => (
             <div className="w-fit flex items-center gap-2 p-2 bg-white rounded-lg shadow animate-shake">
               <div className="text-red-600 font-medium text-sm">
-                ❌ &quot;{event.word.toUpperCase()}&quot; is not a valid word! 🚫
+                ❌ &quot;{event.word.toUpperCase()}&quot; is not a valid word!
+                🚫
               </div>
             </div>
           ),
@@ -235,7 +240,8 @@ export default function Game({ id }: { id: string }) {
             (t) => (
               <div className="w-fit flex items-center gap-2 p-2 bg-white  rounded-lg shadow animate-shake">
                 <div className="text-red-600 font-medium text-sm">
-                  ❌ &quot;{event.word.toUpperCase()}&quot; is valid but adjacent words are not! 🚫
+                  ❌ &quot;{event.word.toUpperCase()}&quot; is valid but
+                  adjacent words are not! 🚫
                 </div>
               </div>
             ),
@@ -281,6 +287,10 @@ export default function Game({ id }: { id: string }) {
         stakeAmount={stakeAmount!}
       />
     );
+  }
+
+  if (!isSignedIn) {
+    return <Loading title="Signing in..." body="" />;
   }
 
   if (gameState === "loading") {
