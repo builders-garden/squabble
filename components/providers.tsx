@@ -14,13 +14,13 @@ const ErudaProvider = dynamic(
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ErudaProvider>
-      <SocketProvider>
-        <MiniAppProvider>
+      <MiniAppProvider>
+        <SocketProvider>
           <DaimoPayProvider>
             <AudioProvider>{children}</AudioProvider>
           </DaimoPayProvider>
-        </MiniAppProvider>
-      </SocketProvider>
+        </SocketProvider>
+      </MiniAppProvider>
     </ErudaProvider>
   );
 }

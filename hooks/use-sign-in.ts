@@ -1,10 +1,11 @@
+import { useMiniApp } from "@/contexts/miniapp-context";
 import { MESSAGE_EXPIRATION_TIME } from "@/lib/constants";
 import sdk from "@farcaster/frame-sdk";
 import { User } from "@prisma/client";
 import { useCallback, useEffect, useState } from "react";
+import { useAccount } from "wagmi";
 import { useApiQuery } from "./use-api-query";
 import { useAuthCheck } from "./use-auth-check";
-import { useAccount } from "wagmi";
 
 export const useSignIn = ({
   autoSignIn = false,
@@ -13,6 +14,7 @@ export const useSignIn = ({
   autoSignIn?: boolean;
   onSuccess?: (user: User) => void;
 }) => {
+  const { context } = useMiniApp();
   const { data: authCheck, isLoading: isCheckingAuth } = useAuthCheck();
   const {
     data: user,
@@ -31,16 +33,23 @@ export const useSignIn = ({
   const [error, setError] = useState<string | null>(null);
   const { address } = useAccount();
 
+  console.log({ address });
+
   const handleSignIn = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      const isMiniApp = await sdk.isInMiniApp();
-      if (!isMiniApp) {
+      if (!address) {
+        console.error("No wallet connected");
+        throw new Error("No wallet connected");
+      }
+
+      if (!context) {
         console.error("Not in mini app");
         throw new Error("Not in mini app");
       }
+
       const result = await sdk.actions.signIn({
         nonce: Math.random().toString(36).substring(2),
         notBefore: new Date().toISOString(),
@@ -54,7 +63,6 @@ export const useSignIn = ({
         throw new Error("Sign in failed");
       }
 
-      const context = await sdk.context;
       const res = await fetch("/api/auth/sign-in", {
         method: "POST",
         headers: {

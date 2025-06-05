@@ -833,10 +833,10 @@
     ox "^0.4.4"
     zod "^3.24.1"
 
-"@farcaster/frame-core@0.1.4":
-  version "0.1.4"
-  resolved "https://registry.yarnpkg.com/@farcaster/frame-core/-/frame-core-0.1.4.tgz#4056755efee3ad758823395726a5d161460d87dd"
-  integrity sha512-eKRSsMxibOR/Wo9LDJaEwyKviUtk09GHksVZ5Hy/YdFp/vtqpX64eLr7dZWsI6NY/qzxlsbBZJn6+ybdx0hi0g==
+"@farcaster/frame-core@0.1.6":
+  version "0.1.6"
+  resolved "https://registry.yarnpkg.com/@farcaster/frame-core/-/frame-core-0.1.6.tgz#bf0c7431cbc93c32e599e471855c6291408ab773"
+  integrity sha512-kSDFxCWvv6hdfmytVapWNX43nKs9SuDa6rQke/YESXPeGgsmlhymG+5Ses3H7gKXU9UfjXU1FIdlVN8fB3/yQw==
   dependencies:
     "@solana/web3.js" "^1.98.2"
     ox "^0.4.4"
@@ -872,12 +872,12 @@
     eventemitter3 "^5.0.1"
     ox "^0.4.4"
 
-"@farcaster/frame-sdk@^0.0.55":
-  version "0.0.55"
-  resolved "https://registry.yarnpkg.com/@farcaster/frame-sdk/-/frame-sdk-0.0.55.tgz#d3e3411e95db423cb64aa63f9298146e58dae15a"
-  integrity sha512-fPkXGh2nFkZtnYk8SuXjKOKX1qmwwKHUiQ6jZfc4DBiziMFI9CvLMTon1GQCt0PK0FsW2OSXWmfWxeODiCArSQ==
+"@farcaster/frame-sdk@^0.0.57":
+  version "0.0.57"
+  resolved "https://registry.yarnpkg.com/@farcaster/frame-sdk/-/frame-sdk-0.0.57.tgz#7a24b5660f88ab8a1c175abad893bcd7f353e608"
+  integrity sha512-9607alCwGSu3pR5Ck9ZY7M+EbpmIRUvmJEdcg3gEHdsLQRarbGkm1qKll31xklnrVGUsgVkGBuZhiDbMSF+Zjw==
   dependencies:
-    "@farcaster/frame-core" "0.1.4"
+    "@farcaster/frame-core" "0.1.6"
     "@farcaster/quick-auth" "^0.0.5"
     comlink "^4.4.2"
     eventemitter3 "^5.0.1"
@@ -888,10 +888,10 @@
   resolved "https://registry.yarnpkg.com/@farcaster/frame-wagmi-connector/-/frame-wagmi-connector-0.0.16.tgz#8c58d479e4819fcd0de2bba3ba081641fc2cfb39"
   integrity sha512-9ymoD49f8mT7itHdZnnXWqt6MQKqaxG/1QzOr+0MBnSPL+BTBpbKFGCUMbhLdEE2XDool139oM5uMxlPEOOP2A==
 
-"@farcaster/frame-wagmi-connector@^0.0.42":
-  version "0.0.42"
-  resolved "https://registry.yarnpkg.com/@farcaster/frame-wagmi-connector/-/frame-wagmi-connector-0.0.42.tgz#49be0fdbceb59344e2b138893418cd265f6fc9d6"
-  integrity sha512-KI6/Jai7TVOz1B166E86Pf+ehNFyknn0AzSXJ7RTeSX/Uvh1jna+DgISNpRJjV08YJHBxkynAi+kQI4dlbqJoQ==
+"@farcaster/frame-wagmi-connector@^0.0.46":
+  version "0.0.46"
+  resolved "https://registry.yarnpkg.com/@farcaster/frame-wagmi-connector/-/frame-wagmi-connector-0.0.46.tgz#875e50887e6a155986f11ce1b410b475cb02a833"
+  integrity sha512-SCFrOw239PZsojXVL3w5faOAvSgi5t+weL1H8Mk86lb5BnI7zMrMKzaCTiaFfdG/Vh4JDlY0t9E33CqCAjOmCQ==
 
 "@farcaster/quick-auth@^0.0.5":
   version "0.0.5"
