@@ -33,8 +33,6 @@ export const useSignIn = ({
   const [error, setError] = useState<string | null>(null);
   const { address } = useAccount();
 
-  console.log({ context });
-
   const handleSignIn = useCallback(async () => {
     try {
       setIsLoading(true);
