@@ -1,5 +1,5 @@
 import { useMiniApp } from "@/contexts/miniapp-context";
-import { MESSAGE_EXPIRATION_TIME } from "@/lib/constants";
+import { FARCASTER_CLIENT_FID, MESSAGE_EXPIRATION_TIME } from "@/lib/constants";
 import sdk from "@farcaster/frame-sdk";
 import { User } from "@prisma/client";
 import { useCallback, useEffect, useState } from "react";
@@ -33,7 +33,7 @@ export const useSignIn = ({
   const [error, setError] = useState<string | null>(null);
   const { address } = useAccount();
 
-  console.log({ address });
+  console.log({ context });
 
   const handleSignIn = useCallback(async () => {
     try {
@@ -56,7 +56,7 @@ export const useSignIn = ({
         expirationTime: new Date(
           Date.now() + MESSAGE_EXPIRATION_TIME
         ).toISOString(),
-        acceptAuthAddress: true,
+        acceptAuthAddress: context.client.clientFid === FARCASTER_CLIENT_FID,
       });
       if (!result) {
         console.error("Sign in failed");
