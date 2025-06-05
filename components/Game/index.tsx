@@ -274,6 +274,11 @@ export default function Game({ id }: { id: string }) {
   if (!address) {
     return <NoWallet />;
   }
+
+  if (!isSignedIn || isSignInLoading) {
+    return <Loading title="Signing in..." body="" />;
+  }
+
   if (gameState === "lobby") {
     return (
       <Lobby
@@ -287,10 +292,6 @@ export default function Game({ id }: { id: string }) {
         stakeAmount={stakeAmount!}
       />
     );
-  }
-
-  if (!isSignedIn) {
-    return <Loading title="Signing in..." body="" />;
   }
 
   if (gameState === "loading") {
