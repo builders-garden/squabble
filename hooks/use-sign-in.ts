@@ -57,8 +57,8 @@ export const useSignIn = ({
         acceptAuthAddress: context.client.clientFid === FARCASTER_CLIENT_FID,
       });
       if (!result) {
-        console.error("Sign in failed");
-        throw new Error("Sign in failed");
+        console.error("Sign in failed, no result");
+        throw new Error("Sign in failed, no result");
       }
 
       const res = await fetch("/api/auth/sign-in", {
