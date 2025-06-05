@@ -47,9 +47,10 @@ export const useSignIn = ({
         console.error("Not in mini app");
         throw new Error("Not in mini app");
       }
+      const nonce = Math.random().toString(36).substring(2);
 
       const result = await sdk.actions.signIn({
-        nonce: Math.random().toString(36).substring(2),
+        nonce,
         notBefore: new Date().toISOString(),
         expirationTime: new Date(
           Date.now() + MESSAGE_EXPIRATION_TIME
@@ -68,9 +69,9 @@ export const useSignIn = ({
         },
         body: JSON.stringify({
           signature: result.signature,
-          message: result.message,
-          fid: context?.user?.fid,
-          walletAddress: address,
+            message: result.message,
+            fid: context.user.fid,
+            nonce: result,
           // referrerFid,
         }),
       });
