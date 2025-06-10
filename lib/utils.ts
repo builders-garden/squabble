@@ -1,8 +1,9 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { GameStatus } from "@prisma/client";
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 export const formatAvatarUrl = (avatarUrl: string) => {
@@ -25,4 +26,17 @@ export const formatAvatarUrl = (avatarUrl: string) => {
     );
   }
   return avatarUrl;
+};
+
+export const gameStatusToState = (status: GameStatus) => {
+  switch (status) {
+    case GameStatus.PENDING:
+      return "lobby";
+    case GameStatus.PLAYING:
+      return "live";
+    case GameStatus.FINISHED:
+      return "ended";
+    default:
+      return "loading";
+  }
 };
