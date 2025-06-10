@@ -31,8 +31,6 @@ import Live from "./Live";
 import Loading from "./Loading";
 import Lobby from "./Lobby";
 import NoWallet from "./NoWallet";
-import { gameStatusToState } from "@/lib/utils";
-import { GameStatus } from "@prisma/client";
 
 export default function Game({ id }: { id: string }) {
   const { data: game } = useFetchGame(id);
@@ -270,7 +268,7 @@ export default function Game({ id }: { id: string }) {
 
   const [gameState, setGameState] = useState<
     "lobby" | "live" | "loading" | "ended"
-  >(game ? gameStatusToState(game.status) : "loading");
+  >("lobby");
   const { address } = useAccount();
   if (!address) {
     return <NoWallet />;
