@@ -189,6 +189,7 @@ export default function Lobby({
               onPaymentCompleted={handlePaymentCompleted}
               onPaymentBounced={(e) => console.log("Payment bounced:", e)}
               closeOnSuccess={true}
+              resetOnSuccess={true}
             >
               {({ show }) => (
                 <SquabbleButton
