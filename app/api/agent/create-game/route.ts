@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 
     console.log("Creating game...");
     const game = await createGame({
-      betAmount: parseInt(betAmount),
+      betAmount: parseFloat(betAmount),
       conversationId,
     });
 
