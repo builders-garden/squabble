@@ -202,8 +202,8 @@ export default function Game({ id }: { id: string }) {
         });
         return newLetterPlacers;
       });
-      refreshAvailableLetters(user?.fid!, id);
       if (event.player.fid === user?.fid) {
+        refreshAvailableLetters(user?.fid!, id);
         playSound("wordNotValid");
         toast.custom(
           (t) => (

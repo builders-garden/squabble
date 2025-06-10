@@ -1,7 +1,7 @@
 "use client";
 import { useAudio } from "@/contexts/audio-context";
 import useSocketUtils from "@/hooks/use-socket-utils";
-import { formatAvatarUrl } from "@/lib/utils";
+import { cn, formatAvatarUrl } from "@/lib/utils";
 import { Player } from "@/types/socket-events";
 import sdk from "@farcaster/frame-sdk";
 import { User } from "@prisma/client";
@@ -57,6 +57,9 @@ export default function Live({
     "horizontal" | "vertical" | null
   >(null);
   const [validPlacementCells, setValidPlacementCells] = useState<
+    Array<{ row: number; col: number }>
+  >([]);
+  const [wordCellsToHighlight, setWordCellsToHighlight] = useState<
     Array<{ row: number; col: number }>
   >([]);
 
@@ -783,6 +786,114 @@ export default function Live({
     return !boardHasOtherLetters;
   };
 
+  // This useEffect highlights all cells that are part of any word (main or cross) that would be submitted
+  // It works in three steps:
+  // 1. Find all horizontal words (including cross words)
+  // 2. Find all vertical words (including cross words)
+  // 3. Handle special case for new words not touching existing letters
+  useEffect(() => {
+    let highlightCells: Array<{ row: number; col: number }> = [];
+
+    // Helper function to check if a cell is part of the current turn
+    const isCellPlacedThisTurn = (row: number, col: number) =>
+      placedLetters.some((l) => l.row === row && l.col === col);
+
+    // Helper function to check if a cell has a letter (either from board or current turn)
+    const hasLetter = (row: number, col: number) =>
+      board[row][col] !== "" || isCellPlacedThisTurn(row, col);
+
+    // Helper function to process a segment of cells
+    const processSegment = (segment: Array<{ row: number; col: number }>) => {
+      if (segment.length === 0) return;
+
+      if (
+        segment.length > 1 &&
+        segment.some((cell) => isCellPlacedThisTurn(cell.row, cell.col))
+      ) {
+        highlightCells.push(...segment);
+      }
+    };
+
+    // Step 1: Find horizontal words
+    for (let row = 0; row < 10; row++) {
+      let segment: Array<{ row: number; col: number }> = [];
+
+      for (let col = 0; col < 10; col++) {
+        if (hasLetter(row, col)) {
+          segment.push({ row, col });
+        } else {
+          processSegment(segment);
+          segment = [];
+        }
+      }
+      processSegment(segment);
+    }
+
+    // Step 2: Find vertical words
+    for (let col = 0; col < 10; col++) {
+      let segment: Array<{ row: number; col: number }> = [];
+
+      for (let row = 0; row < 10; row++) {
+        if (hasLetter(row, col)) {
+          segment.push({ row, col });
+        } else {
+          processSegment(segment);
+          segment = [];
+        }
+      }
+      // Don't forget to process the last segment in the column
+      processSegment(segment);
+    }
+
+    // Step 3: Handle special case for new words not touching existing letters
+    if (placedLetters.length > 1) {
+      // Check if all placed letters are in the same row
+      const sameRow = placedLetters.every(
+        (l) => l.row === placedLetters[0].row
+      );
+      if (sameRow) {
+        const row = placedLetters[0].row;
+        const cols = placedLetters.map((l) => l.col).sort((a, b) => a - b);
+
+        // Check if letters are contiguous
+        const isContiguous = cols.every(
+          (col, i) => i === 0 || col === cols[i - 1] + 1
+        );
+        if (isContiguous && cols.length > 1) {
+          highlightCells.push(...cols.map((col) => ({ row, col })));
+        }
+      }
+
+      // Check if all placed letters are in the same column
+      const sameCol = placedLetters.every(
+        (l) => l.col === placedLetters[0].col
+      );
+      if (sameCol) {
+        const col = placedLetters[0].col;
+        const rows = placedLetters.map((l) => l.row).sort((a, b) => a - b);
+
+        // Check if letters are contiguous
+        const isContiguous = rows.every(
+          (row, i) => i === 0 || row === rows[i - 1] + 1
+        );
+
+        if (isContiguous && rows.length > 1) {
+          highlightCells.push(...rows.map((row) => ({ row, col })));
+        }
+      }
+    }
+
+    // Remove any duplicate cells
+    const uniqueCells = Array.from(
+      new Set(highlightCells.map((cell) => `${cell.row}-${cell.col}`))
+    ).map((key) => {
+      const [r, c] = key.split("-").map(Number);
+      return { row: r, col: c };
+    });
+
+    setWordCellsToHighlight(uniqueCells);
+  }, [placedLetters, placementDirection, board]);
+
   return (
     <div className="min-h-screen bg-[#A0E9D9] flex flex-col items-center justify-between p-4">
       {/* Header */}
@@ -898,21 +1009,33 @@ export default function Live({
               const letter = board[rowIndex][colIndex];
               const isPlaced = letterPlacers[`${rowIndex}-${colIndex}`];
               const isHighlighted = highlightedCells.some(
-                (cell) => cell.row === rowIndex && cell.col === colIndex
+                (cell) =>
+                  cell.row.toString() === rowIndex.toString() &&
+                  cell.col.toString() === colIndex.toString()
+              );
+              const isWordHighlight = wordCellsToHighlight.some(
+                (cell) =>
+                  cell.row.toString() === rowIndex.toString() &&
+                  cell.col.toString() === colIndex.toString()
               );
               return (
                 <motion.div
                   key={`${rowIndex}-${colIndex}`}
-                  className={`flex items-center justify-center uppercase cursor-pointer relative ${
-                    letter
-                      ? "bg-[#FFFDEB] border-2 border-[#E6E6E6] font-bold text-[#7B5A2E] text-xl"
-                      : validPlacementCells.some(
-                          (cell) =>
-                            cell.row === rowIndex && cell.col === colIndex
-                        )
-                      ? "bg-[#FFFDEB]/50 border-2 border-[#C8EFE3] hover:bg-[#FFFDEB]"
-                      : "bg-[#B5E9DA] border-2 border-[#C8EFE3]"
-                  } ${selectedLetter ? "hover:bg-[#FFFDEB]/50" : ""}`}
+                  className={cn(
+                    "flex items-center justify-center uppercase cursor-pointer relative",
+                    `${
+                      isWordHighlight
+                        ? "bg-[#FFFDEB] border-2 border-[#E6E6E6] font-bold text-yellow-500 text-xl"
+                        : letter
+                        ? "bg-[#FFFDEB] border-2 border-[#E6E6E6] font-bold text-[#7B5A2E] text-xl"
+                        : validPlacementCells.some(
+                            (cell) =>
+                              cell.row === rowIndex && cell.col === colIndex
+                          )
+                        ? "bg-[#FFFDEB]/50 border-2 border-[#C8EFE3] hover:bg-[#FFFDEB]"
+                        : "bg-[#B5E9DA] border-2 border-[#C8EFE3]"
+                    } ${selectedLetter ? "hover:bg-[#FFFDEB]/50" : ""}`
+                  )}
                   style={{ width: 36, height: 36 }}
                   draggable={!!letter}
                   onDragStart={(e) =>
@@ -922,24 +1045,30 @@ export default function Live({
                   onDrop={(e) => handleDrop(e, rowIndex, colIndex)}
                   onClick={() => handleCellClick(rowIndex, colIndex)}
                 >
-                  <motion.div
-                    animate={
-                      isHighlighted
-                        ? {
-                            scale: [1, 1.2, 1],
-                            color: ["#7B5A2E", "#FFD700", "#7B5A2E"],
-                            transition: {
-                              duration: 1.5,
-                              times: [0, 0.5, 1],
-                              repeat: 0,
-                            },
-                          }
-                        : {}
-                    }
-                    className="text-xl font-bold"
-                  >
-                    {letter}
-                  </motion.div>
+                  {isWordHighlight && letter ? (
+                    <div className="text-xl font-bold">{letter}</div>
+                  ) : (
+                    <motion.div
+                      initial={{ scale: 1, color: "#7B5A2E" }}
+                      animate={
+                        isHighlighted
+                          ? {
+                              scale: [1, 1.2, 1],
+                              color: ["#7B5A2E", "#FFD700", "#7B5A2E"],
+                              transition: {
+                                duration: 1.5,
+                                times: [0, 0.5, 1],
+                                repeat: 0,
+                              },
+                            }
+                          : {}
+                      }
+                      className="text-xl font-bold"
+                    >
+                      {letter}
+                    </motion.div>
+                  )}
+
                   {isPlaced && isPlaced.length > 0 && (
                     <div className="absolute bottom-0.5 left-0.5 flex -space-x-1">
                       {isPlaced
