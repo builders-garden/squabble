@@ -37,6 +37,6 @@ export const gameStatusToState = (status: GameStatus) => {
     case GameStatus.FINISHED:
       return "ended";
     default:
-      return "loading";
+      return "lobby";
   }
 };
