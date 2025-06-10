@@ -169,7 +169,7 @@ export default function Lobby({
               intent="Join Squabble Game"
               toCallData={joinGameCalldata(
                 contractGameId,
-                "0x08DA75FEbd2098293DFF36C71020C5945B13E234"
+                userAddress
               )}
               preferredChains={[base.id]} // Prefer Base
               preferredTokens={[
