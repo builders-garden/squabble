@@ -12,6 +12,7 @@ import Image from "next/image";
 import { DragEvent, useEffect, useState } from "react";
 import { toast } from "sonner";
 import SquabbleButton from "../ui/squabble-button";
+import UserAvatar from "../ui/user-avatar";
 
 const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
@@ -396,7 +397,7 @@ export default function Live({
           ),
           {
             position: "top-left",
-            duration: 1500,
+            duration: 5000,
           }
         );
         return;
@@ -530,7 +531,7 @@ export default function Live({
           ),
           {
             position: "top-left",
-            duration: 1500,
+            duration: 5000,
           }
         );
         return;
@@ -946,7 +947,7 @@ export default function Live({
   }, [placedLetters, placementDirection, board]);
 
   return (
-    <div className="min-h-screen bg-[#A0E9D9] flex flex-col items-center justify-between p-4">
+    <div className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-between p-4">
       {/* Header */}
       <div className="flex flex-row items-center justify-between w-full">
         <div className="flex flex-row items-center justify-center">
@@ -965,7 +966,7 @@ export default function Live({
         </div>
         <div className="flex flex-row items-center gap-2">
           <div
-            className="flex flex-row items-center gap-1 text-red-600 bg-red-600/25 py-1 px-4 rounded-full text-xs cursor-pointer"
+            className="flex flex-row items-center gap-1 text-white font-medium bg-red-800/75  py-1 px-4 rounded-full text-xs cursor-pointer"
             onClick={handleExitGame}
           >
             <p>Exit</p>
@@ -1026,19 +1027,21 @@ export default function Live({
               initial={{ scale: 1.05 }}
               animate={{ scale: 1 }}
               transition={{ duration: 0.3, type: "spring", stiffness: 200 }}
-              className={`flex flex-row items-center bg-[#B5E9DA] rounded-md px-1 py-1 gap-1 min-w-[70px] border-2 border-[#C8EFE3]  ${
-                p.fid === user?.fid ? "ring-2 ring-blue-400" : ""
+              className={`flex flex-row items-center bg-white/15 rounded-md px-1 py-1 gap-1 min-w-[70px] border-2 border-[#C8EFE3]  ${
+                p.fid === user?.fid
+                  ? "bg-blue-300/15 border-2 border-blue-300"
+                  : ""
               }`}
             >
               <div className="text-xs text-white rounded-full font-bold">
                 {i + 1}
               </div>
-              <Image
-                src={formatAvatarUrl(p.avatarUrl || "")}
-                className="w-6 h-6 rounded-full object-cover"
-                alt={p.displayName || p.username || ""}
-                width={32}
-                height={32}
+              <UserAvatar
+                avatarUrl={formatAvatarUrl(p.avatarUrl || "")}
+                size="xs"
+                className={`${
+                  p.fid === user?.fid ? "border-blue-300" : "border-[#C8EFE3]"
+                }`}
               />
               <div className="flex flex-col items-start">
                 <div className="text-xs text-white truncate max-w-[60px]">
@@ -1053,8 +1056,8 @@ export default function Live({
       </div>
 
       {/* Game Board */}
-      <div className="bg-[#B5E9DA] rounded-xl p-2 flex flex-col items-center">
-        <div className="gap-0 grid grid-cols-10 grid-rows-10 w-[360px] h-[360px] bg-[#A0E9D9] rounded-lg border-2 border-[#C8EFE3]">
+      <div className="bg-[#0F4C3A] rounded-xl p-2 flex flex-col items-center">
+        <div className="gap-0 grid grid-cols-10 grid-rows-10 w-[360px] h-[360px] bg-[#1A6B5A]/30 border-2 border-[#2A8B7A]">
           {Array.from({ length: 10 }, (_, rowIndex) =>
             Array.from({ length: 10 }, (_, colIndex) => {
               const letter = board[rowIndex][colIndex];
@@ -1076,20 +1079,20 @@ export default function Live({
                 <motion.div
                   key={`${rowIndex}-${colIndex}`}
                   className={cn(
-                    "flex items-center justify-center uppercase cursor-pointer relative",
+                    "flex items-center border-2 justify-center uppercase cursor-pointer relative border-[#1A6B5A]",
                     `${
                       isWordHighlight
-                        ? "bg-[#FFFDEB] border-2 border-[#E6E6E6] font-bold text-yellow-500 text-xl"
+                        ? "bg-[#FFFDEB] font-bold text-yellow-400 text-xl"
                         : letter
-                        ? "bg-[#FFFDEB] border-2 border-[#E6E6E6] font-bold text-[#7B5A2E] text-xl"
+                        ? "bg-[#FFFDEB] font-bold text-[#B5A16E] text-xl"
                         : validPlacementCells.some(
                             (cell) =>
                               cell.row === rowIndex && cell.col === colIndex
                           )
-                        ? "bg-[#FFFDEB]/50 border-2 border-[#C8EFE3] hover:bg-[#FFFDEB]"
-                        : "bg-[#B5E9DA] border-2 border-[#C8EFE3]"
-                    } ${selectedLetter ? "hover:bg-[#FFFDEB]/50" : ""}`,
-                    isPlacedThisTurn ? "bg-yellow-100/75" : ""
+                        ? "bg-[#FFFDEB]/25 hover:bg-[#FFFDEB]/25"
+                        : "bg-[#1A6B5A]/20"
+                    } ${selectedLetter ? "hover:bg-[#FFFDEB]" : ""}`,
+                    isPlacedThisTurn ? "bg-yellow-400/30 text-yellow-400" : ""
                   )}
                   style={{ width: 36, height: 36 }}
                   draggable={!!letter}
@@ -1104,21 +1107,24 @@ export default function Live({
                     <div className="text-xl font-bold">{letter}</div>
                   ) : (
                     <motion.div
-                      initial={{ scale: 1, color: "#7B5A2E" }}
+                      initial={{ scale: 1, color: "#B5A16E" }}
+                      color="#B5A16E"
                       animate={
                         isHighlighted
                           ? {
                               scale: [1, 1.2, 1],
-                              color: ["#7B5A2E", "#FFD700", "#7B5A2E"],
+                              color: ["#B5A16E", "#EAB308", "#B5A16E"],
                               transition: {
                                 duration: 1.5,
                                 times: [0, 0.5, 1],
                                 repeat: 0,
                               },
                             }
-                          : {}
+                          : {
+                              color: "#B5A16E",
+                          }
                       }
-                      className="text-xl font-bold"
+                      className="text-xl font-bold text-[#B5A16E]"
                     >
                       {letter}
                     </motion.div>
@@ -1131,13 +1137,13 @@ export default function Live({
                         .map((player, idx) => (
                           <div
                             key={player.fid}
-                            className="w-3 h-3 rounded-full overflow-hidden border border-white"
+                            className="w-3 h-3 rounded-full overflow-hidden"
                           >
                             <Image
                               src={formatAvatarUrl(player.avatarUrl || "")}
                               alt={player.displayName || player.username || ""}
-                              width={14}
-                              height={14}
+                              width={24}
+                              height={24}
                             />
                           </div>
                         ))}
@@ -1164,8 +1170,8 @@ export default function Live({
                 layout
               >
                 <div
-                  className={`w-10 h-10 bg-[#FFFDEB] border border-[#E6E6E6] rounded-md uppercase flex flex-col items-center justify-center text-2xl font-bold text-[#B5A16E] shadow relative cursor-pointer ${
-                    selectedLetter?.index === i ? "ring-2 ring-blue-500" : ""
+                  className={`w-10 h-10 bg-[#FFFDEB] border-2 border-[#E6E6E6] rounded-md uppercase flex flex-col items-center justify-center text-2xl font-bold text-[#B5A16E] shadow relative cursor-pointer ${
+                    selectedLetter?.index === i ? "ring-2 ring-blue-400" : ""
                   }`}
                   draggable
                   onDragStart={(e) => handleDragStart(e, l, i)}
@@ -1191,7 +1197,7 @@ export default function Live({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleShuffle}
-            className="w-10 h-10 bg-[#C8EFE3] border-2 border-[#B5E9DA] rounded-md flex items-center justify-center text-[#B5A16E] hover:bg-[#B5E9DA] transition-colors shadow-sm"
+            className="w-10 h-10 bg-[#FFFDEB] border-2 border-[#E6E6E6] rounded-md flex items-center justify-center text-yellow-400 hover:bg-white/15 transition-colors shadow-sm"
           >
             <Shuffle className="w-6 h-6" />
           </motion.button>

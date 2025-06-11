@@ -8,7 +8,7 @@ const luckiestGuy = Luckiest_Guy({
 
 export default function GameStarted() {
   return (
-    <div className="min-h-screen bg-[#A0E9D9] flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-center p-4">
       <div className="flex flex-col items-center gap-6">
         <div className="flex flex-row items-center justify-center">
           <Image

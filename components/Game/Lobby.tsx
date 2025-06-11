@@ -82,7 +82,7 @@ export default function Lobby({
 
   const pendingStakes = players.filter((p) => !p.ready).length;
   return (
-    <div className="min-h-screen bg-[#A0E9D9] flex flex-col items-center justify-between p-4">
+    <div className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-between p-4">
       <div className="flex flex-col items-center justify-center">
         <Image
           src="/images/logo.png"
@@ -135,7 +135,9 @@ export default function Lobby({
                 <LobbyPlayerCard
                   player={p}
                   status={p.ready ? "ready" : "pending"}
-                  isLeader={p.fid?.toString() === gameLeaderFid?.toString()}
+                  isCurrentPlayer={
+                    p.fid?.toString() === currentUser?.fid?.toString()
+                  }
                 />
               </motion.div>
             ))}
@@ -153,8 +155,8 @@ export default function Lobby({
           </AnimatePresence>
         </div>
       </div>
-      <div className="flex flex-col gap-2 items-center w-full">
-        {isCurrentUserPending && currentUser ? (
+      <div className="flex flex-col gap-2 items-center w-full pb-4">
+        {isCurrentUserPending && currentUser && parseFloat(stakeAmount) > 0 ? (
           <div className="flex flex-col gap-2 items-center w-full">
             <div className="text-white/75 mb-2">
               {currentUser.fid.toString() === gameLeaderFid.toString()
@@ -197,7 +199,7 @@ export default function Lobby({
                   ),
                   {
                     position: "top-left",
-                    duration: 1500,
+                    duration: 5000,
                   }
                 );
               }}

@@ -22,7 +22,7 @@ export async function generateMetadata({
         name: "Squabble",
         url: `${appUrl}/games/${requestId}`,
         splashImageUrl: `${appUrl}/images/icon.png`,
-        splashBackgroundColor: "#7DDAC3",
+        splashBackgroundColor: "#1B7A6E",
       },
     },
   };

@@ -1,13 +1,13 @@
 "use client";
-import useSocketUtils from "@/hooks/use-socket-utils";
-import { formatAvatarUrl } from "@/lib/utils";
-import { Player } from "@/types/socket-events";
+import { GameWithParticipants } from "@/hooks/use-fetch-game";
+import { cn, formatAvatarUrl } from "@/lib/utils";
 import sdk from "@farcaster/frame-sdk";
 import { User } from "@prisma/client";
 import { Logout } from "@solar-icons/react";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
 import SquabbleButton from "../ui/squabble-button";
+import UserAvatar from "../ui/user-avatar";
 
 const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
@@ -15,27 +15,27 @@ const luckiestGuy = Luckiest_Guy({
 });
 
 export default function Ended({
-  players,
-  user,
+  currentUser,
   setGameState,
-  gameId,
+  game,
 }: {
-  players: Player[];
-  user: User;
+  currentUser: User;
   setGameState: (state: "lobby" | "loading" | "live" | "ended") => void;
-  gameId: string;
+  game: GameWithParticipants;
 }) {
-  const { startGame } = useSocketUtils();
   const handleExitGame = async () => {
     await sdk.actions.close();
   };
-  // Sort players by score in descending order
-  const sortedPlayers = [...players].sort(
-    (a, b) => (b.score || 0) - (a.score || 0)
-  );
 
+  const sortedParticipants = [...game.participants].sort(
+    (a, b) => (b.points || 0) - (a.points || 0)
+  );
+  const topLeaderboardPoints = sortedParticipants[0]?.points || 0;
+  const isDraw =
+    sortedParticipants.filter((p) => p.points === topLeaderboardPoints).length >
+    1;
   return (
-    <div className="min-h-screen bg-[#A0E9D9] flex flex-col items-center justify-between p-4">
+    <div className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-between p-4">
       {/* Header */}
       <div className="flex flex-row items-center justify-between w-full">
         <div className="flex flex-row items-center justify-center">
@@ -65,36 +65,41 @@ export default function Ended({
         <h1 className={`${luckiestGuy.className} text-4xl text-white mb-2`}>
           Game Over!
         </h1>
-        <p className="text-white/80">Final Scores</p>
+        <p className="text-white/80">
+          {isDraw ? "It's a Draw!" : "Final Scores"}
+        </p>
       </div>
 
       {/* Leaderboard */}
       <div className="w-full max-w-md space-y-3">
-        {sortedPlayers.map((player, index) => (
+        {sortedParticipants.map((player, index) => (
           <div
             key={player.fid}
-            className={`flex flex-row items-center bg-[#B5E9DA] rounded-md px-4 py-3 gap-3 border-2 border-[#C8EFE3] ${
-              index === 0 ? "ring-2 ring-yellow-200" : ""
-            }`}
+            className={cn(
+              "flex flex-row items-center bg-white/15 rounded-md px-4 py-3 gap-3 border-2 border-[#C8EFE3]",
+              player.points === topLeaderboardPoints
+                ? "border-2 border-yellow-200 bg-yellow-200/10"
+                : ""
+            )}
           >
             <div className="text-lg text-white font-bold w-8">{index + 1}</div>
             <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center overflow-hidden">
-              <Image
-                src={formatAvatarUrl(player.avatarUrl || "")}
-                alt={player.displayName || player.username || ""}
-                width={48}
-                height={48}
+              <UserAvatar
+                avatarUrl={formatAvatarUrl(player.user.avatarUrl || "")}
+                size="md"
               />
             </div>
             <div className="flex flex-col items-start flex-grow">
               <div className="text-white font-medium">
-                {player.displayName || player.username || ""}
+                {player.user.displayName || player.user.username || ""}
               </div>
               <div className="text-white/80 text-sm">
-                Score: {player.score || 0}
+                Score: {player.points || 0}
               </div>
             </div>
-            {index === 0 && <div className="text-yellow-200 font-bold">🏆</div>}
+            {player.points === topLeaderboardPoints && (
+              <div className="text-yellow-200 font-bold">🏆</div>
+            )}
           </div>
         ))}
       </div>

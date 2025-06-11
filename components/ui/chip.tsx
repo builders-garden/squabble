@@ -13,8 +13,8 @@ export default function Chip({
         variant === "warning"
           ? "bg-yellow-200/25 border-yellow-200 text-yellow-200"
           : variant === "success"
-          ? "bg-emerald-500/50 border-emerald-500 text-emerald-500"
-          : "bg-[#B5E9DA] border-[#C8EFE3] text-white"
+          ? "bg-emerald-400/25 border-emerald-400 text-emerald-400"
+          : "bg-white/15 border-[#C8EFE3] text-white"
       }`}
     >
       <div
@@ -22,7 +22,7 @@ export default function Chip({
           variant === "warning"
             ? "text-yellow-200"
             : variant === "success"
-            ? "text-emerald-500"
+            ? "text-emerald-400"
             : "text-white"
         }
       >

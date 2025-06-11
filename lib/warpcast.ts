@@ -33,7 +33,7 @@ export async function getFarcasterManifest() {
       imageUrl: `${appUrl}/images/feed.png`,
       buttonTitle: `Play Squabble`,
       splashImageUrl: `${appUrl}/images/splash.png`,
-      splashBackgroundColor: "#7DDAC3",
+      splashBackgroundColor: "#1B7A6E",
       webhookUrl: `${appUrl}/api/webhook`,
       // Metadata https://github.com/farcasterxyz/miniapps/discussions/191
       subtitle: "Outspell your friends, in real time.", // 30 characters, no emojis or special characters, short description under app name

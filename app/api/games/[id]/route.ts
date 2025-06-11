@@ -10,7 +10,14 @@ export async function GET(
   try {
     const game = await prisma.game.findUnique({
       where: { id },
-      include: { participants: true },
+      include: { participants: {
+        include: {
+          user: true,
+        },
+        orderBy: {
+          points: "desc",
+        },
+      } },
     });
 
     if (!game) {

@@ -1,7 +1,6 @@
 "use client";
 
 import { useSocket } from "@/contexts/socket-context";
-import { useSignIn } from "@/hooks/use-sign-in";
 import useSocketUtils from "@/hooks/use-socket-utils";
 import {
   AdjacentWordsNotValidEvent,
@@ -26,19 +25,19 @@ import { toast } from "sonner";
 import { useAccount } from "wagmi";
 
 import { useAudio } from "@/contexts/audio-context";
+import { useFakeSignIn } from "@/hooks/use-fake-sign-in";
 import useFetchGame from "@/hooks/use-fetch-game";
-import { GameStatus } from "@prisma/client";
+import { GameParticipant, GameStatus, Game } from "@prisma/client";
 import Ended from "./Ended";
+import GameFull from "./GameFull";
 import GameStarted from "./GameStarted";
 import Live from "./Live";
 import Loading from "./Loading";
 import Lobby from "./Lobby";
 import NoWallet from "./NoWallet";
-import { useFakeSignIn } from "@/hooks/use-fake-sign-in";
-import GameFull from "./GameFull";
 
-export default function Game({ id }: { id: string }) {
-  const { data: game } = useFetchGame(id);
+export default function GamePage({ id }: { id: string }) {
+  const { data: game, refetch: refetchGame } = useFetchGame(id);
   const { playSound } = useAudio();
   const { subscribe } = useSocket();
   const { connectToLobby, refreshAvailableLetters } = useSocketUtils();
@@ -125,6 +124,7 @@ export default function Game({ id }: { id: string }) {
     subscribe("game_ended", (event: GameEndedEvent) => {
       setGameState("ended");
       setPlayers(event.players);
+      refetchGame();
     });
     subscribe("letter_placed", (event: LetterPlacedEvent) => {
       setLetterPlacers((prev) => {
@@ -194,9 +194,9 @@ export default function Game({ id }: { id: string }) {
         ),
         {
           position: "top-center",
-          duration: 3500,
+          duration: 5000,
           className:
-            "bg-[#B5E9DA] border-2 border-[#C8EFE3] rounded-lg shadow-lg",
+            "bg-white/15 border-2 border-[#C8EFE3] rounded-lg shadow-lg",
         }
       );
     });
@@ -204,9 +204,10 @@ export default function Game({ id }: { id: string }) {
       setLetterPlacers((prev) => {
         const newLetterPlacers = { ...prev };
         event.path.forEach((position) => {
-          newLetterPlacers[`${position.y}-${position.x}`] = newLetterPlacers[
-            `${position.y}-${position.x}`
-          ]?.filter((p) => p.fid !== event.player.fid) || [];
+          newLetterPlacers[`${position.y}-${position.x}`] =
+            newLetterPlacers[`${position.y}-${position.x}`]?.filter(
+              (p) => p.fid !== event.player.fid
+            ) || [];
         });
         return newLetterPlacers;
       });
@@ -225,7 +226,7 @@ export default function Game({ id }: { id: string }) {
           ),
           {
             position: "top-left",
-            duration: 1500,
+            duration: 5000,
           }
         );
       }
@@ -236,9 +237,10 @@ export default function Game({ id }: { id: string }) {
         setLetterPlacers((prev) => {
           const newLetterPlacers = { ...prev };
           event.path.forEach((position) => {
-            newLetterPlacers[`${position.y}-${position.x}`] = newLetterPlacers[
-              `${position.y}-${position.x}`
-            ]?.filter((p) => p.fid !== event.player.fid) || [];
+            newLetterPlacers[`${position.y}-${position.x}`] =
+              newLetterPlacers[`${position.y}-${position.x}`]?.filter(
+                (p) => p.fid !== event.player.fid
+              ) || [];
           });
           return newLetterPlacers;
         });
@@ -257,7 +259,7 @@ export default function Game({ id }: { id: string }) {
             ),
             {
               position: "top-left",
-              duration: 1500,
+              duration: 5000,
             }
           );
         }
@@ -282,13 +284,12 @@ export default function Game({ id }: { id: string }) {
   >("lobby");
 
   const { address } = useAccount();
-  if (game?.status === GameStatus.FINISHED) {
+  if (game?.status === GameStatus.FINISHED || gameState === "ended" || true) {
     return (
       <Ended
-        players={players}
-        user={user!}
+        currentUser={user!}
         setGameState={setGameState}
-        gameId={id}
+        game={game!}
       />
     );
   }
@@ -301,12 +302,12 @@ export default function Game({ id }: { id: string }) {
     return <GameStarted />;
   }
 
-  if (!address) {
-    return <NoWallet />;
+  if (isSignInLoading) {
+    return <Loading title="Signing in..." body="" />;
   }
 
-  if (!isSignedIn || isSignInLoading) {
-    return <Loading title="Signing in..." body="" />;
+  if (!address) {
+    return <NoWallet />;
   }
 
   if (gameState === "lobby") {
@@ -326,17 +327,6 @@ export default function Game({ id }: { id: string }) {
 
   if (gameState === "loading") {
     return <Loading title={loadingTitle} body={loadingBody} />;
-  }
-
-  if (gameState === "ended") {
-    return (
-      <Ended
-        players={players}
-        user={user!}
-        setGameState={setGameState}
-        gameId={id}
-      />
-    );
   }
 
   return (
@@ -363,7 +353,7 @@ export default function Game({ id }: { id: string }) {
                 duration: 0.2,
               },
             }}
-            className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-[#B5E9DA] rounded-lg px-6 py-3 shadow-lg border-2 border-[#C8EFE3] z-50"
+            className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-white/15 rounded-lg px-6 py-3 shadow-lg border-2 border-[#C8EFE3] z-50"
           >
             <motion.div
               initial={{ scale: 0.9, rotate: -2 }}

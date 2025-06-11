@@ -1,42 +1,39 @@
 "use client";
 import { formatAvatarUrl } from "@/lib/utils";
 import { Player } from "@/types/socket-events";
-import { CheckCircle, ClockCircle, Crown } from "@solar-icons/react";
-import Image from "next/image";
+import { CheckCircle, ClockCircle } from "@solar-icons/react";
+import UserAvatar from "./user-avatar";
 
 export default function LobbyPlayerCard({
   player,
   status,
-  isLeader,
+  isCurrentPlayer,
 }: {
   player: Player;
   status: "pending" | "ready";
-  isLeader: boolean;
+  isCurrentPlayer: boolean;
 }) {
   return (
     <div
-      className={`w-full h-full bg-[#B5E9DA] rounded-xl flex items-center gap-2 p-2 ${
-        status === "pending"
-          ? "border-2 border-[#FFE59E]"
-          : "border-2 border-[#C8EFE3]"
+      className={`w-full h-full rounded-xl flex items-center gap-1 p-2 ${
+        isCurrentPlayer
+          ? "border-2 border-blue-300 bg-blue-300/15"
+          : "border-2 border-[#C8EFE3] bg-white/15"
       }`}
     >
       <div className="relative">
-        <Image
-          src={formatAvatarUrl(player.avatarUrl!)}
-          alt={player.username!}
-          className={`w-10 h-10 rounded-full border-2 border-[#C8EFE3] object-cover`}
-          width={42}
-          height={42}
+        <UserAvatar
+          avatarUrl={formatAvatarUrl(player.avatarUrl!)}
+          size="md"
+          className={`border-2 ${
+            isCurrentPlayer ? "border-blue-300" : "border-[#C8EFE3]"
+          }`}
         />
-        {isLeader && (
-          <span className="absolute -top-1.5 -right-1.5 bg-yellow-300 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">
-            <Crown color="black" size={20} />
-          </span>
-        )}
       </div>
-      <div className="flex flex-col">
-        <div className={`font-bold text-white text-sm truncate max-w-[120px]`}>
+      <div className="flex flex-col gap-0.5">
+        <div
+          className={`font-medium text-white text-xs truncate max-w-[120px]`}
+        >
           {player.displayName || player.username || ""}
         </div>
         <div className="flex items-center gap-1">
@@ -46,7 +43,7 @@ export default function LobbyPlayerCard({
             <ClockCircle className="text-yellow-200" size={14} />
           )}
           <div
-            className={`font-medium text-sm ${
+            className={`font-medium text-xs ${
               status === "pending" ? "text-yellow-200" : "text-emerald-400"
             }`}
           >
