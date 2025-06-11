@@ -26,6 +26,11 @@ export interface GameUpdateEvent {
   status: "pending" | "ready" | "finished";
 }
 
+export interface GameFullEvent {
+  gameId: string;
+  players: Array<Player>;
+}
+
 export interface GameStartedEvent {
   gameId: string;
   board: string[][];
@@ -199,4 +204,5 @@ export type SocketEventMap = {
   word_not_valid: WordNotValidEvent;
   adjacent_words_not_valid: AdjacentWordsNotValidEvent;
   game_loading: GameLoadingEvent;
+  game_full: GameFullEvent;
 };

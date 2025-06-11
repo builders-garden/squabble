@@ -6,6 +6,7 @@ import useSocketUtils from "@/hooks/use-socket-utils";
 import {
   AdjacentWordsNotValidEvent,
   GameEndedEvent,
+  GameFullEvent,
   GameLoadingEvent,
   GameStartedEvent,
   GameUpdateEvent,
@@ -34,6 +35,7 @@ import Loading from "./Loading";
 import Lobby from "./Lobby";
 import NoWallet from "./NoWallet";
 import { useFakeSignIn } from "@/hooks/use-fake-sign-in";
+import GameFull from "./GameFull";
 
 export default function Game({ id }: { id: string }) {
   const { data: game } = useFetchGame(id);
@@ -90,6 +92,9 @@ export default function Game({ id }: { id: string }) {
   useEffect(() => {
     subscribe("player_joined", (event: PlayerJoinedEvent) => {
       // TODO: add Toast with new player that joined
+    });
+    subscribe("game_full", (event: GameFullEvent) => {
+      setGameState("full");
     });
     subscribe("game_update", (event: GameUpdateEvent) => {
       setPlayers(event.players);
@@ -273,7 +278,7 @@ export default function Game({ id }: { id: string }) {
   }, [subscribe, user]);
 
   const [gameState, setGameState] = useState<
-    "lobby" | "live" | "loading" | "ended"
+    "lobby" | "live" | "loading" | "ended" | "full"
   >("lobby");
 
   const { address } = useAccount();
@@ -286,6 +291,10 @@ export default function Game({ id }: { id: string }) {
         gameId={id}
       />
     );
+  }
+
+  if (gameState === "full") {
+    return <GameFull />;
   }
 
   if (game?.status === GameStatus.PLAYING) {

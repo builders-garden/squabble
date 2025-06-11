@@ -219,12 +219,14 @@ export default function Lobby({
             <div className="text-white/75">
               {pendingStakes
                 ? "Waiting for everyone to pay their stake..."
+                : players.length < 2
+                ? "Need at least 2 players to start the game"
                 : "Everyone is ready, start the game!"}
             </div>
             <SquabbleButton
               text="Start Game"
               variant="primary"
-              disabled={pendingStakes > 0}
+              disabled={pendingStakes > 0 && players.length >= 2}
               onClick={handleStartGame}
             />
           </div>
