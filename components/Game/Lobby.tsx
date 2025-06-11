@@ -187,10 +187,19 @@ export default function Lobby({
               onPaymentCompleted={handlePaymentCompleted}
               onPaymentBounced={(e) => {
                 console.log("Payment bounced:", e);
-                toast.error("Payment was bounced. Please try again.", {
-                  duration: 5000,
-                  position: "top-center",
-                });
+                toast.custom(
+                  (t) => (
+                    <div className="w-fit flex items-center gap-2 p-2 bg-white  rounded-lg shadow animate-shake">
+                      <div className="text-red-600 font-medium text-sm">
+                        ❌ Payment was bounced. Please try again.
+                      </div>
+                    </div>
+                  ),
+                  {
+                    position: "top-left",
+                    duration: 1500,
+                  }
+                );
               }}
               closeOnSuccess={true}
               resetOnSuccess={true}
