@@ -284,7 +284,7 @@ export default function GamePage({ id }: { id: string }) {
   >("lobby");
 
   const { address } = useAccount();
-  if (game?.status === GameStatus.FINISHED || gameState === "ended" || true) {
+  if (game?.status === GameStatus.FINISHED || gameState === "ended") {
     return (
       <Ended
         currentUser={user!}

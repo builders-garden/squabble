@@ -27,6 +27,26 @@ export default function Ended({
     await sdk.actions.close();
   };
 
+  if (game.participants.length === 0) {
+    return <div className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-between p-4">
+      <div className="flex flex-row items-center justify-center">
+        <Image
+          src="/images/logo.png"
+          alt="Squabble Logo"
+          className="w-[36px] mb-1"
+          width={36}
+          height={36}
+        />
+      </div>
+      <div className="text-center">
+        <h1 className={`${luckiestGuy.className} text-4xl text-white mb-2`}>
+          Game Over!
+        </h1>
+        <p className="text-white/80">No players joined the game</p>
+      </div>
+    </div>;
+  }
+
   const sortedParticipants = [...game.participants].sort(
     (a, b) => (b.points || 0) - (a.points || 0)
   );
