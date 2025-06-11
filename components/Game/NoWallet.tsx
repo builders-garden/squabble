@@ -1,5 +1,8 @@
+import { farcasterFrame as miniAppConnector } from "@farcaster/frame-wagmi-connector";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
+import { useAccount, useConnect } from "wagmi";
+import SquabbleButton from "../ui/squabble-button";
 
 const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
@@ -7,6 +10,13 @@ const luckiestGuy = Luckiest_Guy({
 });
 
 export default function NoWallet() {
+  const { connect } = useConnect();
+  const { address } = useAccount();
+  const handleConnectWallet = () => {
+    console.log("connecting wallet");
+    connect({ connector: miniAppConnector() });
+    console.log("wallet connected", address);
+  };
   return (
     <div className="min-h-screen bg-[#A0E9D9] flex flex-col items-center justify-center p-4">
       <div className="flex flex-col items-center gap-4">
@@ -25,8 +35,14 @@ export default function NoWallet() {
           </div>
         </div>
         <div className="text-white font-medium text-center">
-          Please connect your wallet to continue
+          Please connect your wallet to play!
         </div>
+        <SquabbleButton
+          onClick={handleConnectWallet}
+          variant="primary"
+          text="Connect Wallet"
+          disabled={false}
+        />
       </div>
     </div>
   );
