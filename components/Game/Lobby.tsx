@@ -233,7 +233,7 @@ export default function Lobby({
             <SquabbleButton
               text="Start Game"
               variant="primary"
-              disabled={pendingStakes > 0 && players.length >= 2}
+              disabled={pendingStakes > 0 || players.length < 2}
               onClick={handleStartGame}
             />
           </div>
