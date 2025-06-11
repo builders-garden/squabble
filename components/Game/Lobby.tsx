@@ -11,6 +11,7 @@ import { CheckCircle, ClockCircle } from "@solar-icons/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
+import { toast } from "sonner";
 import { base } from "viem/chains";
 import Chip from "../ui/chip";
 import LobbyPlayerCard from "../ui/lobby-player-card";
@@ -167,10 +168,7 @@ export default function Lobby({
               toUnits={stakeAmount}
               toToken="0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913" // Base USDC
               intent="Join Squabble Game"
-              toCallData={joinGameCalldata(
-                contractGameId,
-                userAddress
-              )}
+              toCallData={joinGameCalldata(contractGameId, userAddress)}
               preferredChains={[base.id]} // Prefer Base
               preferredTokens={[
                 {
@@ -187,7 +185,13 @@ export default function Lobby({
               }}
               onPaymentStarted={(e) => console.log("Payment started:", e)}
               onPaymentCompleted={handlePaymentCompleted}
-              onPaymentBounced={(e) => console.log("Payment bounced:", e)}
+              onPaymentBounced={(e) => {
+                console.log("Payment bounced:", e);
+                toast.error("Payment was bounced. Please try again.", {
+                  duration: 5000,
+                  position: "top-center",
+                });
+              }}
               closeOnSuccess={true}
               resetOnSuccess={true}
             >
