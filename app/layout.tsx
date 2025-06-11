@@ -18,7 +18,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={rubik.className}>
+      <body className={`${rubik.className} bg-[#1B7A6E]`}>
         <Providers>{children}</Providers>
         <Toaster richColors/>
       </body>
