@@ -27,7 +27,7 @@ import { useAccount } from "wagmi";
 import { useAudio } from "@/contexts/audio-context";
 import { useFakeSignIn } from "@/hooks/use-fake-sign-in";
 import useFetchGame from "@/hooks/use-fetch-game";
-import { GameParticipant, GameStatus, Game } from "@prisma/client";
+import { GameStatus } from "@prisma/client";
 import Ended from "./Ended";
 import GameFull from "./GameFull";
 import GameStarted from "./GameStarted";
@@ -122,9 +122,10 @@ export default function GamePage({ id }: { id: string }) {
       setLoadingBody(event.body);
     });
     subscribe("game_ended", (event: GameEndedEvent) => {
-      setGameState("ended");
-      setPlayers(event.players);
-      refetchGame();
+      refetchGame().then(() => {
+        setGameState("ended");
+        setPlayers(event.players);
+      });
     });
     subscribe("letter_placed", (event: LetterPlacedEvent) => {
       setLetterPlacers((prev) => {
@@ -286,11 +287,7 @@ export default function GamePage({ id }: { id: string }) {
   const { address } = useAccount();
   if (game?.status === GameStatus.FINISHED || gameState === "ended") {
     return (
-      <Ended
-        currentUser={user!}
-        setGameState={setGameState}
-        game={game!}
-      />
+      <Ended currentUser={user!} setGameState={setGameState} game={game!} />
     );
   }
 

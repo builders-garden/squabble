@@ -28,23 +28,58 @@ export default function Ended({
   };
 
   if (game.participants.length === 0) {
-    return <div className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-between p-4">
-      <div className="flex flex-row items-center justify-center">
-        <Image
-          src="/images/logo.png"
-          alt="Squabble Logo"
-          className="w-[36px] mb-1"
-          width={36}
-          height={36}
-        />
+    return (
+      <div className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-between p-4">
+        {/* Header */}
+        <div className="flex flex-row items-center justify-between w-full">
+          <div className="flex flex-row items-center justify-center">
+            <Image
+              src="/images/logo.png"
+              alt="Squabble Logo"
+              className="w-[36px] mb-1"
+              width={36}
+              height={36}
+            />
+            <div
+              className={`${luckiestGuy.className} text-xl text-white tracking-wider`}
+            >
+              SQUABBLE
+            </div>
+          </div>
+          <div className="flex flex-row items-center gap-2">
+            <div className="flex flex-row items-center gap-1 text-red-600 bg-red-600/25 py-1 px-4 rounded-full text-xs">
+              <p>Exit</p>
+              <Logout size={12} />
+            </div>
+          </div>
+        </div>
+
+        {/* Game Over Title */}
+        <div className="text-center">
+          <h1 className={`${luckiestGuy.className} text-4xl text-white mb-2`}>
+            Game Over!
+          </h1>
+          <p className="text-white/80">No players joined the game</p>
+        </div>
+
+        {/* Empty space to maintain layout */}
+        <div className="w-full max-w-md space-y-3">
+          <div className="flex flex-row items-center bg-white/15 rounded-md px-4 py-3 gap-3 border-2 border-[#C8EFE3]">
+            <p className="text-white/80 w-full text-center">No participants</p>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="w-full max-w-md space-y-3">
+          <SquabbleButton
+            text="Exit Game"
+            variant="primary"
+            disabled={false}
+            onClick={handleExitGame}
+          />
+        </div>
       </div>
-      <div className="text-center">
-        <h1 className={`${luckiestGuy.className} text-4xl text-white mb-2`}>
-          Game Over!
-        </h1>
-        <p className="text-white/80">No players joined the game</p>
-      </div>
-    </div>;
+    );
   }
 
   const sortedParticipants = [...game.participants].sort(
