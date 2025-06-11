@@ -70,7 +70,8 @@ export default function Lobby({
           avatarUrl: currentUser.avatarUrl,
         },
         gameId,
-        event.txHash as string
+        event.txHash as string,
+        event.payment.source?.payerAddress as string
       );
     }
   };

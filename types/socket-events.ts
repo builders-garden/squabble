@@ -132,6 +132,7 @@ export interface PlayerStakeConfirmedEvent {
   player: Player;
   gameId: string;
   paymentHash: string;
+  payerAddress: string;
 }
 
 export interface StartGameEvent {

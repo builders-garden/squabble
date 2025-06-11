@@ -16,8 +16,8 @@ export default function useSocketUtils() {
     emit("player_ready", { player, gameId });
   };
 
-  const playerStakeConfirmed = (player: Player, gameId: string, paymentHash: string) => {
-    emit("player_stake_confirmed", { player, gameId, paymentHash });
+  const playerStakeConfirmed = (player: Player, gameId: string, paymentHash: string, payerAddress: string) => {
+    emit("player_stake_confirmed", { player, gameId, paymentHash, payerAddress });
   };
 
   const startGame = (player: Player, gameId: string) => {
