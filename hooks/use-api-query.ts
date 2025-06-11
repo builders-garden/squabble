@@ -1,3 +1,4 @@
+import { useMiniApp } from "@/contexts/miniapp-context";
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
@@ -29,8 +30,7 @@ export const useApiQuery = <TData, TBody = unknown>(
         headers: {
           ...(body && { "Content-Type": "application/json" }),
         },
-        ...(isProtected && {
-          credentials: "include",
+        ...(isProtected && {credentials: "include",
         }),
         ...(body && { body: JSON.stringify(body) }),
       });

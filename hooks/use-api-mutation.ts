@@ -1,3 +1,4 @@
+import { useMiniApp } from "@/contexts/miniapp-context";
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
@@ -30,8 +31,7 @@ export const useApiMutation = <TData, TVariables = unknown>(
         headers: {
           "Content-Type": "application/json",
         },
-        ...(isProtected && {
-          credentials: "include",
+        ...(isProtected && {credentials: "include",
         }),
         ...(resolvedBody ? { body: JSON.stringify(resolvedBody) } : {}),
       });

@@ -33,6 +33,7 @@ import Live from "./Live";
 import Loading from "./Loading";
 import Lobby from "./Lobby";
 import NoWallet from "./NoWallet";
+import { useFakeSignIn } from "@/hooks/use-fake-sign-in";
 
 export default function Game({ id }: { id: string }) {
   const { data: game } = useFetchGame(id);
@@ -61,7 +62,7 @@ export default function Game({ id }: { id: string }) {
     user,
     isSignedIn,
     isLoading: isSignInLoading,
-  } = useSignIn({
+  } = useFakeSignIn({
     autoSignIn: true,
     onSuccess: (user) => {
       if (!user) {
