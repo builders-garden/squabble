@@ -6,18 +6,6 @@ import { createOrUpdateUser } from "@/lib/prisma/user";
 import * as jose from "jose";
 import { NextRequest, NextResponse } from "next/server";
 
-const appClient = createAppClient({
-  relay: "https://relay.farcaster.xyz",
-  ethereum: viemConnector({
-    rpcUrls: [
-      "https://mainnet.optimism.io",
-      "https://1rpc.io/op",
-      "https://optimism-rpc.publicnode.com",
-      "https://optimism.drpc.org",
-    ],
-  }),
-});
-
 export const POST = async (req: NextRequest) => {
   let { fid } = await req.json();
 
