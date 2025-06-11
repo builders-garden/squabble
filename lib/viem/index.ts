@@ -24,7 +24,6 @@ export async function createNewGame(
   }
 
   const account = privateKeyToAccount(privateKey);
-  console.log("account address:", account.address);
 
   if (!account) {
     throw new Error("No account found");
@@ -49,12 +48,10 @@ export async function createNewGame(
     functionName: "createGame",
     args: [gameId, stakeAmountBigInt],
   });
-  console.log("tx", tx);
 
   const txReceipt = await publicClient.waitForTransactionReceipt({
     hash: tx,
   });
-  console.log("txReceipt", txReceipt);
 
   if (txReceipt.status === "success") {
     return txReceipt.transactionHash;

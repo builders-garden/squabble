@@ -26,7 +26,9 @@ import { useAccount } from "wagmi";
 
 import { useAudio } from "@/contexts/audio-context";
 import useFetchGame from "@/hooks/use-fetch-game";
+import { GameStatus } from "@prisma/client";
 import Ended from "./Ended";
+import GameStarted from "./GameStarted";
 import Live from "./Live";
 import Loading from "./Loading";
 import Lobby from "./Lobby";
@@ -143,7 +145,6 @@ export default function Game({ id }: { id: string }) {
       setBoard(event.board);
       setLetterPlacers((prev) => {
         const newLetterPlacers = { ...prev };
-        console.log("newLetterPlacers", event.path);
         event.path.forEach((position) => {
           newLetterPlacers[`${position.y}-${position.x}`] = [];
         });
@@ -194,15 +195,17 @@ export default function Game({ id }: { id: string }) {
       );
     });
     subscribe("word_not_valid", (event: WordNotValidEvent) => {
-      setBoard(event.board);
       setLetterPlacers((prev) => {
         const newLetterPlacers = { ...prev };
         event.path.forEach((position) => {
-          delete newLetterPlacers[`${position.y}-${position.x}`];
+          newLetterPlacers[`${position.y}-${position.x}`] = newLetterPlacers[
+            `${position.y}-${position.x}`
+          ]?.filter((p) => p.fid !== event.player.fid) || [];
         });
         return newLetterPlacers;
       });
       if (event.player.fid === user?.fid) {
+        setBoard(event.board);
         refreshAvailableLetters(user?.fid!, id);
         playSound("wordNotValid");
         toast.custom(
@@ -224,16 +227,18 @@ export default function Game({ id }: { id: string }) {
     subscribe(
       "adjacent_words_not_valid",
       (event: AdjacentWordsNotValidEvent) => {
-        setBoard(event.board);
         setLetterPlacers((prev) => {
           const newLetterPlacers = { ...prev };
           event.path.forEach((position) => {
-            delete newLetterPlacers[`${position.y}-${position.x}`];
+            newLetterPlacers[`${position.y}-${position.x}`] = newLetterPlacers[
+              `${position.y}-${position.x}`
+            ]?.filter((p) => p.fid !== event.player.fid) || [];
           });
           return newLetterPlacers;
         });
-        refreshAvailableLetters(user?.fid!, id);
         if (event.player.fid === user?.fid) {
+          setBoard(event.board);
+          refreshAvailableLetters(user?.fid!, id);
           playSound("wordNotValid");
           toast.custom(
             (t) => (
@@ -269,7 +274,23 @@ export default function Game({ id }: { id: string }) {
   const [gameState, setGameState] = useState<
     "lobby" | "live" | "loading" | "ended"
   >("lobby");
+
   const { address } = useAccount();
+  if (game?.status === GameStatus.FINISHED && false) {
+    return (
+      <Ended
+        players={players}
+        user={user!}
+        setGameState={setGameState}
+        gameId={id}
+      />
+    );
+  }
+
+  if (game?.status === GameStatus.PLAYING) {
+    return <GameStarted />;
+  }
+
   if (!address) {
     return <NoWallet />;
   }
