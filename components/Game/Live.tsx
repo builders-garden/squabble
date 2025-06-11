@@ -622,6 +622,57 @@ export default function Live({
   const handleSubmitWord = () => {
     if (placedLetters.length === 0) return;
 
+    // Special handling for single letter placement
+    if (placedLetters.length === 1) {
+      const { row, col, letter } = placedLetters[0];
+      // Collect horizontal word
+      let hCol = col;
+      while (hCol > 0 && board[row][hCol - 1]) hCol--;
+      const horizontalLetters = [];
+      for (let c = hCol; c < 10 && board[row][c]; c++) {
+        horizontalLetters.push({ letter: board[row][c], row, col: c });
+      }
+      // Insert the placed letter if not already present
+      if (!horizontalLetters.some((l) => l.row === row && l.col === col)) {
+        horizontalLetters.push({ letter, row, col });
+        horizontalLetters.sort((a, b) => a.col - b.col);
+      }
+
+      // Collect vertical word
+      let vRow = row;
+      while (vRow > 0 && board[vRow - 1][col]) vRow--;
+      const verticalLetters = [];
+      for (let r = vRow; r < 10 && board[r][col]; r++) {
+        verticalLetters.push({ letter: board[r][col], row: r, col });
+      }
+      if (!verticalLetters.some((l) => l.row === row && l.col === col)) {
+        verticalLetters.push({ letter, row, col });
+        verticalLetters.sort((a, b) => a.row - b.row);
+      }
+
+      // Pick the longer word (or horizontal if equal)
+      const mainWord =
+        horizontalLetters.length >= verticalLetters.length
+          ? horizontalLetters
+          : verticalLetters;
+      const word = mainWord.map((l) => l.letter).join("");
+      const path = mainWord.map((l) => ({ x: l.col, y: l.row }));
+
+      submitWord(
+        user,
+        gameId,
+        word,
+        path,
+        true,
+        placedLetters.map((l) => ({ letter: l.letter, x: l.col, y: l.row }))
+      );
+
+      // Reset the placed letters and direction after submission
+      setPlacedLetters([]);
+      setPlacementDirection(null);
+      return;
+    }
+
     // Get all connected letters in the same direction
     const connectedLetters: Array<{
       letter: string;
@@ -1018,6 +1069,9 @@ export default function Live({
                   cell.row.toString() === rowIndex.toString() &&
                   cell.col.toString() === colIndex.toString()
               );
+              const isPlacedThisTurn = placedLetters.some(
+                (l) => l.row === rowIndex && l.col === colIndex
+              );
               return (
                 <motion.div
                   key={`${rowIndex}-${colIndex}`}
@@ -1034,7 +1088,8 @@ export default function Live({
                           )
                         ? "bg-[#FFFDEB]/50 border-2 border-[#C8EFE3] hover:bg-[#FFFDEB]"
                         : "bg-[#B5E9DA] border-2 border-[#C8EFE3]"
-                    } ${selectedLetter ? "hover:bg-[#FFFDEB]/50" : ""}`
+                    } ${selectedLetter ? "hover:bg-[#FFFDEB]/50" : ""}`,
+                    isPlacedThisTurn ? "bg-yellow-100/75" : ""
                   )}
                   style={{ width: 36, height: 36 }}
                   draggable={!!letter}
