@@ -277,7 +277,7 @@ export default function Game({ id }: { id: string }) {
   >("lobby");
 
   const { address } = useAccount();
-  if (game?.status === GameStatus.FINISHED && false) {
+  if (game?.status === GameStatus.FINISHED) {
     return (
       <Ended
         players={players}

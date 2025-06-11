@@ -1,4 +1,6 @@
 "use client";
+import useSocketUtils from "@/hooks/use-socket-utils";
+import { formatAvatarUrl } from "@/lib/utils";
 import { Player } from "@/types/socket-events";
 import sdk from "@farcaster/frame-sdk";
 import { User } from "@prisma/client";
@@ -6,8 +8,6 @@ import { Logout } from "@solar-icons/react";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
 import SquabbleButton from "../ui/squabble-button";
-import { formatAvatarUrl } from "@/lib/utils";
-import useSocketUtils from "@/hooks/use-socket-utils";
 
 const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
@@ -90,7 +90,9 @@ export default function Ended({
               <div className="text-white font-medium">
                 {player.displayName || player.username || ""}
               </div>
-              <div className="text-white/80 text-sm">Score: {player.score || 0}</div>
+              <div className="text-white/80 text-sm">
+                Score: {player.score || 0}
+              </div>
             </div>
             {index === 0 && <div className="text-yellow-200 font-bold">🏆</div>}
           </div>
@@ -99,13 +101,6 @@ export default function Ended({
 
       {/* Action Buttons */}
       <div className="w-full max-w-md space-y-3">
-        {/* TODO: remove after testing */}
-        <SquabbleButton
-          text="Play Again"
-          variant="primary"
-          disabled={false}
-          onClick={() => startGame(user!, gameId)}
-        />
         <SquabbleButton
           text="Exit Game"
           variant="primary"
