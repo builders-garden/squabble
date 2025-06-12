@@ -236,6 +236,17 @@ export default function Lobby({
               disabled={pendingStakes > 0 || players.length < 2}
               onClick={handleStartGame}
             />
+            {currentPlayer?.ready && pendingStakes > 0 && (
+              <SquabbleButton
+                text="Get Stake Back"
+                variant="outline"
+                disabled={pendingStakes === 0}
+                onClick={() => {
+                  // TODO: onchain call to get stake back
+                  console.log("Get stake back");
+                }}
+              />
+            )}
           </div>
         )}
       </div>
