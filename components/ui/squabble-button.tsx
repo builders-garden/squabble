@@ -4,11 +4,15 @@ export default function SquabbleButton({
   variant,
   disabled,
   onClick,
+  isLoading,
+  loadingText,
 }: {
   text: string;
   variant: "primary" | "secondary" | "outline";
   disabled: boolean;
   onClick: () => void;
+  isLoading?: boolean;
+  loadingText?: string;
 }) {
   const getVariantStyles = () => {
     switch (variant) {
@@ -25,13 +29,20 @@ export default function SquabbleButton({
 
   return (
     <button
-      disabled={disabled}
+      disabled={disabled || isLoading}
       className={`w-full font-bold text-3xl rounded-xl px-12 py-4 ${getVariantStyles()} ${
-        disabled ? "opacity-50" : ""
-      }`}
+        disabled || isLoading ? "opacity-50" : ""
+      } relative`}
       onClick={onClick}
     >
-      {text}
+      {isLoading ? (
+        <div className="flex items-center justify-center gap-3">
+          <div className="w-6 h-6 border-2 border-current border-t-transparent rounded-full animate-spin" />
+          {loadingText || text}
+        </div>
+      ) : (
+        text
+      )}
     </button>
   );
 }

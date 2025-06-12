@@ -6,22 +6,23 @@ import {
 } from "@/lib/constants";
 import { joinGameCalldata } from "@/lib/daimo";
 import { env } from "@/lib/env";
+import { config } from "@/lib/wagmi/config";
 import { Player } from "@/types/socket-events";
 import { DaimoPayButton } from "@daimo/pay";
 import { PaymentCompletedEvent } from "@daimo/pay-common";
 import { User } from "@prisma/client";
 import { CheckCircle, ClockCircle } from "@solar-icons/react";
+import { writeContract } from "@wagmi/core";
 import { AnimatePresence, motion } from "framer-motion";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
+import { useState } from "react";
 import { toast } from "sonner";
 import { base } from "viem/chains";
-import { writeContract } from "@wagmi/core";
 import Chip from "../ui/chip";
 import LobbyPlayerCard from "../ui/lobby-player-card";
 import LobbySpotAvailableCard from "../ui/lobby-spot-available-card";
 import SquabbleButton from "../ui/squabble-button";
-import { config } from "@/lib/wagmi/config";
 
 const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
@@ -47,7 +48,9 @@ export default function Lobby({
   contractGameId: string;
   stakeAmount: string;
 }) {
-  const { playerStakeConfirmed, startGame, playerStakeRefunded } = useSocketUtils();
+  const { playerStakeConfirmed, startGame, playerStakeRefunded } =
+    useSocketUtils();
+  const [isRefunding, setIsRefunding] = useState(false);
 
   // Find current user in players list to check their status
   const currentPlayer = currentUser
@@ -88,13 +91,45 @@ export default function Lobby({
 
   const handleGetStakeBack = async () => {
     // onchain call to get stake back using wagmi
-    const txHash = await writeContract(config, {
-      address: SQUABBLE_CONTRACT_ADDRESS as `0x${string}`,
-      abi: SQUABBLE_CONTRACT_ABI,
-      functionName: "withdrawFromGame",
-      args: [BigInt(contractGameId)],
-    });
-    playerStakeRefunded(currentPlayer!, gameId, txHash as `0x${string}`);
+    try {
+      setIsRefunding(true);
+      const txHash = await writeContract(config, {
+        address: SQUABBLE_CONTRACT_ADDRESS as `0x${string}`,
+        abi: SQUABBLE_CONTRACT_ABI,
+        functionName: "withdrawFromGame",
+        args: [BigInt(contractGameId)],
+      });
+      playerStakeRefunded(currentPlayer!, gameId, txHash as `0x${string}`);
+      toast.custom(
+        (t) => (
+          <div className="w-fit flex items-center gap-2 p-2 bg-white  rounded-lg shadow animate-shake">
+            <div className="text-green-600 font-medium text-sm">
+              ✅ Stake refunded.
+            </div>
+          </div>
+        ),
+        {
+          position: "top-left",
+          duration: 5000,
+        }
+      );
+    } catch (error) {
+      toast.custom(
+        (t) => (
+          <div className="w-fit flex items-center gap-2 p-2 bg-white  rounded-lg shadow animate-shake">
+            <div className="text-red-600 font-medium text-sm">
+              ❌ Failed to get stake back. Please try again.
+            </div>
+          </div>
+        ),
+        {
+          position: "top-left",
+          duration: 5000,
+        }
+      );
+    } finally {
+      setIsRefunding(false);
+    }
   };
 
   const pendingStakes = players.filter((p) => !p.ready).length;
@@ -250,14 +285,18 @@ export default function Lobby({
               disabled={pendingStakes > 0 || players.length < 2}
               onClick={handleStartGame}
             />
-            {currentPlayer?.ready && pendingStakes > 0 && parseFloat(stakeAmount) > 0 && (
-              <SquabbleButton
-                text="Get Stake Back"
-                variant="outline"
-                disabled={false}
-                onClick={handleGetStakeBack}
-              />
-            )}
+            {currentPlayer?.ready &&
+              pendingStakes > 0 &&
+              parseFloat(stakeAmount) > 0 && (
+                <SquabbleButton
+                  text="Get Stake Back"
+                  variant="outline"
+                  disabled={false}
+                  onClick={handleGetStakeBack}
+                  isLoading={isRefunding}
+                  loadingText="Refunding..."
+                />
+              )}
           </div>
         )}
       </div>
