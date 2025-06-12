@@ -20,7 +20,7 @@ export async function generateMetadata({
       action: {
         type: "launch_frame",
         name: "Squabble",
-        url: `${appUrl}/games/${requestId}`,
+        url: appUrl,
         splashImageUrl: `${appUrl}/images/icon.png`,
         splashBackgroundColor: "#1B7A6E",
       },
