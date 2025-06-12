@@ -135,6 +135,12 @@ export interface PlayerStakeConfirmedEvent {
   payerAddress: string;
 }
 
+export interface PlayerStakeRefundedEvent {
+  player: Player;
+  gameId: string;
+  transactionHash: string;
+}
+
 export interface StartGameEvent {
   player: Player;
   gameId: string;
@@ -196,6 +202,7 @@ export type SocketEventMap = {
   connect_to_lobby: ConnectToLobbyEvent;
   player_ready: PlayerReadyEvent;
   player_stake_confirmed: PlayerStakeConfirmedEvent;
+  player_stake_refunded: PlayerStakeRefundedEvent;
   start_game: StartGameEvent;
   submit_word: SubmitWordEvent;
   place_letter: PlaceLetterEvent;

@@ -20,6 +20,10 @@ export default function useSocketUtils() {
     emit("player_stake_confirmed", { player, gameId, paymentHash, payerAddress });
   };
 
+  const playerStakeRefunded = (player: Player, gameId: string, transactionHash: string) => {
+    emit("player_stake_refunded", { player, gameId, transactionHash });
+  };
+
   const startGame = (player: Player, gameId: string) => {
     emit("start_game", { player, gameId });
   };
@@ -56,5 +60,6 @@ export default function useSocketUtils() {
     disconnectFromLobby,
     playerStakeConfirmed,
     refreshAvailableLetters,
+    playerStakeRefunded,
   };
 }

@@ -42,7 +42,7 @@ export default function Lobby({
   contractGameId: string;
   stakeAmount: string;
 }) {
-  const { playerStakeConfirmed, startGame } = useSocketUtils();
+  const { playerStakeConfirmed, startGame, playerStakeRefunded } = useSocketUtils();
 
   // Find current user in players list to check their status
   const currentPlayer = currentUser
@@ -79,6 +79,13 @@ export default function Lobby({
   const handleStartGame = () => {
     setGameState("loading");
     startGame(currentPlayer!, gameId);
+  };
+
+  const handleGetStakeBack = () => {
+    // TODO: onchain call to get stake back
+    // const txHash = ...
+    console.log("Get stake back");
+    playerStakeRefunded(currentPlayer!, gameId, "0xTxHash");
   };
 
   const pendingStakes = players.filter((p) => !p.ready).length;
@@ -239,10 +246,7 @@ export default function Lobby({
                 text="Get Stake Back"
                 variant="outline"
                 disabled={false}
-                onClick={() => {
-                  // TODO: onchain call to get stake back
-                  console.log("Get stake back");
-                }}
+                onClick={handleGetStakeBack}
               />
             )}
           </div>
