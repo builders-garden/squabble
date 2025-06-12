@@ -7,17 +7,10 @@ import { env } from "@/lib/env";
  */
 export async function getFarcasterManifest() {
   let frameName = "Squabble";
-  let noindex = false;
+  let noindex = true;
   const appUrl = env.NEXT_PUBLIC_URL;
-  if (appUrl.includes("localhost")) {
-    frameName += " Local";
-    noindex = true;
-  } else if (appUrl.includes("ngrok")) {
-    frameName += " NGROK";
-    noindex = true;
-  } else if (appUrl.includes("https://dev.")) {
-    frameName += " Dev";
-    noindex = true;
+  if (appUrl === "https://squabble.lol") {
+    noindex = false;
   }
   return {
     accountAssociation: {
@@ -36,11 +29,11 @@ export async function getFarcasterManifest() {
       splashBackgroundColor: "#1B7A6E",
       webhookUrl: `${appUrl}/api/webhook`,
       // Metadata https://github.com/farcasterxyz/miniapps/discussions/191
-      subtitle: "Outspell your friends, in real time.", // 30 characters, no emojis or special characters, short description under app name
+      subtitle: "Fast-paced social word game", // 30 characters, no emojis or special characters, short description under app name
       description: "Outspell your friends, in real time.", // 170 characters, no emojis or special characters, promotional message displayed on Mini App Page
       primaryCategory: "social",
       tags: ["words", "game", "word-game"], // up to 5 tags, filtering/search tags
-      tagline: "Outspell your friends, in real time.", // 30 characters, marketing tagline should be punchy and descriptive
+      tagline: "Fast-paced social word game", // 30 characters, marketing tagline should be punchy and descriptive
       ogTitle: `${frameName}`, // 30 characters, app name + short tag, Title case, no emojis
       ogDescription: "Outspell your friends, in real time.", // 100 characters, summarize core benefits in 1-2 lines
       screenshotUrls: [
