@@ -1,6 +1,9 @@
 "use client";
 import useSocketUtils from "@/hooks/use-socket-utils";
-import { SQUABBLE_CONTRACT_ADDRESS } from "@/lib/constants";
+import {
+  SQUABBLE_CONTRACT_ABI,
+  SQUABBLE_CONTRACT_ADDRESS,
+} from "@/lib/constants";
 import { joinGameCalldata } from "@/lib/daimo";
 import { env } from "@/lib/env";
 import { Player } from "@/types/socket-events";
@@ -13,10 +16,12 @@ import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
 import { toast } from "sonner";
 import { base } from "viem/chains";
+import { writeContract } from "@wagmi/core";
 import Chip from "../ui/chip";
 import LobbyPlayerCard from "../ui/lobby-player-card";
 import LobbySpotAvailableCard from "../ui/lobby-spot-available-card";
 import SquabbleButton from "../ui/squabble-button";
+import { config } from "@/lib/wagmi/config";
 
 const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
@@ -81,11 +86,15 @@ export default function Lobby({
     startGame(currentPlayer!, gameId);
   };
 
-  const handleGetStakeBack = () => {
-    // TODO: onchain call to get stake back
-    // const txHash = ...
-    console.log("Get stake back");
-    playerStakeRefunded(currentPlayer!, gameId, "0xTxHash");
+  const handleGetStakeBack = async () => {
+    // onchain call to get stake back using wagmi
+    const txHash = await writeContract(config, {
+      address: SQUABBLE_CONTRACT_ADDRESS as `0x${string}`,
+      abi: SQUABBLE_CONTRACT_ABI,
+      functionName: "withdrawFromGame",
+      args: [BigInt(contractGameId)],
+    });
+    playerStakeRefunded(currentPlayer!, gameId, txHash as `0x${string}`);
   };
 
   const pendingStakes = players.filter((p) => !p.ready).length;
