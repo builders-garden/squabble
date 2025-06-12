@@ -106,11 +106,9 @@ export default function Lobby({
         <div className="flex gap-2">
           <Chip text={`${players.length}/6 Players`} variant="info" />
           {/* TODO: add from game data */}
-          {
-            parseFloat(stakeAmount) > 0 && (
-              <Chip text={`$${stakeAmount} Stake`} variant="info" />
-            )
-          }
+          {parseFloat(stakeAmount) > 0 && (
+            <Chip text={`$${stakeAmount} Stake`} variant="info" />
+          )}
           {pendingStakes > 0 ? (
             <Chip
               text={`${pendingStakes} Pending stakes`}
@@ -236,7 +234,7 @@ export default function Lobby({
               disabled={pendingStakes > 0 || players.length < 2}
               onClick={handleStartGame}
             />
-            {currentPlayer?.ready && pendingStakes > 0 && (
+            {currentPlayer?.ready && pendingStakes > 0 && parseFloat(stakeAmount) > 0 && (
               <SquabbleButton
                 text="Get Stake Back"
                 variant="outline"
