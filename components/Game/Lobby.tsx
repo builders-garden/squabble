@@ -238,7 +238,7 @@ export default function Lobby({
               <SquabbleButton
                 text="Get Stake Back"
                 variant="outline"
-                disabled={pendingStakes === 0}
+                disabled={false}
                 onClick={() => {
                   // TODO: onchain call to get stake back
                   console.log("Get stake back");
