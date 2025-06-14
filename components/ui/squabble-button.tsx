@@ -1,4 +1,7 @@
 "use client";
+
+import { cn } from "@/lib/utils";
+
 export default function SquabbleButton({
   text,
   variant,
@@ -6,6 +9,7 @@ export default function SquabbleButton({
   onClick,
   isLoading,
   loadingText,
+  className,
 }: {
   text: string;
   variant: "primary" | "secondary" | "outline";
@@ -13,6 +17,7 @@ export default function SquabbleButton({
   onClick: () => void;
   isLoading?: boolean;
   loadingText?: string;
+  className?: string;
 }) {
   const getVariantStyles = () => {
     switch (variant) {
@@ -30,9 +35,12 @@ export default function SquabbleButton({
   return (
     <button
       disabled={disabled || isLoading}
-      className={`w-full font-bold text-3xl rounded-xl px-12 py-4 ${getVariantStyles()} ${
-        disabled || isLoading ? "opacity-50" : ""
-      } relative`}
+      className={cn(
+        "w-full font-bold text-3xl rounded-xl px-12 py-4 relative",
+        getVariantStyles(),
+        disabled || isLoading ? "opacity-50" : "",
+        className
+      )}
       onClick={onClick}
     >
       {isLoading ? (
