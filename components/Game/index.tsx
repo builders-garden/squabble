@@ -35,6 +35,7 @@ import Live from "./Live";
 import Loading from "./Loading";
 import Lobby from "./Lobby";
 import NoWallet from "./NoWallet";
+import SignIn from "./SignIn";
 
 export default function GamePage({ id }: { id: string }) {
   const { data: game, refetch: refetchGame } = useFetchGame(id);
@@ -62,6 +63,7 @@ export default function GamePage({ id }: { id: string }) {
   const {
     user,
     isSignedIn,
+    signIn,
     isLoading: isSignInLoading,
   } = useFakeSignIn({
     autoSignIn: true,
@@ -303,9 +305,14 @@ export default function GamePage({ id }: { id: string }) {
     return <Loading title="Signing in..." body="" />;
   }
 
+  if (!isSignedIn) {
+    return <SignIn signIn={signIn} />;
+  }
+
   if (!address) {
     return <NoWallet />;
   }
+
 
   if (gameState === "lobby") {
     return (
