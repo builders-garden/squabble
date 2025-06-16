@@ -1,7 +1,5 @@
-import { farcasterFrame as miniAppConnector } from "@farcaster/frame-wagmi-connector";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
-import { useAccount, useConnect } from "wagmi";
 import SquabbleButton from "../ui/squabble-button";
 
 const luckiestGuy = Luckiest_Guy({
@@ -28,7 +26,8 @@ export default function SignIn({ signIn }: { signIn: () => void }) {
           </div>
         </div>
         <div className="text-white font-medium text-center">
-          There&apos;s been a problem signing in. Please sign in again.
+          There&apos;s been a problem signing in. Please sign in again or
+          refresh the miniapp
         </div>
         <SquabbleButton
           onClick={signIn}
