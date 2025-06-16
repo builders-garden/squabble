@@ -13,7 +13,8 @@ export const useFakeSignIn = ({
   onSuccess?: (user: User) => void;
 }) => {
   const { context } = useMiniApp();
-  const { data: authCheck, isLoading: isCheckingAuth } = useAuthCheck();
+  //const { data: authCheck, isLoading: isCheckingAuth } = useAuthCheck();
+  const [isSignedIn, setIsSignedIn] = useState(false);
   const {
     data: user,
     isLoading: isLoadingNeynarUser,
@@ -23,10 +24,9 @@ export const useFakeSignIn = ({
     method: "GET",
     isProtected: true,
     queryKey: ["user"],
-    enabled: !!authCheck,
+    enabled: !!isSignedIn,
   });
 
-  const [isSignedIn, setIsSignedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { address } = useAccount();
@@ -36,10 +36,10 @@ export const useFakeSignIn = ({
       setIsLoading(true);
       setError(null);
 
-      if (!address) {
-        console.error("No wallet connected");
-        throw new Error("No wallet connected");
-      }
+      // if (!address) {
+      //   console.error("No wallet connected");
+      //   throw new Error("No wallet connected");
+      // }
 
       if (!context) {
         console.error("Not in mini app");
@@ -81,29 +81,25 @@ export const useFakeSignIn = ({
   useEffect(() => {
     // if autoSignIn is true, sign in automatically on mount
     if (autoSignIn) {
-      if (authCheck && !isCheckingAuth) {
-        setIsSignedIn(true);
-        if (!user) {
-          refetchUser().then(() => {
-            onSuccess?.(user!);
-          });
-        } else {
-          onSuccess?.(user);
-        }
-      } else if (!authCheck && !isCheckingAuth && !isSignedIn) {
-        console.log("Signing in");
-        console.log(authCheck, isCheckingAuth, isSignedIn);
+      if (!isSignedIn) {
         handleSignIn();
       }
+      // if (authCheck && !isCheckingAuth) {
+      //   setIsSignedIn(true);
+      //   if (!user) {
+      //     refetchUser().then(() => {
+      //       onSuccess?.(user!);
+      //     });
+      //   } else {
+      //     onSuccess?.(user);
+      //   }
+      // } else if (!authCheck && !isCheckingAuth && !isSignedIn) {
+      //   console.log("Signing in");
+      //   console.log(authCheck, isCheckingAuth, isSignedIn);
+      //   handleSignIn();
+      // }
     }
-  }, [
-    autoSignIn,
-    handleSignIn,
-    authCheck,
-    isCheckingAuth,
-    refetchUser,
-    onSuccess,
-  ]);
+  }, [autoSignIn, handleSignIn, address, isSignedIn]);
 
   return { signIn: handleSignIn, isSignedIn, isLoading, error, user };
 };
