@@ -100,20 +100,23 @@ export const useSignIn = ({
   useEffect(() => {
     // if autoSignIn is true, sign in automatically on mount
     if (autoSignIn) {
-      if (authCheck && !isCheckingAuth) {
-        setIsSignedIn(true);
-        if (!user) {
-          refetchUser().then(() => {
-            onSuccess?.(user!);
-          });
-        } else {
-          onSuccess?.(user);
-        }
-      } else if (!authCheck && !isCheckingAuth && !isSignedIn) {
-        console.log("Signing in");
-        console.log(authCheck, isCheckingAuth, isSignedIn);
+      if (!isSignedIn) {
         handleSignIn();
       }
+      // if (authCheck && !isCheckingAuth) {
+      //   setIsSignedIn(true);
+      //   if (!user) {
+      //     refetchUser().then(() => {
+      //       onSuccess?.(user!);
+      //     });
+      //   } else {
+      //     onSuccess?.(user);
+      //   }
+      // } else if (!authCheck && !isCheckingAuth && !isSignedIn) {
+      //   console.log("Signing in");
+      //   console.log(authCheck, isCheckingAuth, isSignedIn);
+      //   handleSignIn();
+      // }
     }
   }, [
     autoSignIn,
