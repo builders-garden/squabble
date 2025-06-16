@@ -117,7 +117,7 @@ export const useSignIn = ({
       //   handleSignIn();
       // }
     }
-  }, [autoSignIn, handleSignIn, isSignedIn]);
+  }, [autoSignIn, handleSignIn, isSignedIn, address]);
 
   return { signIn: handleSignIn, isSignedIn, isLoading, error, user };
 };
