@@ -5,7 +5,6 @@ import { User } from "@prisma/client";
 import { useCallback, useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 import { useApiQuery } from "./use-api-query";
-import { useAuthCheck } from "./use-auth-check";
 
 export const useSignIn = ({
   autoSignIn = false,
@@ -15,7 +14,8 @@ export const useSignIn = ({
   onSuccess?: (user: User) => void;
 }) => {
   const { context } = useMiniApp();
-  const { data: authCheck, isLoading: isCheckingAuth } = useAuthCheck();
+  // const { data: authCheck, isLoading: isCheckingAuth } = useAuthCheck();const [isSignedIn, setIsSignedIn] = useState(false);
+  const [isSignedIn, setIsSignedIn] = useState(false);
   const {
     data: user,
     isLoading: isLoadingNeynarUser,
@@ -25,10 +25,9 @@ export const useSignIn = ({
     method: "GET",
     isProtected: true,
     queryKey: ["user"],
-    enabled: !!authCheck,
+    enabled: !!isSignedIn,
   });
 
-  const [isSignedIn, setIsSignedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { address } = useAccount();
@@ -118,14 +117,7 @@ export const useSignIn = ({
       //   handleSignIn();
       // }
     }
-  }, [
-    autoSignIn,
-    handleSignIn,
-    authCheck,
-    isCheckingAuth,
-    refetchUser,
-    onSuccess,
-  ]);
+  }, [autoSignIn, handleSignIn, isSignedIn]);
 
   return { signIn: handleSignIn, isSignedIn, isLoading, error, user };
 };
