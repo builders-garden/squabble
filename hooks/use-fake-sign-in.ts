@@ -33,9 +33,6 @@ export const useFakeSignIn = ({
 
   const handleSignIn = useCallback(async () => {
     try {
-      if (isSignedIn || isLoading) {
-        return;
-      }
       setIsLoading(true);
       setError(null);
 
