@@ -25,6 +25,11 @@ export async function POST(req: NextRequest) {
       betAmount,
       conversationId,
     });
+    let adjBetAmount = betAmount;
+
+    if (betAmount === "no bet") {
+      adjBetAmount = 0;
+    }
 
     if (typeof betAmount !== "string" || typeof conversationId !== "string") {
       console.log("Validation failed");
@@ -33,7 +38,7 @@ export async function POST(req: NextRequest) {
 
     console.log("Creating game...");
     const game = await createGame({
-      betAmount: parseFloat(betAmount),
+      betAmount: parseFloat(adjBetAmount),
       conversationId,
     });
 
