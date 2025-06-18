@@ -8,6 +8,8 @@ export async function createGame(data: {
   contractGameId?: number;
 }): Promise<Game> {
   // Build the game data object explicitly to avoid undefined values
+  
+  console.log("betAmount", data.betAmount);
   const gameData: any = {
     betAmount: data.betAmount,
     status: GameStatus.PENDING,
