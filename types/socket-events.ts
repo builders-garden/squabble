@@ -1,6 +1,7 @@
 export interface Player {
   id?: number;
   fid: number;
+  address: `0x${string}`;
   displayName?: string;
   username?: string;
   avatarUrl?: string;

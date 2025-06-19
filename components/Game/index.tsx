@@ -301,6 +301,7 @@ function useGameEvents(id: string, user: any, refetchGame: () => Promise<any>) {
 function GameContent({ id }: { id: string }) {
   const { data: game, refetch: refetchGame } = useFetchGame(id);
   const { connectToLobby } = useSocketUtils();
+  const { address } = useAccount();
   const {
     user,
     isSignedIn,
@@ -323,6 +324,7 @@ function GameContent({ id }: { id: string }) {
           displayName: user.displayName,
           username: user.username,
           avatarUrl: user.avatarUrl || "",
+          address: address as `0x${string}`,
         },
         id
       );
@@ -347,7 +349,7 @@ function GameContent({ id }: { id: string }) {
   } = useGame();
 
   const stakeAmount = game?.betAmount?.toString();
-  const { address } = useAccount();
+  
 
   if (game?.status === GameStatus.FINISHED || gameState === "ended") {
     return (
