@@ -25,8 +25,8 @@ import { toast } from "sonner";
 import { useAccount } from "wagmi";
 
 import { useAudio } from "@/contexts/audio-context";
-import { useFakeSignIn } from "@/hooks/use-fake-sign-in";
 import useFetchGame from "@/hooks/use-fetch-game";
+import { useSignIn } from "@/hooks/use-sign-in";
 import { GameStatus } from "@prisma/client";
 import Ended from "./Ended";
 import GameFull from "./GameFull";
@@ -65,14 +65,14 @@ export default function GamePage({ id }: { id: string }) {
     isSignedIn,
     signIn,
     isLoading: isSignInLoading,
-  } = useFakeSignIn({
+  } = useSignIn({
     autoSignIn: true,
     onSuccess: (user) => {
       if (!user) {
         console.error("No user found");
         return;
       }
-      if (players.find((p) => p.fid === user.fid)) {
+      if (players.find((p) => p.fid.toString() === user.fid.toString())) {
         console.log("User already in game");
         return;
       }
@@ -87,6 +87,34 @@ export default function GamePage({ id }: { id: string }) {
       );
     },
   });
+
+  // const {
+  //   user,
+  //   isSignedIn,
+  //   signIn,
+  //   isLoading: isSignInLoading,
+  // } = useFakeSignIn({
+  //   autoSignIn: true,
+  //   onSuccess: (user) => {
+  //     if (!user) {
+  //       console.error("No user found");
+  //       return;
+  //     }
+  //     if (players.find((p) => p.fid === user.fid)) {
+  //       console.log("User already in game");
+  //       return;
+  //     }
+  //     connectToLobby(
+  //       {
+  //         fid: user.fid,
+  //         displayName: user.displayName,
+  //         username: user.username,
+  //         avatarUrl: user.avatarUrl || "",
+  //       },
+  //       id
+  //     );
+  //   },
+  // });
 
   const stakeAmount = game?.betAmount?.toString();
 
@@ -312,7 +340,6 @@ export default function GamePage({ id }: { id: string }) {
   if (!address) {
     return <NoWallet />;
   }
-
 
   if (gameState === "lobby") {
     return (

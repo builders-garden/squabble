@@ -3,7 +3,6 @@ import { User } from "@prisma/client";
 import { useCallback, useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 import { useApiQuery } from "./use-api-query";
-import { useAuthCheck } from "./use-auth-check";
 
 export const useFakeSignIn = ({
   autoSignIn = false,

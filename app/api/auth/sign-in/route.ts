@@ -1,39 +1,46 @@
-import { createAppClient, viemConnector } from "@farcaster/auth-client";
+import { Errors, createClient } from "@farcaster/quick-auth";
 
 import { env } from "@/lib/env";
 import { fetchUser } from "@/lib/neynar";
 import { createOrUpdateUser } from "@/lib/prisma/user";
 import * as jose from "jose";
 import { NextRequest, NextResponse } from "next/server";
+import { Address, zeroAddress } from "viem";
 
-const appClient = createAppClient({
-  relay: "https://relay.farcaster.xyz",
-  ethereum: viemConnector({
-    rpcUrls: [
-      "https://mainnet.optimism.io",
-      "https://1rpc.io/op",
-      "https://optimism-rpc.publicnode.com",
-      "https://optimism.drpc.org",
-    ],
-  }),
-});
+export const dynamic = "force-dynamic";
+
+const quickAuthClient = createClient();
 
 export const POST = async (req: NextRequest) => {
-  let { nonce, signature, message } = await req.json();
-
+  const { referrerFid, token: farcasterToken } = await req.json();
+  let fid;
+  let isValidSignature;
+  let walletAddress: Address = zeroAddress;
+  let expirationTime = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
   // Verify signature matches custody address and auth address
-  const { data, success, fid } = await appClient.verifySignInMessage({
-    domain: new URL(env.NEXT_PUBLIC_URL).hostname,
-    nonce,
-    message,
-    signature,
-    acceptAuthAddress: true,
-  });
-  if (!success)
+  try {
+    const payload = await quickAuthClient.verifyJwt({
+      domain: new URL(env.NEXT_PUBLIC_URL).hostname,
+      token: farcasterToken,
+    });
+    isValidSignature = !!payload;
+    fid = Number(payload.sub);
+    walletAddress = payload.address as `0x${string}`;
+    expirationTime = payload.exp ?? Date.now() + 7 * 24 * 60 * 60 * 1000;
+  } catch (e) {
+    if (e instanceof Errors.InvalidTokenError) {
+      console.error("Invalid token", e);
+      isValidSignature = false;
+    }
+    console.error("Error verifying token", e);
+  }
+
+  if (!isValidSignature || !fid) {
     return NextResponse.json(
-      { success: false, error: "Invalid signature" },
+      { success: false, error: "Invalid token" },
       { status: 401 }
     );
+  }
 
   const neynarUser = await fetchUser(fid.toString());
 
@@ -48,11 +55,12 @@ export const POST = async (req: NextRequest) => {
   const secret = new TextEncoder().encode(env.JWT_SECRET);
   const token = await new jose.SignJWT({
     fid,
-    walletAddress: data.address as `0x${string}`,
+    walletAddress,
+    timestamp: Date.now(),
   })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime("7d")
+    .setExpirationTime(expirationTime)
     .sign(secret);
 
   // Create the response

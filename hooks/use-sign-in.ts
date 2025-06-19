@@ -1,5 +1,4 @@
 import { useMiniApp } from "@/contexts/miniapp-context";
-import { FARCASTER_CLIENT_FID, MESSAGE_EXPIRATION_TIME } from "@/lib/constants";
 import sdk from "@farcaster/frame-sdk";
 import { User } from "@prisma/client";
 import { useCallback, useEffect, useState } from "react";
@@ -14,7 +13,6 @@ export const useSignIn = ({
   onSuccess?: (user: User) => void;
 }) => {
   const { context } = useMiniApp();
-  // const { data: authCheck, isLoading: isCheckingAuth } = useAuthCheck();const [isSignedIn, setIsSignedIn] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
   const {
     data: user,
@@ -37,28 +35,15 @@ export const useSignIn = ({
       setIsLoading(true);
       setError(null);
 
-      if (!address) {
-        console.error("No wallet connected");
-        throw new Error("No wallet connected");
-      }
-
       if (!context) {
         console.error("Not in mini app");
         throw new Error("Not in mini app");
       }
-      const nonce = Math.random().toString(36).substring(2);
 
-      const result = await sdk.actions.signIn({
-        nonce,
-        notBefore: new Date().toISOString(),
-        expirationTime: new Date(
-          Date.now() + MESSAGE_EXPIRATION_TIME
-        ).toISOString(),
-        acceptAuthAddress: context.client.clientFid === FARCASTER_CLIENT_FID,
-      });
-      if (!result) {
-        console.error("Sign in failed, no result");
-        throw new Error("Sign in failed, no result");
+      const { token } = await sdk.quickAuth.getToken();
+      if (!token) {
+        console.error("Sign in failed, no farcaster token");
+        throw new Error("Sign in failed");
       }
 
       const res = await fetch("/api/auth/sign-in", {
@@ -67,11 +52,8 @@ export const useSignIn = ({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          signature: result.signature,
-          message: result.message,
+          token,
           fid: context.user.fid,
-          nonce,
-          // referrerFid,
         }),
       });
 
@@ -82,8 +64,8 @@ export const useSignIn = ({
       }
 
       const data = await res.json();
-      refetchUser();
       setIsSignedIn(true);
+      refetchUser();
       onSuccess?.(data.user);
       return data;
     } catch (err) {
@@ -98,26 +80,12 @@ export const useSignIn = ({
 
   useEffect(() => {
     // if autoSignIn is true, sign in automatically on mount
-    if (autoSignIn) {
+    if (autoSignIn && context) {
       if (!isSignedIn) {
         handleSignIn();
       }
-      // if (authCheck && !isCheckingAuth) {
-      //   setIsSignedIn(true);
-      //   if (!user) {
-      //     refetchUser().then(() => {
-      //       onSuccess?.(user!);
-      //     });
-      //   } else {
-      //     onSuccess?.(user);
-      //   }
-      // } else if (!authCheck && !isCheckingAuth && !isSignedIn) {
-      //   console.log("Signing in");
-      //   console.log(authCheck, isCheckingAuth, isSignedIn);
-      //   handleSignIn();
-      // }
     }
-  }, [autoSignIn, handleSignIn, isSignedIn, address]);
+  }, [autoSignIn, handleSignIn, isSignedIn, context]);
 
   return { signIn: handleSignIn, isSignedIn, isLoading, error, user };
 };
