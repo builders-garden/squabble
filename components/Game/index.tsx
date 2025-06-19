@@ -88,34 +88,6 @@ export default function GamePage({ id }: { id: string }) {
     },
   });
 
-  // const {
-  //   user,
-  //   isSignedIn,
-  //   signIn,
-  //   isLoading: isSignInLoading,
-  // } = useFakeSignIn({
-  //   autoSignIn: true,
-  //   onSuccess: (user) => {
-  //     if (!user) {
-  //       console.error("No user found");
-  //       return;
-  //     }
-  //     if (players.find((p) => p.fid === user.fid)) {
-  //       console.log("User already in game");
-  //       return;
-  //     }
-  //     connectToLobby(
-  //       {
-  //         fid: user.fid,
-  //         displayName: user.displayName,
-  //         username: user.username,
-  //         avatarUrl: user.avatarUrl || "",
-  //       },
-  //       id
-  //     );
-  //   },
-  // });
-
   const stakeAmount = game?.betAmount?.toString();
 
   useEffect(() => {
