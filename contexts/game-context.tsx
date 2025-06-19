@@ -1,5 +1,6 @@
 "use client";
 
+import { useAudio } from "@/contexts/audio-context";
 import { useSocket } from "@/contexts/socket-context";
 import useSocketUtils from "@/hooks/use-socket-utils";
 import {
@@ -19,30 +20,46 @@ import {
   WordNotValidEvent,
   WordSubmittedEvent,
 } from "@/types/socket-events";
-import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { useAccount } from "wagmi";
 
-import { useAudio } from "@/contexts/audio-context";
-import { GameProvider, useGame } from "@/contexts/game-context";
-import useFetchGame from "@/hooks/use-fetch-game";
-import { useSignIn } from "@/hooks/use-sign-in";
-import { GameStatus } from "@prisma/client";
-import Ended from "./Ended";
-import GameFull from "./GameFull";
-import GameStarted from "./GameStarted";
-import Live from "./Live";
-import Loading from "./Loading";
-import Lobby from "./Lobby";
-import NoWallet from "./NoWallet";
-import SignIn from "./SignIn";
+interface GameContextType {
+  board: string[][];
+  players: Player[];
+  gameState: "lobby" | "live" | "loading" | "ended" | "full";
+  loadingTitle: string;
+  loadingBody: string;
+  highlightedCells: Array<{ row: number; col: number }>;
+  highlightedWord: string;
+  letterPlacers: { [key: string]: Player[] };
+  availableLetters: { letter: string; value: number }[];
+  timeRemaining: number;
+  setBoard: (board: string[][]) => void;
+  setPlayers: (players: Player[]) => void;
+  setGameState: (
+    state: "lobby" | "live" | "loading" | "ended" | "full"
+  ) => void;
+  setHighlightedCells: (cells: Array<{ row: number; col: number }>) => void;
+  setHighlightedWord: (word: string) => void;
+  setLetterPlacers: (placers: { [key: string]: Player[] }) => void;
+  setAvailableLetters: (letters: { letter: string; value: number }[]) => void;
+  setTimeRemaining: (time: number) => void;
+}
+
+const GameContext = createContext<GameContextType | null>(null);
 
 // Create a ref to track processed events
 const processedEvents = new Set<string>();
 
-// Custom hook for socket events
-function useGameEvents(id: string, user: any, refetchGame: () => Promise<any>) {
+export function GameProvider({
+  children,
+  gameId,
+  user,
+}: {
+  children: React.ReactNode;
+  gameId: string;
+  user: any;
+}) {
   const { subscribe, unsubscribe } = useSocket();
   const { playSound } = useAudio();
   const { refreshAvailableLetters } = useSocketUtils();
@@ -98,10 +115,8 @@ function useGameEvents(id: string, user: any, refetchGame: () => Promise<any>) {
         setLoadingBody(event.body);
       },
       game_ended: (event: GameEndedEvent) => {
-        refetchGame().then(() => {
-          setGameState("ended");
-          setPlayers(event.players);
-        });
+        setGameState("ended");
+        setPlayers(event.players);
       },
       letter_placed: (event: LetterPlacedEvent) => {
         setLetterPlacers((prev) => {
@@ -109,7 +124,6 @@ function useGameEvents(id: string, user: any, refetchGame: () => Promise<any>) {
           const key = `${event.position.x}-${event.position.y}`;
           const existingPlacers = newLetterPlacers[key] || [];
 
-          // Only add player if they haven't already placed on this cell
           if (!existingPlacers.find((p) => p.fid === event.player.fid)) {
             newLetterPlacers[key] = [...existingPlacers, event.player];
           }
@@ -125,19 +139,10 @@ function useGameEvents(id: string, user: any, refetchGame: () => Promise<any>) {
         });
       },
       word_submitted: (event: WordSubmittedEvent) => {
-        // Create a unique event ID based on timestamp and word
         const eventId = `${event.gameId}-${event.words.join()}-${Date.now()}`;
-
-        // Skip if we've already processed this event
-        if (processedEvents.has(eventId)) {
-          return;
-        }
+        if (processedEvents.has(eventId)) return;
         processedEvents.add(eventId);
-
-        // Clear old events from the Set after 5 seconds
-        setTimeout(() => {
-          processedEvents.delete(eventId);
-        }, 5000);
+        setTimeout(() => processedEvents.delete(eventId), 5000);
 
         setBoard(event.board);
         setLetterPlacers((prev) => {
@@ -162,7 +167,7 @@ function useGameEvents(id: string, user: any, refetchGame: () => Promise<any>) {
 
         toast.custom(
           (id) => (
-            <div className="flex items-center gap-4 p-3 bg-white rounded-2xl shadow-lg animate-bounce">
+            <div className="flex items-center gap-4 p-3 bg-white rounded-2xl shadow-lg animate-bounce border-2 border-[#C8EFE3]">
               <img
                 src={require("@/lib/utils").formatAvatarUrl(
                   event.player.avatarUrl || ""
@@ -183,8 +188,7 @@ function useGameEvents(id: string, user: any, refetchGame: () => Promise<any>) {
           {
             position: "top-center",
             duration: 5000,
-            className:
-              "bg-white/15 border-2 border-[#C8EFE3] rounded-lg shadow-lg",
+            className: "!p-0",
           }
         );
       },
@@ -201,7 +205,7 @@ function useGameEvents(id: string, user: any, refetchGame: () => Promise<any>) {
         });
         if (event.player.fid === user?.fid) {
           setBoard(event.board);
-          refreshAvailableLetters(user?.fid!, id);
+          refreshAvailableLetters(user?.fid!, gameId);
           playSound("wordNotValid");
           toast.custom(
             (t) => (
@@ -232,11 +236,11 @@ function useGameEvents(id: string, user: any, refetchGame: () => Promise<any>) {
         });
         if (event.player.fid === user?.fid) {
           setBoard(event.board);
-          refreshAvailableLetters(user?.fid!, id);
+          refreshAvailableLetters(user?.fid!, gameId);
           playSound("wordNotValid");
           toast.custom(
             (t) => (
-              <div className="w-fit flex items-center gap-2 p-2 bg-white  rounded-lg shadow animate-shake">
+              <div className="w-fit flex items-center gap-2 p-2 bg-white rounded-lg shadow animate-shake">
                 <div className="text-red-600 font-medium text-sm">
                   ❌ &quot;{event.word.toUpperCase()}&quot; is valid but
                   adjacent words are not! 🚫
@@ -274,207 +278,47 @@ function useGameEvents(id: string, user: any, refetchGame: () => Promise<any>) {
         unsubscribe(event as any, handler);
       });
     };
-  }, [subscribe, unsubscribe, user, playSound, refreshAvailableLetters, id]);
-
-  return {
-    board,
-    players,
-    gameState,
-    loadingTitle,
-    loadingBody,
-    highlightedCells,
-    highlightedWord,
-    letterPlacers,
-    availableLetters,
-    timeRemaining,
-    setBoard,
-    setPlayers,
-    setGameState,
-    setHighlightedCells,
-    setHighlightedWord,
-    setLetterPlacers,
-    setAvailableLetters,
-    setTimeRemaining,
-  };
-}
-
-function GameContent({ id }: { id: string }) {
-  const { data: game, refetch: refetchGame } = useFetchGame(id);
-  const { connectToLobby } = useSocketUtils();
-  const {
+  }, [
+    subscribe,
+    unsubscribe,
     user,
-    isSignedIn,
-    signIn,
-    isLoading: isSignInLoading,
-  } = useSignIn({
-    autoSignIn: true,
-    onSuccess: (user) => {
-      if (!user) {
-        console.error("No user found");
-        return;
-      }
-      if (players.find((p) => p.fid.toString() === user.fid.toString())) {
-        console.log("User already in game");
-        return;
-      }
-      connectToLobby(
-        {
-          fid: user.fid,
-          displayName: user.displayName,
-          username: user.username,
-          avatarUrl: user.avatarUrl || "",
-        },
-        id
-      );
-    },
-  });
-
-  const {
-    board,
-    players,
-    gameState,
-    loadingTitle,
-    loadingBody,
-    highlightedCells,
-    highlightedWord,
-    letterPlacers,
-    availableLetters,
-    timeRemaining,
-    setBoard,
-    setAvailableLetters,
-    setTimeRemaining,
-    setGameState,
-  } = useGame();
-
-  const stakeAmount = game?.betAmount?.toString();
-  const { address } = useAccount();
-
-  if (game?.status === GameStatus.FINISHED || gameState === "ended") {
-    return (
-      <Ended currentUser={user!} setGameState={setGameState} game={game!} />
-    );
-  }
-
-  if (gameState === "full") {
-    return <GameFull />;
-  }
-
-  if (game?.status === GameStatus.PLAYING) {
-    return <GameStarted />;
-  }
-
-  if (isSignInLoading) {
-    return <Loading title="Signing in..." body="" />;
-  }
-
-  if (!isSignedIn) {
-    return <SignIn signIn={signIn} />;
-  }
-
-  if (!address) {
-    return <NoWallet />;
-  }
-
-  if (gameState === "lobby") {
-    return (
-      <Lobby
-        setGameState={setGameState}
-        players={players}
-        gameLeaderFid={4461}
-        currentUser={user || null}
-        userAddress={address as `0x${string}`}
-        gameId={id}
-        contractGameId={game?.contractGameId?.toString()!}
-        stakeAmount={stakeAmount!}
-      />
-    );
-  }
-
-  if (gameState === "loading") {
-    return <Loading title={loadingTitle} body={loadingBody} />;
-  }
+    playSound,
+    refreshAvailableLetters,
+    gameId,
+  ]);
 
   return (
-    <>
-      <AnimatePresence>
-        {highlightedWord && (
-          <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.8 }}
-            animate={{
-              opacity: 1,
-              y: 0,
-              scale: 1,
-              transition: {
-                type: "spring",
-                stiffness: 300,
-                damping: 20,
-              },
-            }}
-            exit={{
-              opacity: 0,
-              y: -20,
-              scale: 0.8,
-              transition: {
-                duration: 0.2,
-              },
-            }}
-            className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-white/15 rounded-lg px-6 py-3 shadow-lg border-2 border-[#C8EFE3] z-50"
-          >
-            <motion.div
-              initial={{ scale: 0.9, rotate: -2 }}
-              animate={{
-                scale: 1,
-                rotate: 0,
-                transition: {
-                  type: "spring",
-                  stiffness: 300,
-                  damping: 20,
-                },
-              }}
-              className="text-xl font-bold text-white flex items-center gap-2"
-            >
-              <motion.span
-                initial={{ scale: 0 }}
-                animate={{
-                  scale: 1,
-                  transition: {
-                    delay: 0.1,
-                    type: "spring",
-                    stiffness: 300,
-                  },
-                }}
-                className="text-[#7B5A2E]"
-              >
-                ✓
-              </motion.span>
-              {highlightedWord}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      <Live
-        user={user!}
-        gameId={id}
-        board={board}
-        timeRemaining={timeRemaining}
-        availableLetters={availableLetters}
-        setAvailableLetters={setAvailableLetters}
-        setBoard={setBoard}
-        setTimeRemaining={setTimeRemaining}
-        letterPlacers={letterPlacers}
-        players={players}
-        highlightedCells={highlightedCells}
-      />
-    </>
+    <GameContext.Provider
+      value={{
+        board,
+        players,
+        gameState,
+        loadingTitle,
+        loadingBody,
+        highlightedCells,
+        highlightedWord,
+        letterPlacers,
+        availableLetters,
+        timeRemaining,
+        setBoard,
+        setPlayers,
+        setGameState,
+        setHighlightedCells,
+        setHighlightedWord,
+        setLetterPlacers,
+        setAvailableLetters,
+        setTimeRemaining,
+      }}
+    >
+      {children}
+    </GameContext.Provider>
   );
 }
 
-export default function GamePage({ id }: { id: string }) {
-  const { user } = useSignIn({ autoSignIn: true });
-
-  return (
-    <GameProvider gameId={id} user={user}>
-      <GameContent id={id} />
-    </GameProvider>
-  );
+export function useGame() {
+  const context = useContext(GameContext);
+  if (!context) {
+    throw new Error("useGame must be used within a GameProvider");
+  }
+  return context;
 }
