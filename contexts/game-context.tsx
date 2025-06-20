@@ -105,11 +105,11 @@ export function GameProvider({
         return;
       }
 
-      // Check if we've already connected to lobby for this user
-      if (hasConnectedToLobby.current) {
-        console.log("Already connected to lobby");
-        return;
-      }
+      // // Check if we've already connected to lobby for this user
+      // if (hasConnectedToLobby.current) {
+      //   console.log("Already connected to lobby");
+      //   return;
+      // }
 
       hasConnectedToLobby.current = true;
       connectToLobby(

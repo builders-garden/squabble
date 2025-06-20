@@ -44,7 +44,7 @@ export const POST = async (req: NextRequest) => {
     httpOnly: true,
     secure: true,
     sameSite: "none",
-    maxAge: 7 * 24 * 60 * 60, // 7 days
+    maxAge: 30 * 24 * 60 * 60, // 30 days
     path: "/",
   });
 
