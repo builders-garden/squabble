@@ -63,6 +63,7 @@ export default function Live({
   const [wordCellsToHighlight, setWordCellsToHighlight] = useState<
     Array<{ row: number; col: number }>
   >([]);
+  const currentPlayer = players.find((p) => p.fid === user.fid);
 
   const handleDragStart = (
     e: DragEvent<HTMLDivElement>,
@@ -435,7 +436,7 @@ export default function Live({
 
       // Remove the letter from available letters
       setAvailableLetters(availableLetters.filter((_, i) => i !== index));
-      placeLetter(user, gameId, letter, row, col);
+      placeLetter(currentPlayer!, gameId, letter, row, col);
       setSelectedLetter(null);
       playSound("letterPlaced");
     }
@@ -473,7 +474,7 @@ export default function Live({
         newAvailableLetters.push({ letter: existingLetter, value: 1 });
         setAvailableLetters(newAvailableLetters);
 
-        placeLetter(user, gameId, selectedLetter.letter, row, col);
+        placeLetter(currentPlayer!, gameId, selectedLetter.letter, row, col);
         setSelectedLetter(null);
         playSound("letterPlaced");
         return;
@@ -575,7 +576,7 @@ export default function Live({
       setAvailableLetters(
         availableLetters.filter((_, i) => i !== selectedLetter.index)
       );
-      placeLetter(user, gameId, selectedLetter.letter, row, col);
+      placeLetter(currentPlayer!, gameId, selectedLetter.letter, row, col);
       setSelectedLetter(null);
       playSound("letterPlaced");
     }
@@ -660,7 +661,7 @@ export default function Live({
       const path = mainWord.map((l) => ({ x: l.col, y: l.row }));
 
       submitWord(
-        user,
+        currentPlayer!,
         gameId,
         word,
         path,
@@ -735,7 +736,7 @@ export default function Live({
     const path = sortedLetters.map((l) => ({ x: l.col, y: l.row }));
 
     submitWord(
-      user,
+      currentPlayer!,
       gameId,
       word,
       path,
