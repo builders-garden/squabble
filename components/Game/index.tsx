@@ -20,7 +20,7 @@ import {
   WordSubmittedEvent,
 } from "@/types/socket-events";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAccount } from "wagmi";
 
@@ -302,6 +302,17 @@ function GameContent({ id }: { id: string }) {
   const { data: game, refetch: refetchGame } = useFetchGame(id);
   const { connectToLobby } = useSocketUtils();
   const { address } = useAccount();
+  const hasConnectedToLobby = useRef(false);
+
+  // Reset the connection flag when game ID changes or component unmounts
+  useEffect(() => {
+    hasConnectedToLobby.current = false;
+
+    return () => {
+      hasConnectedToLobby.current = false;
+    };
+  }, [id]);
+
   const {
     user,
     isSignedIn,
@@ -314,10 +325,20 @@ function GameContent({ id }: { id: string }) {
         console.error("No user found");
         return;
       }
+
+      // Check if user is already in the game
       if (players.find((p) => p.fid.toString() === user.fid.toString())) {
         console.log("User already in game");
         return;
       }
+
+      // Check if we've already connected to lobby for this user
+      if (hasConnectedToLobby.current) {
+        console.log("Already connected to lobby");
+        return;
+      }
+
+      hasConnectedToLobby.current = true;
       connectToLobby(
         {
           fid: user.fid,
