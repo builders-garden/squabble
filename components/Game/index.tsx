@@ -26,6 +26,7 @@ import { useAccount } from "wagmi";
 
 import { useAudio } from "@/contexts/audio-context";
 import { GameProvider, useGame } from "@/contexts/game-context";
+import { useFakeSignIn } from "@/hooks/use-fake-sign-in";
 import useFetchGame from "@/hooks/use-fetch-game";
 import { useSignIn } from "@/hooks/use-sign-in";
 import { GameStatus } from "@prisma/client";
@@ -303,6 +304,7 @@ function GameContent({ id }: { id: string }) {
   const { connectToLobby } = useSocketUtils();
   const { address } = useAccount();
   const hasConnectedToLobby = useRef(false);
+  const { user, isSignedIn, isSignInLoading, signIn } = useGame();
 
   // Reset the connection flag when game ID changes or component unmounts
   useEffect(() => {
@@ -312,45 +314,6 @@ function GameContent({ id }: { id: string }) {
       hasConnectedToLobby.current = false;
     };
   }, [id]);
-
-  const {
-    user,
-    isSignedIn,
-    signIn,
-    isLoading: isSignInLoading,
-  } = useSignIn({
-    autoSignIn: true,
-    onSuccess: (user) => {
-      if (!user) {
-        console.error("No user found");
-        return;
-      }
-
-      // Check if user is already in the game
-      if (players.find((p) => p.fid.toString() === user.fid.toString())) {
-        console.log("User already in game");
-        return;
-      }
-
-      // Check if we've already connected to lobby for this user
-      if (hasConnectedToLobby.current) {
-        console.log("Already connected to lobby");
-        return;
-      }
-
-      hasConnectedToLobby.current = true;
-      connectToLobby(
-        {
-          fid: user.fid,
-          displayName: user.displayName,
-          username: user.username,
-          avatarUrl: user.avatarUrl || "",
-          address: address as `0x${string}`,
-        },
-        id
-      );
-    },
-  });
 
   const {
     board,
@@ -492,10 +455,8 @@ function GameContent({ id }: { id: string }) {
 }
 
 export default function GamePage({ id }: { id: string }) {
-  const { user } = useSignIn({ autoSignIn: true });
-
   return (
-    <GameProvider gameId={id} user={user}>
+    <GameProvider gameId={id}>
       <GameContent id={id} />
     </GameProvider>
   );

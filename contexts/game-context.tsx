@@ -2,6 +2,7 @@
 
 import { useAudio } from "@/contexts/audio-context";
 import { useSocket } from "@/contexts/socket-context";
+import { useFakeSignIn } from "@/hooks/use-fake-sign-in";
 import useSocketUtils from "@/hooks/use-socket-utils";
 import {
   AdjacentWordsNotValidEvent,
@@ -20,8 +21,10 @@ import {
   WordNotValidEvent,
   WordSubmittedEvent,
 } from "@/types/socket-events";
-import { createContext, useContext, useEffect, useState } from "react";
+import { User } from "@prisma/client";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { useAccount } from "wagmi";
 
 interface GameContextType {
   board: string[][];
@@ -34,6 +37,10 @@ interface GameContextType {
   letterPlacers: { [key: string]: Player[] };
   availableLetters: { letter: string; value: number }[];
   timeRemaining: number;
+  user: User | undefined;
+  isSignedIn: boolean;
+  isSignInLoading: boolean;
+  signIn: () => void;
   setBoard: (board: string[][]) => void;
   setPlayers: (players: Player[]) => void;
   setGameState: (
@@ -54,11 +61,9 @@ const processedEvents = new Set<string>();
 export function GameProvider({
   children,
   gameId,
-  user,
 }: {
   children: React.ReactNode;
   gameId: string;
-  user: any;
 }) {
   const { subscribe, unsubscribe } = useSocket();
   const { playSound } = useAudio();
@@ -82,6 +87,43 @@ export function GameProvider({
     { letter: string; value: number }[]
   >([]);
   const [timeRemaining, setTimeRemaining] = useState<number>(0);
+
+  const { address } = useAccount();
+  const { connectToLobby } = useSocketUtils();
+  const hasConnectedToLobby = useRef(false);
+  const { user, isSignedIn, isLoading:isSignInLoading, signIn } = useFakeSignIn({
+    autoSignIn: true,
+    onSuccess: (user) => {
+      if (!user) {
+        console.error("No user found");
+        return;
+      }
+
+      // Check if user is already in the game
+      if (players.find((p) => p.fid.toString() === user.fid.toString())) {
+        console.log("User already in game");
+        return;
+      }
+
+      // Check if we've already connected to lobby for this user
+      if (hasConnectedToLobby.current) {
+        console.log("Already connected to lobby");
+        return;
+      }
+
+      hasConnectedToLobby.current = true;
+      connectToLobby(
+        {
+          fid: user.fid,
+          displayName: user.displayName,
+          username: user.username,
+          avatarUrl: user.avatarUrl || "",
+          address: address as `0x${string}`,
+        },
+        gameId
+      );
+    },
+  });
 
   useEffect(() => {
     const eventHandlers = {
@@ -300,6 +342,10 @@ export function GameProvider({
         letterPlacers,
         availableLetters,
         timeRemaining,
+        isSignedIn,
+        isSignInLoading,
+        user,
+        signIn,
         setBoard,
         setPlayers,
         setGameState,
