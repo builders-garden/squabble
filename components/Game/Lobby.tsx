@@ -17,7 +17,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { base } from "viem/chains";
-import { useWriteContract } from "wagmi";
+import { useAccount, useWriteContract } from "wagmi";
 import Chip from "../ui/chip";
 import LobbyPlayerCard from "../ui/lobby-player-card";
 import LobbySpotAvailableCard from "../ui/lobby-spot-available-card";
@@ -51,6 +51,7 @@ export default function Lobby({
     useSocketUtils();
   const { data: txHash, writeContract } = useWriteContract();
   const [isRefunding, setIsRefunding] = useState(false);
+  const { address } = useAccount();
 
   // Find current user in players list to check their status
   const currentPlayer = currentUser
@@ -76,6 +77,7 @@ export default function Lobby({
           displayName: currentUser.displayName,
           username: currentUser.username,
           avatarUrl: currentUser.avatarUrl,
+          address: address!,
         },
         gameId,
         event.txHash as string,
