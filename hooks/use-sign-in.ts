@@ -35,6 +35,11 @@ export const useSignIn = ({
       setIsLoading(true);
       setError(null);
 
+      if (!address) {
+        console.error("No wallet connected");
+        throw new Error("No wallet connected");
+      }
+
       if (!context) {
         console.error("Not in mini app");
         throw new Error("Not in mini app");
@@ -80,12 +85,12 @@ export const useSignIn = ({
 
   useEffect(() => {
     // if autoSignIn is true, sign in automatically on mount
-    if (autoSignIn && context) {
+    if (autoSignIn && context && address) {
       if (!isSignedIn) {
         handleSignIn();
       }
     }
-  }, [autoSignIn, handleSignIn, isSignedIn, context]);
+  }, [autoSignIn, handleSignIn, isSignedIn, context, address]);
 
   return { signIn: handleSignIn, isSignedIn, isLoading, error, user };
 };
