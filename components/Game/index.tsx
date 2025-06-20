@@ -349,7 +349,6 @@ function GameContent({ id }: { id: string }) {
   } = useGame();
 
   const stakeAmount = game?.betAmount?.toString();
-  
 
   if (game?.status === GameStatus.FINISHED || gameState === "ended") {
     return (
@@ -365,16 +364,16 @@ function GameContent({ id }: { id: string }) {
     return <GameStarted />;
   }
 
+  if (!address) {
+    return <NoWallet />;
+  }
+
   if (isSignInLoading) {
     return <Loading title="Signing in..." body="" />;
   }
 
   if (!isSignedIn) {
     return <SignIn signIn={signIn} />;
-  }
-
-  if (!address) {
-    return <NoWallet />;
   }
 
   if (gameState === "lobby") {
