@@ -301,7 +301,6 @@ function useGameEvents(id: string, user: any, refetchGame: () => Promise<any>) {
 
 function GameContent({ id }: { id: string }) {
   const { data: game, refetch: refetchGame } = useFetchGame(id);
-  const { connectToLobby } = useSocketUtils();
   const { address } = useAccount();
   const hasConnectedToLobby = useRef(false);
   const { user, isSignedIn, isSignInLoading, signIn } = useGame();
@@ -336,7 +335,7 @@ function GameContent({ id }: { id: string }) {
 
   if (game?.status === GameStatus.FINISHED || gameState === "ended") {
     return (
-      <Ended currentUser={user!} setGameState={setGameState} game={game!} />
+      <Ended players={players} game={game!} />
     );
   }
 
