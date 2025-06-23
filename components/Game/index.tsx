@@ -26,9 +26,7 @@ import { useAccount } from "wagmi";
 
 import { useAudio } from "@/contexts/audio-context";
 import { GameProvider, useGame } from "@/contexts/game-context";
-import { useFakeSignIn } from "@/hooks/use-fake-sign-in";
 import useFetchGame from "@/hooks/use-fetch-game";
-import { useSignIn } from "@/hooks/use-sign-in";
 import { GameStatus } from "@prisma/client";
 import Ended from "./Ended";
 import GameFull from "./GameFull";
@@ -334,9 +332,7 @@ function GameContent({ id }: { id: string }) {
   const stakeAmount = game?.betAmount?.toString();
 
   if (game?.status === GameStatus.FINISHED || gameState === "ended") {
-    return (
-      <Ended players={players} game={game!} />
-    );
+    return <Ended players={players} game={game!} />;
   }
 
   if (gameState === "full") {

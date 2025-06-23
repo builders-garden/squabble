@@ -35,10 +35,10 @@ export const useFakeSignIn = ({
       setIsLoading(true);
       setError(null);
 
-      // if (!address) {
-      //   console.error("No wallet connected");
-      //   throw new Error("No wallet connected");
-      // }
+      if (!address) {
+        console.error("No wallet connected");
+        throw new Error("No wallet connected");
+      }
 
       if (!context) {
         console.error("Not in mini app");
