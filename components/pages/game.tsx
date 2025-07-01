@@ -1,9 +1,9 @@
 import dynamic from "next/dynamic";
-import { LoadingScreen } from "@/components/ui/loading-screen";
+import Loading from "../Game/Loading";
 
 const GameComponent = dynamic(() => import("@/components/Game"), {
   ssr: false,
-  loading: () => <LoadingScreen />,
+  loading: () => <Loading />,
 });
 
 export default function Game({

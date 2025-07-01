@@ -37,9 +37,6 @@ import Lobby from "./Lobby";
 import NoWallet from "./NoWallet";
 import SignIn from "./SignIn";
 
-// Create a ref to track processed events
-const processedEvents = new Set<string>();
-
 
 function GameContent({ id }: { id: string }) {
   const { data: game, refetch: refetchGame } = useFetchGame(id);
@@ -95,7 +92,7 @@ function GameContent({ id }: { id: string }) {
     return <Loading title="Signing in..." body="" />;
   }
 
-  if (!isSignedIn) {
+  if (!isSignedIn && !isSignInLoading) {
     return <SignIn signIn={signIn} />;
   }
 
