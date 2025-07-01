@@ -1,3 +1,4 @@
+import { User } from "@prisma/client";
 import { prisma } from "../client";
 
 // Create or update a user
@@ -72,4 +73,26 @@ export const listUsers = async () => {
       participatedGames: true,
     },
   });
+};
+
+export const fetchTopUsers = async (
+  limit = 5
+): Promise<{
+  users: User[];
+  totalCount: number;
+}> => {
+  const result = await prisma.$transaction([
+    prisma.user.findMany({
+      take: limit,
+      orderBy: {
+        fid: "asc",
+      },
+    }),
+    prisma.user.count(),
+  ]);
+
+  return {
+    users: result[0],
+    totalCount: result[1],
+  };
 };
