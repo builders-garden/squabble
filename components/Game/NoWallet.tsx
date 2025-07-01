@@ -1,6 +1,7 @@
 import { farcasterFrame as miniAppConnector } from "@farcaster/frame-wagmi-connector";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
+import { useEffect } from "react";
 import { useAccount, useConnect } from "wagmi";
 import SquabbleButton from "../ui/squabble-button";
 
@@ -17,6 +18,10 @@ export default function NoWallet() {
     connect({ connector: miniAppConnector() });
     console.log("wallet connected", address);
   };
+  useEffect(() => {
+    handleConnectWallet();
+  }, []);
+
   return (
     <div className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-center p-4">
       <div className="flex flex-col items-center gap-4">

@@ -1,31 +1,11 @@
 "use client";
 
-import { useSocket } from "@/contexts/socket-context";
-import useSocketUtils from "@/hooks/use-socket-utils";
-import {
-  AdjacentWordsNotValidEvent,
-  GameEndedEvent,
-  GameFullEvent,
-  GameLoadingEvent,
-  GameStartedEvent,
-  GameUpdateEvent,
-  LetterPlacedEvent,
-  LetterRemovedEvent,
-  Player,
-  PlayerJoinedEvent,
-  RefreshedAvailableLettersEvent,
-  ScoreUpdateEvent,
-  TimerTickEvent,
-  WordNotValidEvent,
-  WordSubmittedEvent,
-} from "@/types/socket-events";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
+import { useEffect, useRef } from "react";
 import { useAccount } from "wagmi";
 
-import { useAudio } from "@/contexts/audio-context";
 import { GameProvider, useGame } from "@/contexts/game-context";
+import { SocketProvider } from "@/contexts/socket-context";
 import useFetchGame from "@/hooks/use-fetch-game";
 import { GameStatus } from "@prisma/client";
 import Ended from "./Ended";
@@ -36,7 +16,6 @@ import Loading from "./Loading";
 import Lobby from "./Lobby";
 import NoWallet from "./NoWallet";
 import SignIn from "./SignIn";
-
 
 function GameContent({ id }: { id: string }) {
   const { data: game, refetch: refetchGame } = useFetchGame(id);
@@ -192,8 +171,10 @@ function GameContent({ id }: { id: string }) {
 
 export default function GamePage({ id }: { id: string }) {
   return (
-    <GameProvider gameId={id}>
-      <GameContent id={id} />
-    </GameProvider>
+    <SocketProvider>
+      <GameProvider gameId={id}>
+        <GameContent id={id} />
+      </GameProvider>
+    </SocketProvider>
   );
 }
