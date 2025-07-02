@@ -8,6 +8,7 @@ import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
 import SquabbleButton from "../ui/squabble-button";
 import UserAvatar from "../ui/user-avatar";
+import { useEffect } from "react";
 
 const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
@@ -17,9 +18,11 @@ const luckiestGuy = Luckiest_Guy({
 export default function Ended({
   players,
   game,
+  refetchGame,
 }: {
   players: Player[];
   game: GameWithParticipants;
+  refetchGame: () => void;
 }) {
   const handleExitGame = async () => {
     await sdk.actions.close();
@@ -28,6 +31,10 @@ export default function Ended({
   // Determine which data source to use
   const hasGameParticipants = game?.participants?.length > 0;
   const hasPlayers = players.length > 0;
+
+  useEffect(() => {
+    refetchGame();
+  }, []);
 
   // If no game participants but we have players, use players data
   if (!hasGameParticipants && hasPlayers) {

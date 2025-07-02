@@ -52,7 +52,7 @@ function GameContent({ id }: { id: string }) {
   const stakeAmount = game?.betAmount?.toString();
 
   if (game?.status === GameStatus.FINISHED || gameState === "ended") {
-    return <Ended players={players} game={game!} />;
+    return <Ended players={players} game={game!} refetchGame={refetchGame} />;
   }
 
   if (
