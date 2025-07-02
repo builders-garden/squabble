@@ -60,6 +60,7 @@ export default function ShareButton({
     await sdk.actions.composeCast({
       text: customCastText || "Check this out!",
       embeds: [customUrl],
+      channelKey: "squabble",
     });
   };
 
