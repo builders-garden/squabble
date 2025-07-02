@@ -41,35 +41,29 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     [K in keyof SocketEventMap]?: Array<EventCallback<SocketEventMap[K]>>;
   }>({});
 
-  const subscribe = <T extends keyof SocketEventMap>(
-    event: T,
-    callback: EventCallback<SocketEventMap[T]>
-  ) => {
-    if (!listeners.current[event]) listeners.current[event] = [];
-    (listeners.current[event] as Array<EventCallback<SocketEventMap[T]>>).push(
-      callback
+  const setupEventListeners = () => {
+    if (!socket.current) return;
+
+    console.log(
+      "Setting up event listeners for events:",
+      Object.keys(listeners.current)
     );
-  };
 
-  const unsubscribe = <T extends keyof SocketEventMap>(
-    event: T,
-    callback: EventCallback<SocketEventMap[T]>
-  ) => {
-    if (!listeners.current[event]) return;
-    (listeners.current[event] as Array<EventCallback<SocketEventMap[T]>>) = (
-      listeners.current[event] as Array<EventCallback<SocketEventMap[T]>>
-    ).filter((cb) => cb !== callback);
-  };
+    // Set up listeners for all registered events
+    Object.entries(listeners.current).forEach(([event, callbacks]) => {
+      // Remove any existing listeners first to prevent duplicates
+      socket.current!.off(event);
 
-  const handleEvent = <T extends keyof SocketEventMap>(
-    event: T,
-    data: SocketEventMap[T]
-  ) => {
-    if (listeners.current[event]) {
-      (
-        listeners.current[event] as Array<EventCallback<SocketEventMap[T]>>
-      ).forEach((cb) => cb(data));
-    }
+      // Only set up listener if we have callbacks
+      if (callbacks && callbacks.length > 0) {
+        socket.current!.on(event, (data: any) => {
+          console.log("[SOCKET EVENT]", event, data);
+          (callbacks as Array<EventCallback<any>>).forEach((callback) =>
+            callback(data)
+          );
+        });
+      }
+    });
   };
 
   const connect = () => {
@@ -79,34 +73,32 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         {
           autoConnect: true,
           reconnection: true,
-          reconnectionAttempts: 10,
+          reconnectionAttempts: Infinity,
           reconnectionDelay: 1000,
+          forceNew: false,
+          transports: ["websocket"],
         }
       );
 
-      console.log("Socket connected", env.NEXT_PUBLIC_SOCKET_URL);
-
       socket.current.on("connect", () => {
         console.log("Socket connected");
+        setupEventListeners();
       });
 
-      socket.current.on("disconnect", () => {
-        console.log("Socket disconnected");
+      socket.current.on("reconnect", (attempt: number) => {
+        console.log(`Socket reconnected after ${attempt} attempts`);
+        setupEventListeners();
+      });
+
+      socket.current.on("disconnect", (reason: string) => {
+        console.log("Socket disconnected:", reason);
       });
 
       socket.current.on("error", (error) => {
         console.error("Socket error:", error);
       });
-
-      // Listen to all game events and call handleEvent
-      (Object.keys(listeners.current) as Array<keyof SocketEventMap>).forEach(
-        (event) => {
-          socket.current!.on(event, (data: SocketEventMap[typeof event]) => {
-            console.log("[SOCKET EVENT]", event, data);
-            handleEvent(event, data);
-          });
-        }
-      );
+    } else if (!socket.current.connected) {
+      socket.current.connect();
     }
   };
 
@@ -135,10 +127,70 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
           console.log(`Sent message after reconnect: ${key}`, data);
         } else {
           console.warn(
-            "Socket still not connected after reconnect attempt. Cannot send message."
+            "Socket still not connected after reconnect attempt. Retrying in 1s..."
           );
+          // Try one more time after a longer delay
+          setTimeout(() => {
+            connect();
+            if (socket.current?.connected) {
+              socket.current.emit(key, data);
+              console.log(
+                `Sent message after second reconnect attempt: ${key}`,
+                data
+              );
+            }
+          }, 1000);
         }
-      }, 1000);
+      }, 100);
+    }
+  };
+
+  const handleEvent = <T extends keyof SocketEventMap>(
+    event: T,
+    data: SocketEventMap[T]
+  ) => {
+    if (listeners.current[event]) {
+      (
+        listeners.current[event] as Array<EventCallback<SocketEventMap[T]>>
+      ).forEach((cb) => cb(data));
+    }
+  };
+
+  const subscribe = <T extends keyof SocketEventMap>(
+    event: T,
+    callback: EventCallback<SocketEventMap[T]>
+  ) => {
+    if (!listeners.current[event]) {
+      listeners.current[event] = [];
+    }
+
+    // Add callback to listeners registry if not already present
+    const callbacks = listeners.current[event] as Array<
+      EventCallback<SocketEventMap[T]>
+    >;
+    if (!callbacks.includes(callback)) {
+      callbacks.push(callback);
+      console.log(`Subscribed to ${event}, total listeners:`, callbacks.length);
+
+      // Set up socket listener if socket is connected
+      if (socket.current?.connected) {
+        setupEventListeners();
+      }
+    }
+  };
+
+  const unsubscribe = <T extends keyof SocketEventMap>(
+    event: T,
+    callback: EventCallback<SocketEventMap[T]>
+  ) => {
+    if (!listeners.current[event]) return;
+    (listeners.current[event] as Array<EventCallback<SocketEventMap[T]>>) = (
+      listeners.current[event] as Array<EventCallback<SocketEventMap[T]>>
+    ).filter((cb) => cb !== callback);
+
+    // If no more listeners for this event, remove the socket listener
+    if (listeners.current[event]?.length === 0 && socket.current?.connected) {
+      socket.current.off(event);
     }
   };
 

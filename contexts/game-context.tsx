@@ -93,6 +93,23 @@ export function GameProvider({
   const hasConnectedToLobby = useRef(false);
   const { user, isSigningIn, signIn } = useRegisteredUser();
 
+  const handleConnectToLobby = async () => {
+    if (hasConnectedToLobby.current) {
+      return;
+    }
+    hasConnectedToLobby.current = true;
+    connectToLobby(
+      {
+        fid: user?.data?.fid!,
+        displayName: user?.data?.displayName,
+        username: user?.data?.username,
+        avatarUrl: user?.data?.avatarUrl || "",
+        address: address as `0x${string}`,
+      },
+      gameId
+    );
+  };
+
   useEffect(() => {
     if (user?.data) {
       // Check if user is already in the game
@@ -103,53 +120,18 @@ export function GameProvider({
         return;
       }
 
-      hasConnectedToLobby.current = true;
-      connectToLobby(
-        {
-          fid: user.data.fid,
-          displayName: user.data.displayName,
-          username: user.data.username,
-          avatarUrl: user.data.avatarUrl || "",
-          address: address as `0x${string}`,
-        },
-        gameId
-      );
+      handleConnectToLobby();
     }
-  }, [user]);
+  }, [user?.data]);
 
-  // const { user, isSignedIn, isLoading:isSignInLoading, signIn } = useFakeSignIn({
-  //   autoSignIn: true,
-  //   onSuccess: (user) => {
-  //     if (!user) {
-  //       console.error("No user found");
-  //       return;
-  //     }
-
-  //     // Check if user is already in the game
-  //     if (players.find((p) => p.fid.toString() === user.fid.toString())) {
-  //       console.log("User already in game");
-  //       return;
-  //     }
-
-  //     // // Check if we've already connected to lobby for this user
-  //     // if (hasConnectedToLobby.current) {
-  //     //   console.log("Already connected to lobby");
-  //     //   return;
-  //     // }
-
-  //     hasConnectedToLobby.current = true;
-  //     connectToLobby(
-  //       {
-  //         fid: user.fid,
-  //         displayName: user.displayName,
-  //         username: user.username,
-  //         avatarUrl: user.avatarUrl || "",
-  //         address: address as `0x${string}`,
-  //       },
-  //       gameId
-  //     );
-  //   },
-  // });
+  useEffect(() => {
+    if (
+      !players.find((p) => p.fid.toString() === user?.data?.fid.toString()) &&
+      players.length < 6
+    ) {
+      handleConnectToLobby();
+    }
+  }, [players]);
 
   useEffect(() => {
     const eventHandlers = {
@@ -157,7 +139,9 @@ export function GameProvider({
         // TODO: add Toast with new player that joined
       },
       game_full: (event: GameFullEvent) => {
-        if (!players.find((p) => p.fid.toString() === user?.data?.fid.toString())) {
+        if (
+          !players.find((p) => p.fid.toString() === user?.data?.fid.toString())
+        ) {
           setGameState("full");
         }
       },
