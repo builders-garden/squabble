@@ -14,6 +14,7 @@ import { DragEvent, useEffect, useState } from "react";
 import { toast } from "sonner";
 import SquabbleButton from "../ui/squabble-button";
 import UserAvatar from "../ui/user-avatar";
+import Loading from "./Loading";
 
 const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
@@ -46,6 +47,13 @@ export default function Live({
   players: Player[];
   highlightedCells: Array<{ row: number; col: number }>;
 }) {
+  // If board is not defined, show loading state
+  if (!board) {
+    return (
+      <Loading title="Loading game..." body="Waiting for game to start..." />
+    );
+  }
+
   const { playSound } = useAudio();
   const { refreshAvailableLetters, placeLetter, submitWord } = useSocketUtils();
   const [selectedLetter, setSelectedLetter] = useState<{
