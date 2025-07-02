@@ -69,7 +69,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     method: "POST",
     body: (variables) => variables,
     onSuccess: (data) => {
-      posthog.identify(data?.user?.fid?.toString());
+      posthog.identify(data.user.fid.toString());
       setIsSignedIn(true);
       setIsSigningIn(false);
     },

@@ -8,6 +8,7 @@ import {
 } from "@/lib/constants";
 import { joinGameCalldata } from "@/lib/daimo";
 import { env } from "@/lib/env";
+import { trackEvent } from "@/lib/posthog/client";
 import { Player } from "@/types/socket-events";
 import { DaimoPayButton } from "@daimo/pay";
 import { PaymentCompletedEvent } from "@daimo/pay-common";
@@ -25,7 +26,6 @@ import LobbyPlayerCard from "../ui/lobby-player-card";
 import LobbySpotAvailableCard from "../ui/lobby-spot-available-card";
 import ShareButton from "../ui/share-button";
 import SquabbleButton from "../ui/squabble-button";
-import { trackEvent } from "@/lib/posthog/client";
 
 const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
