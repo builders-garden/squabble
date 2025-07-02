@@ -152,17 +152,19 @@ export default function Lobby({
   return (
     <div className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-between p-4">
       <div className="flex flex-col items-center justify-center">
-        <Image
-          src="/images/logo.png"
-          alt="Squabble Logo"
-          className="w-[120px]"
-          width={120}
-          height={120}
-        />
-        <div
-          className={`${luckiestGuy.className} text-4xl text-white tracking-wider`}
-        >
-          SQUABBLE
+        <div className="flex flex-row items-center">
+          <Image
+            src="/images/logo.png"
+            alt="Squabble Logo"
+            className="w-[80px] pb-2"
+            width={80}
+            height={80}
+          />
+          <div
+            className={`${luckiestGuy.className} text-4xl text-white tracking-wider`}
+          >
+            SQUABBLE
+          </div>
         </div>
         <div className="text-xl text-white font-medium">
           Outspell your friends, in real time.
