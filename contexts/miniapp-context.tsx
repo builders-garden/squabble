@@ -58,7 +58,7 @@ export function MiniAppProvider({
 
   const handleAddMiniApp = useCallback(async () => {
     try {
-      const result = await sdk.actions.addFrame();
+      const result = await sdk.actions.addMiniApp();
       if (result) {
         return result;
       }

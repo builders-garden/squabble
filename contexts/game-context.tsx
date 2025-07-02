@@ -185,8 +185,8 @@ export function GameProvider({
         setLoadingBody(event.body);
       },
       game_ended: (event: GameEndedEvent) => {
-        setGameState("ended");
         setPlayers(event.players);
+        setGameState("ended");
       },
       letter_placed: (event: LetterPlacedEvent) => {
         setLetterPlacers((prev) => {
