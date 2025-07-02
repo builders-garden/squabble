@@ -25,14 +25,13 @@ function GameContent({ id }: { id: string }) {
   const { user, isSignedIn, isSignInLoading, signIn } = useGame();
 
   useEffect(() => {
-    if (game?.status === GameStatus.PLAYING && board) {
-      setGameState("live");
-    } else if (game?.status === GameStatus.FINISHED) {
+    if (game?.status === GameStatus.FINISHED) {
       setGameState("ended");
-    }
-    if (
+    } else if (
       game?.participants.length === 6 &&
-      !game?.participants.some((p) => p?.fid?.toString() === user?.fid?.toString())
+      !game?.participants.some(
+        (p) => p?.fid?.toString() === user?.fid?.toString()
+      )
     ) {
       setGameState("full");
     }
@@ -108,7 +107,9 @@ function GameContent({ id }: { id: string }) {
     (gameState === "full" ||
       players.length === 6 ||
       game?.participants?.length === 6) &&
-    !game?.participants?.some((p) => p?.fid?.toString() === user?.fid?.toString())
+    !game?.participants?.some(
+      (p) => p?.fid?.toString() === user?.fid?.toString()
+    )
   ) {
     return <GameFull />;
   }
