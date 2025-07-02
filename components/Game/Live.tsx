@@ -48,13 +48,6 @@ export default function Live({
   players: Player[];
   highlightedCells: Array<{ row: number; col: number }>;
 }) {
-  // If board is not defined, show loading state
-  if (!board) {
-    return (
-      <Loading title="Loading game..." body="Waiting for game to start..." />
-    );
-  }
-
   const { playSound } = useAudio();
   const { refreshAvailableLetters, placeLetter, submitWord } = useSocketUtils();
   const [selectedLetter, setSelectedLetter] = useState<{
@@ -985,6 +978,13 @@ export default function Live({
 
     setWordCellsToHighlight(uniqueCells);
   }, [placedLetters, placementDirection, board]);
+
+  // If board is not defined, show loading state
+  if (!board) {
+    return (
+      <Loading title="Loading game..." body="Waiting for game to start..." />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-between p-4">
