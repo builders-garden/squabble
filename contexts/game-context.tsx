@@ -123,7 +123,7 @@ export function GameProvider({
 
   useEffect(() => {
     if (
-      !players.find((p) => p.fid.toString() === user?.data?.fid.toString()) &&
+      !players.find((p) => p?.fid?.toString() === user?.data?.fid.toString()) &&
       players.length < 6
     ) {
       handleConnectToLobby();
@@ -144,7 +144,7 @@ export function GameProvider({
       },
       game_update: (event: GameUpdateEvent) => {
         console.log("RECEIVED game_update", event.players);
-        setPlayers(event.players);
+        setPlayers(event.players.filter((p) => p.fid));
       },
       game_started: (event: GameStartedEvent) => {
         setGameState("live");
@@ -168,7 +168,7 @@ export function GameProvider({
         setLoadingBody(event.body);
       },
       game_ended: (event: GameEndedEvent) => {
-        setPlayers(event.players);
+        setPlayers(event.players.filter((p) => p.fid));
         setGameState("ended");
       },
       letter_placed: (event: LetterPlacedEvent) => {
@@ -320,7 +320,7 @@ export function GameProvider({
           if (playerIndex !== -1) {
             newPlayers[playerIndex].score = event.newScore;
           }
-          return newPlayers;
+          return newPlayers.filter((p) => p.fid);
         });
       },
     };
