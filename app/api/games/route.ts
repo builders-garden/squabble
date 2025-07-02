@@ -1,3 +1,4 @@
+import { trackEvent } from "@/lib/posthog/server";
 import { prisma } from "@/lib/prisma/client";
 import { createGame, updateGame } from "@/lib/prisma/games";
 import { uuidToBigInt } from "@/lib/utils";
@@ -27,6 +28,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   try {
     const { betAmount } = await req.json();
+    const fid = req.headers.get("x-user-fid")!;
 
     const game = await createGame({
       betAmount: parseFloat(betAmount),
@@ -52,6 +54,13 @@ export async function POST(req: NextRequest) {
     );
 
     console.log("Smart contract call successful:", txHash);
+
+    trackEvent("game_created", {
+        gameId: game.id,
+        stakeAmount: stakeAmount,
+      },
+      fid
+    );
 
     return NextResponse.json({
       id: game.id,

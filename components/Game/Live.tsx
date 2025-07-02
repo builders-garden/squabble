@@ -1,6 +1,7 @@
 "use client";
 import { useAudio } from "@/contexts/audio-context";
 import useSocketUtils from "@/hooks/use-socket-utils";
+import { trackEvent } from "@/lib/posthog/client";
 import { cn, formatAvatarUrl } from "@/lib/utils";
 import { Player } from "@/types/socket-events";
 import sdk from "@farcaster/frame-sdk";
@@ -439,6 +440,14 @@ export default function Live({
       placeLetter(currentPlayer!, gameId, letter, row, col);
       setSelectedLetter(null);
       playSound("letterPlaced");
+
+      trackEvent("letter_placed", {
+        fid: currentPlayer?.fid,
+        letter,
+        row,
+        col,
+        gameId,
+      });
     }
   };
 
@@ -477,6 +486,14 @@ export default function Live({
         placeLetter(currentPlayer!, gameId, selectedLetter.letter, row, col);
         setSelectedLetter(null);
         playSound("letterPlaced");
+
+        trackEvent("letter_replaced", {
+          fid: currentPlayer?.fid,
+          letter: selectedLetter.letter,
+          row,
+          col,
+          gameId,
+        });
         return;
       }
     }
@@ -615,6 +632,11 @@ export default function Live({
     setTimeout(() => {
       refreshAvailableLetters(user.fid, gameId);
     }, 125); // Small delay to let sounds start first
+
+    trackEvent("shuffle_letters", {
+      fid: currentPlayer?.fid,
+      gameId,
+    });
   };
 
   const handleExitGame = async () => {
@@ -672,6 +694,14 @@ export default function Live({
       // Reset the placed letters and direction after submission
       setPlacedLetters([]);
       setPlacementDirection(null);
+
+      trackEvent("word_submitted", {
+        fid: currentPlayer?.fid,
+        word,
+        path,
+        letters: placedLetters.map((l) => l.letter),
+        gameId,
+      });
       return;
     }
 
@@ -1123,7 +1153,7 @@ export default function Live({
                             }
                           : {
                               color: "#B5A16E",
-                          }
+                            }
                       }
                       className="text-xl font-bold text-[#B5A16E]"
                     >

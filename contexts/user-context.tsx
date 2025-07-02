@@ -2,6 +2,7 @@ import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useApiQuery } from "@/hooks/use-api-query";
 import { User } from "@prisma/client";
 import { QueryObserverResult } from "@tanstack/react-query";
+import posthog from "posthog-js";
 import {
   createContext,
   ReactNode,
@@ -68,6 +69,12 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     method: "POST",
     body: (variables) => variables,
     onSuccess: (data) => {
+      posthog.identify(data.user.fid.toString(), {
+        fid: data.user.fid,
+        displayName: data.user.displayName,
+        username: data.user.username,
+        avatarUrl: data.user.avatarUrl,
+      });
       setIsSignedIn(true);
       setIsSigningIn(false);
     },

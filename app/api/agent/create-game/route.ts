@@ -1,3 +1,4 @@
+import { trackEvent } from "@/lib/posthog/server";
 import { createGame, updateGame } from "@/lib/prisma/games";
 import { uuidToBigInt } from "@/lib/utils";
 import { createNewGame } from "@/lib/viem";
@@ -57,6 +58,12 @@ export async function POST(req: NextRequest) {
     );
 
     console.log("Smart contract call successful:", txHash);
+
+    trackEvent("game_created", {
+      gameId: game.id,
+      stakeAmount: stakeAmount,
+      conversationId: conversationId,
+    }, "agent");
 
     return NextResponse.json({
       id: game.id,

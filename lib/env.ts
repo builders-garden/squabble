@@ -23,6 +23,7 @@ export const env = createEnv({
     NEXT_PUBLIC_FARCASTER_SIGNATURE: z.string().min(1),
     NEXT_PUBLIC_SOCKET_URL: z.string().min(1),
     NEXT_PUBLIC_DAIMO_PAY_ID: z.string().min(1),
+    NEXT_PUBLIC_POSTHOG_KEY: z.string().optional(),
   },
   // For Next.js >= 13.4.4, you only need to destructure client variables:
   experimental__runtimeEnv: {
@@ -34,5 +35,6 @@ export const env = createEnv({
     NEXT_PUBLIC_FARCASTER_SIGNATURE: process.env.NEXT_PUBLIC_FARCASTER_SIGNATURE,
     NEXT_PUBLIC_SOCKET_URL: process.env.NEXT_PUBLIC_SOCKET_URL,
     NEXT_PUBLIC_DAIMO_PAY_ID: process.env.NEXT_PUBLIC_DAIMO_PAY_ID,
+    NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
   },
 });

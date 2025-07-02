@@ -25,6 +25,7 @@ import LobbyPlayerCard from "../ui/lobby-player-card";
 import LobbySpotAvailableCard from "../ui/lobby-spot-available-card";
 import ShareButton from "../ui/share-button";
 import SquabbleButton from "../ui/squabble-button";
+import { trackEvent } from "@/lib/posthog/client";
 
 const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
@@ -97,6 +98,12 @@ export default function Lobby({
   const handleStartGame = () => {
     setGameState("loading");
     startGame(currentPlayer!, gameId);
+    trackEvent("game_started", {
+      gameId,
+      stakeAmount: stakeAmount,
+      fid: currentPlayer?.fid,
+      players: players?.length,
+    });
   };
 
   const handleGetStakeBack = async () => {
