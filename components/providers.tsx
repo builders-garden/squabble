@@ -14,7 +14,7 @@ const ErudaProvider = dynamic(
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ErudaProvider>
-      <MiniAppProvider>
+      <MiniAppProvider addMiniAppOnLoad={true}>
         <UserProvider>
           <DaimoPayProvider>
             <AudioProvider>{children}</AudioProvider>

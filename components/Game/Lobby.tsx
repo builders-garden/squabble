@@ -1,6 +1,8 @@
 "use client";
+import { useMiniApp } from "@/contexts/miniapp-context";
 import useSocketUtils from "@/hooks/use-socket-utils";
 import {
+  FARCASTER_CLIENT_FID,
   SQUABBLE_CONTRACT_ABI,
   SQUABBLE_CONTRACT_ADDRESS,
 } from "@/lib/constants";
@@ -57,6 +59,7 @@ export default function Lobby({
   const { data: txHash, writeContract } = useWriteContract();
   const [isRefunding, setIsRefunding] = useState(false);
   const { address } = useAccount();
+  const { context } = useMiniApp();
 
   // Find current user in players list to check their status
   const currentPlayer = currentUser
@@ -194,14 +197,16 @@ export default function Lobby({
         </div>
         <div className="w-full flex flex-row items-center justify-between">
           <div className="font-medium text-xl text-white">Players in Lobby</div>
-          <ShareButton
-            customUrl={`https://squabble.lol/games/${gameId}`}
-            customCastText={
-              parseFloat(stakeAmount) > 0
-                ? `🎲 Play Squabble with me, entry fee is $${stakeAmount}!`
-                : "🎲 Play Squabble with me!"
-            }
-          />
+          {context?.client.clientFid === FARCASTER_CLIENT_FID && (
+            <ShareButton
+              customUrl={`https://squabble.lol/games/${gameId}`}
+              customCastText={
+                parseFloat(stakeAmount) > 0
+                  ? `🎲 Play Squabble with me, entry fee is $${stakeAmount}!`
+                  : "🎲 Play Squabble with me!"
+              }
+            />
+          )}
         </div>
         <div className="grid grid-cols-2 grid-rows-3 gap-4">
           <AnimatePresence mode="popLayout">
