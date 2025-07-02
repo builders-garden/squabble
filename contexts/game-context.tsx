@@ -201,7 +201,11 @@ export function GameProvider({
         setLetterPlacers((prev) => {
           const newLetterPlacers = { ...prev };
           event.path.forEach((position) => {
-            newLetterPlacers[`${position.y}-${position.x}`] = [];
+            const key = `${position.y}-${position.x}`;
+            newLetterPlacers[key] =
+              newLetterPlacers[key]?.filter(
+                (p) => p.fid !== event.player.fid
+              ) || [];
           });
           return newLetterPlacers;
         });
