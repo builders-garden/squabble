@@ -1,10 +1,9 @@
-import { useMiniApp, MiniAppProvider } from "@/contexts/miniapp-context";
 import dynamic from "next/dynamic";
-import { LoadingScreen } from "@/components/ui/loading-screen";
+import Loading from "../Game/Loading";
 
 const ProfileComponent = dynamic(() => import("@/components/Profile"), {
   ssr: false,
-  loading: () => <LoadingScreen />,
+  loading: () => <Loading />,
 });
 
 export default function Profile() {

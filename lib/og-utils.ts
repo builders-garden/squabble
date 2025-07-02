@@ -17,12 +17,15 @@ export async function loadGoogleFont(font: string, text: string) {
   throw new Error("failed to load font data");
 }
 
-export async function loadImage(url: string): Promise<ArrayBuffer> {
+export async function loadImage(url: string): Promise<string> {
   const logoImageRes = await fetch(url);
 
   if (!logoImageRes.ok) {
     throw new Error(`Failed to fetch logo image: ${logoImageRes.statusText}`);
   }
 
-  return await logoImageRes.arrayBuffer();
+  const buffer = await logoImageRes.arrayBuffer();
+  const base64 = Buffer.from(buffer).toString("base64");
+  const mimeType = logoImageRes.headers.get("content-type") || "image/png";
+  return `data:${mimeType};base64,${base64}`;
 }

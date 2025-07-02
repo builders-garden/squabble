@@ -1,4 +1,4 @@
-import { GameParticipant } from "@prisma/client";
+import { GameParticipant, User } from "@prisma/client";
 import { prisma } from "../client";
 
 // Types
@@ -64,10 +64,14 @@ export async function getGameParticipantByFidAndGameId(
   }
 }
 
+export interface GameParticipantWithUser extends GameParticipant {
+  user: User;
+}
+
 // Get game participants by game ID
 export async function getGameParticipantsByGameId(
   gameId: string
-): Promise<GameParticipant[]> {
+): Promise<GameParticipantWithUser[]> {
   try {
     return await prisma.gameParticipant.findMany({
       where: { gameId },

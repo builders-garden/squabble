@@ -21,6 +21,7 @@ import { useAccount, useWriteContract } from "wagmi";
 import Chip from "../ui/chip";
 import LobbyPlayerCard from "../ui/lobby-player-card";
 import LobbySpotAvailableCard from "../ui/lobby-spot-available-card";
+import ShareButton from "../ui/share-button";
 import SquabbleButton from "../ui/squabble-button";
 
 const luckiestGuy = Luckiest_Guy({
@@ -47,8 +48,12 @@ export default function Lobby({
   contractGameId: string;
   stakeAmount: string;
 }) {
-  const { playerStakeConfirmed, startGame, playerStakeRefunded } =
-    useSocketUtils();
+  const {
+    playerStakeConfirmed,
+    startGame,
+    playerStakeRefunded,
+    connectToLobby,
+  } = useSocketUtils();
   const { data: txHash, writeContract } = useWriteContract();
   const [isRefunding, setIsRefunding] = useState(false);
   const { address } = useAccount();
@@ -147,17 +152,19 @@ export default function Lobby({
   return (
     <div className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-between p-4">
       <div className="flex flex-col items-center justify-center">
-        <Image
-          src="/images/logo.png"
-          alt="Squabble Logo"
-          className="w-[120px]"
-          width={120}
-          height={120}
-        />
-        <div
-          className={`${luckiestGuy.className} text-4xl text-white tracking-wider`}
-        >
-          SQUABBLE
+        <div className="flex flex-row items-center">
+          <Image
+            src="/images/logo.png"
+            alt="Squabble Logo"
+            className="w-[80px] pb-2"
+            width={80}
+            height={80}
+          />
+          <div
+            className={`${luckiestGuy.className} text-4xl text-white tracking-wider`}
+          >
+            SQUABBLE
+          </div>
         </div>
         <div className="text-xl text-white font-medium">
           Outspell your friends, in real time.
@@ -185,7 +192,17 @@ export default function Lobby({
             />
           ) : null}
         </div>
-        <div className="font-medium text-xl text-white">Players in Lobby</div>
+        <div className="w-full flex flex-row items-center justify-between">
+          <div className="font-medium text-xl text-white">Players in Lobby</div>
+          <ShareButton
+            customUrl={`https://squabble.lol/games/${gameId}`}
+            customCastText={
+              parseFloat(stakeAmount) > 0
+                ? `🎲 Play Squabble with me, entry fee is $${stakeAmount}!`
+                : "🎲 Play Squabble with me!"
+            }
+          />
+        </div>
         <div className="grid grid-cols-2 grid-rows-3 gap-4">
           <AnimatePresence mode="popLayout">
             {players.map((p, i) => (
@@ -219,6 +236,29 @@ export default function Lobby({
             ))}
           </AnimatePresence>
         </div>
+        {!players.find(
+          (p) => p.fid.toString() === currentUser?.fid?.toString()
+        ) &&
+          !isCurrentUserPending && (
+            <p
+              className="text-yellow-200 text-sm cursor-pointer"
+              onClick={() => {
+                connectToLobby(
+                  {
+                    fid: currentUser?.fid!,
+                    displayName: currentUser?.displayName,
+                    username: currentUser?.username,
+                    avatarUrl: currentUser?.avatarUrl,
+                    address: address!,
+                  },
+                  gameId
+                );
+              }}
+            >
+              Don&apos;t see yourself?{" "}
+              <span className="underline font-bold">Click to refresh!</span>
+            </p>
+          )}
       </div>
       <div className="flex flex-col gap-2 items-center w-full pb-4">
         {isCurrentUserPending && currentUser && parseFloat(stakeAmount) > 0 ? (

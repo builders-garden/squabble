@@ -9,9 +9,9 @@ export async function generateMetadata({
 }: {
   params: { id: string };
 }): Promise<Metadata> {
-  const requestId = params.id;
+  const gameId = params.id;
 
-  const imageUrl = `${appUrl}/images/feed.png`;
+  const imageUrl = `${appUrl}/api/og/games/${gameId}`;
   const frame = {
     version: "next",
     imageUrl,
@@ -20,7 +20,7 @@ export async function generateMetadata({
       action: {
         type: "launch_frame",
         name: "Squabble",
-        url: `${appUrl}/games/${requestId}`,
+        url: `${appUrl}/games/${gameId}`,
         splashImageUrl: `${appUrl}/images/icon.png`,
         splashBackgroundColor: "#1B7A6E",
       },

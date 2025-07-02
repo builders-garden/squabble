@@ -1,19 +1,9 @@
 import { createGame, updateGame } from "@/lib/prisma/games";
+import { uuidToBigInt } from "@/lib/utils";
 import { createNewGame } from "@/lib/viem";
 import { NextRequest, NextResponse } from "next/server";
 
-// Function to convert UUID string to a safe integer
-function uuidToBigInt(uuid: string): bigint {
-  // Remove hyphens to get full hex string
-  const hex = uuid.replace(/-/g, "");
 
-  // Take only the first 6 hex characters (24 bits) to ensure safe range
-  // This gives us ~16 million possible values, which is still very unique
-  // and fits comfortably within 32-bit signed integer range (max: 2,147,483,647)
-  const safeHex = hex.substring(0, 6);
-
-  return BigInt("0x" + safeHex);
-}
 
 export async function POST(req: NextRequest) {
   try {

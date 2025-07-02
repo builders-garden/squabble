@@ -73,14 +73,13 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const connect = () => {
-    
     if (!socket.current) {
       socket.current = io(
         env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3001",
         {
           autoConnect: true,
           reconnection: true,
-          reconnectionAttempts: 5,
+          reconnectionAttempts: 10,
           reconnectionDelay: 1000,
         }
       );
@@ -113,6 +112,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
   const disconnect = () => {
     if (socket.current) {
+      console.log("Disconnecting socket");
       socket.current.disconnect();
       socket.current = null;
     }

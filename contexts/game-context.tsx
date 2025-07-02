@@ -2,7 +2,6 @@
 
 import { useAudio } from "@/contexts/audio-context";
 import { useSocket } from "@/contexts/socket-context";
-import { useFakeSignIn } from "@/hooks/use-fake-sign-in";
 import useSocketUtils from "@/hooks/use-socket-utils";
 import {
   AdjacentWordsNotValidEvent,
@@ -25,6 +24,7 @@ import { User } from "@prisma/client";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAccount } from "wagmi";
+import { useRegisteredUser } from "./user-context";
 
 interface GameContextType {
   board: string[][];
@@ -91,44 +91,65 @@ export function GameProvider({
   const { address } = useAccount();
   const { connectToLobby } = useSocketUtils();
   const hasConnectedToLobby = useRef(false);
-  const {
-    user,
-    isSignedIn,
-    isLoading: isSignInLoading,
-    signIn,
-  } = useFakeSignIn({
-    autoSignIn: true,
-    onSuccess: (user) => {
-      if (!user) {
-        console.error("No user found");
-        return;
-      }
+  const { user, isSigningIn, signIn } = useRegisteredUser();
 
+  useEffect(() => {
+    if (user?.data) {
       // Check if user is already in the game
-      if (players.find((p) => p.fid.toString() === user.fid.toString())) {
+      if (
+        players.find((p) => p.fid.toString() === user?.data?.fid.toString())
+      ) {
         console.log("User already in game");
         return;
       }
 
-      // // Check if we've already connected to lobby for this user
-      // if (hasConnectedToLobby.current) {
-      //   console.log("Already connected to lobby");
-      //   return;
-      // }
-
       hasConnectedToLobby.current = true;
       connectToLobby(
         {
-          fid: user.fid,
-          displayName: user.displayName,
-          username: user.username,
-          avatarUrl: user.avatarUrl || "",
+          fid: user.data.fid,
+          displayName: user.data.displayName,
+          username: user.data.username,
+          avatarUrl: user.data.avatarUrl || "",
           address: address as `0x${string}`,
         },
         gameId
       );
-    },
-  });
+    }
+  }, [user]);
+
+  // const { user, isSignedIn, isLoading:isSignInLoading, signIn } = useFakeSignIn({
+  //   autoSignIn: true,
+  //   onSuccess: (user) => {
+  //     if (!user) {
+  //       console.error("No user found");
+  //       return;
+  //     }
+
+  //     // Check if user is already in the game
+  //     if (players.find((p) => p.fid.toString() === user.fid.toString())) {
+  //       console.log("User already in game");
+  //       return;
+  //     }
+
+  //     // // Check if we've already connected to lobby for this user
+  //     // if (hasConnectedToLobby.current) {
+  //     //   console.log("Already connected to lobby");
+  //     //   return;
+  //     // }
+
+  //     hasConnectedToLobby.current = true;
+  //     connectToLobby(
+  //       {
+  //         fid: user.fid,
+  //         displayName: user.displayName,
+  //         username: user.username,
+  //         avatarUrl: user.avatarUrl || "",
+  //         address: address as `0x${string}`,
+  //       },
+  //       gameId
+  //     );
+  //   },
+  // });
 
   useEffect(() => {
     const eventHandlers = {
@@ -136,9 +157,12 @@ export function GameProvider({
         // TODO: add Toast with new player that joined
       },
       game_full: (event: GameFullEvent) => {
-        setGameState("full");
+        if (!players.find((p) => p.fid.toString() === user?.data?.fid.toString())) {
+          setGameState("full");
+        }
       },
       game_update: (event: GameUpdateEvent) => {
+        console.log("RECEIVED game_update", event.players);
         setPlayers(event.players);
       },
       game_started: (event: GameStartedEvent) => {
@@ -147,9 +171,10 @@ export function GameProvider({
         setTimeRemaining(event.timeRemaining);
       },
       refreshed_available_letters: (event: RefreshedAvailableLettersEvent) => {
-        if (!user || (event.playerId && event.playerId !== user.fid)) return;
+        if (!user?.data || (event.playerId && event.playerId !== user.data.fid))
+          return;
         const availableLetters = event.players.find(
-          (p) => p.fid.toString() === user.fid.toString()
+          (p) => p.fid.toString() === user?.data?.fid.toString()
         )?.availableLetters;
         setAvailableLetters(availableLetters || []);
       },
@@ -250,9 +275,9 @@ export function GameProvider({
           });
           return newLetterPlacers;
         });
-        if (event.player.fid === user?.fid) {
+        if (event.player.fid === user?.data?.fid) {
           setBoard(event.board);
-          refreshAvailableLetters(user?.fid!, gameId);
+          refreshAvailableLetters(user?.data?.fid!, gameId);
           playSound("wordNotValid");
           toast.custom(
             (t) => (
@@ -281,9 +306,9 @@ export function GameProvider({
           });
           return newLetterPlacers;
         });
-        if (event.player.fid === user?.fid) {
+        if (event.player.fid === user?.data?.fid) {
           setBoard(event.board);
-          refreshAvailableLetters(user?.fid!, gameId);
+          refreshAvailableLetters(user?.data?.fid!, gameId);
           playSound("wordNotValid");
           toast.custom(
             (t) => (
@@ -347,9 +372,9 @@ export function GameProvider({
         letterPlacers,
         availableLetters,
         timeRemaining,
-        isSignedIn,
-        isSignInLoading,
-        user,
+        isSignedIn: !!user?.data,
+        isSignInLoading: isSigningIn,
+        user: user?.data,
         signIn,
         setBoard,
         setPlayers,

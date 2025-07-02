@@ -1,3 +1,4 @@
+import { GameWithParticipants } from "@/hooks/use-fetch-game";
 import { Game, GameStatus } from "@prisma/client";
 import { prisma } from "../client";
 
@@ -8,7 +9,7 @@ export async function createGame(data: {
   contractGameId?: number;
 }): Promise<Game> {
   // Build the game data object explicitly to avoid undefined values
-  
+
   console.log("betAmount", data.betAmount);
   const gameData: any = {
     betAmount: data.betAmount,
@@ -32,7 +33,9 @@ export async function createGame(data: {
 }
 
 // Get a game by ID
-export async function getGameById(id: string): Promise<Game | null> {
+export async function getGameById(
+  id: string
+): Promise<GameWithParticipants | null> {
   return prisma.game.findUnique({
     where: { id },
     include: {
@@ -88,7 +91,6 @@ export async function deleteGame(id: string): Promise<Game> {
   });
 }
 
-
 // Get games by status
 export async function getGamesByStatus(status: GameStatus): Promise<Game[]> {
   return prisma.game.findMany({
@@ -99,7 +101,6 @@ export async function getGamesByStatus(status: GameStatus): Promise<Game[]> {
           user: true,
         },
       },
-      
     },
     orderBy: {
       createdAt: "desc",
