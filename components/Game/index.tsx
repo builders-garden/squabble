@@ -25,7 +25,7 @@ function GameContent({ id }: { id: string }) {
   const { user, isSignedIn, isSignInLoading, signIn } = useGame();
 
   useEffect(() => {
-    if (game?.status === GameStatus.PLAYING) {
+    if (game?.status === GameStatus.PLAYING && board) {
       setGameState("live");
     } else if (game?.status === GameStatus.FINISHED) {
       setGameState("ended");
