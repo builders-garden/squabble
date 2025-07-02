@@ -42,11 +42,16 @@ export async function createNewGame(
 
   const stakeAmountBigInt = parseUnits(stakeAmount.toString(), 6); //USDC decimals
 
+  const nonce = await publicClient.getTransactionCount({
+    address: account.address,
+  });
+
   const tx = await walletClient.writeContract({
     address: SQUABBLE_CONTRACT_ADDRESS,
     abi: SQUABBLE_CONTRACT_ABI as Abi,
     functionName: "createGame",
     args: [gameId, stakeAmountBigInt],
+    nonce: nonce,
   });
 
   const txReceipt = await publicClient.waitForTransactionReceipt({
