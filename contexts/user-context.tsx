@@ -71,9 +71,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     onSuccess: (data) => {
       posthog.identify(data.user.fid.toString(), {
         fid: data.user.fid,
-        displayName: data.user.displayName,
-        username: data.user.username,
-        avatarUrl: data.user.avatarUrl,
+
       });
       setIsSignedIn(true);
       setIsSigningIn(false);
