@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import SquabbleButton from "../ui/squabble-button";
 import UserAvatar from "../ui/user-avatar";
 import Loading from "./Loading";
+import { useGame } from "@/contexts/game-context";
 
 const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
@@ -72,7 +73,7 @@ export default function Live({
   const [wordCellsToHighlight, setWordCellsToHighlight] = useState<
     Array<{ row: number; col: number }>
   >([]);
-  const currentPlayer = players.find((p) => p.fid === user.fid);
+  const { currentPlayer } = useGame();
 
   const handleDragStart = (
     e: DragEvent<HTMLDivElement>,

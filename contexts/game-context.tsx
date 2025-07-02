@@ -29,6 +29,7 @@ import { useRegisteredUser } from "./user-context";
 interface GameContextType {
   board: string[][];
   players: Player[];
+  currentPlayer: Player | undefined;
   gameState: "lobby" | "live" | "loading" | "ended" | "full";
   loadingTitle: string;
   loadingBody: string;
@@ -71,6 +72,7 @@ export function GameProvider({
 
   const [board, setBoard] = useState<string[][]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
+  const [currentPlayer, setCurrentPlayer] = useState<Player | undefined>();
   const [gameState, setGameState] = useState<
     "lobby" | "live" | "loading" | "ended" | "full"
   >("lobby");
@@ -344,11 +346,25 @@ export function GameProvider({
     gameId,
   ]);
 
+  // Keep currentPlayer in sync with players array and user FID
+  useEffect(() => {
+    const userData = user?.data;
+    if (userData && players.length > 0) {
+      const player = players.find(
+        (p) => p.fid.toString() === userData.fid.toString()
+      );
+      setCurrentPlayer(player);
+    } else {
+      setCurrentPlayer(undefined);
+    }
+  }, [players, user?.data?.fid]);
+
   return (
     <GameContext.Provider
       value={{
         board,
         players,
+        currentPlayer,
         gameState,
         loadingTitle,
         loadingBody,

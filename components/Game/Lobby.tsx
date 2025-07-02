@@ -26,6 +26,7 @@ import LobbyPlayerCard from "../ui/lobby-player-card";
 import LobbySpotAvailableCard from "../ui/lobby-spot-available-card";
 import ShareButton from "../ui/share-button";
 import SquabbleButton from "../ui/squabble-button";
+import { useGame } from "@/contexts/game-context";
 
 const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
@@ -63,17 +64,7 @@ export default function Lobby({
   const { context } = useMiniApp();
 
   // Find current user in players list to check their status
-  const currentPlayer = currentUser
-    ? players.find((p) => {
-        // Handle both string and number fids
-        const currentUserFid =
-          typeof currentUser.fid === "string"
-            ? parseInt(currentUser.fid)
-            : currentUser.fid;
-        // Player objects may use 'id' or 'fid'
-        return p.id === currentUserFid || p.fid === currentUserFid;
-      })
-    : null;
+  const { currentPlayer } = useGame();
   const isCurrentUserPending = currentPlayer && !currentPlayer.ready;
 
   const handlePaymentCompleted = (event: PaymentCompletedEvent) => {
