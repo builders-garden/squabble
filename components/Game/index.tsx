@@ -55,7 +55,11 @@ function GameContent({ id }: { id: string }) {
     return <Ended players={players} game={game!} />;
   }
 
-  if (gameState === "full") {
+  if (
+    gameState === "full" ||
+    players.length === 6 ||
+    game?.participants?.length === 6
+  ) {
     return <GameFull />;
   }
 

@@ -6,6 +6,7 @@ interface CreateGameVariables {
 
 interface CreateGameResponse {
   id: string;
+  stakeAmount: string;
   contractGameId: string;
   txHash: string;
 }

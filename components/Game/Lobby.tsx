@@ -9,9 +9,8 @@ import { env } from "@/lib/env";
 import { Player } from "@/types/socket-events";
 import { DaimoPayButton } from "@daimo/pay";
 import { PaymentCompletedEvent } from "@daimo/pay-common";
-import sdk from "@farcaster/frame-sdk";
 import { User } from "@prisma/client";
-import { CheckCircle, ClockCircle, Copy, Share } from "@solar-icons/react";
+import { CheckCircle, ClockCircle } from "@solar-icons/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
@@ -22,6 +21,7 @@ import { useAccount, useWriteContract } from "wagmi";
 import Chip from "../ui/chip";
 import LobbyPlayerCard from "../ui/lobby-player-card";
 import LobbySpotAvailableCard from "../ui/lobby-spot-available-card";
+import ShareButton from "../ui/share-button";
 import SquabbleButton from "../ui/squabble-button";
 
 const luckiestGuy = Luckiest_Guy({
@@ -48,8 +48,12 @@ export default function Lobby({
   contractGameId: string;
   stakeAmount: string;
 }) {
-  const { playerStakeConfirmed, startGame, playerStakeRefunded } =
-    useSocketUtils();
+  const {
+    playerStakeConfirmed,
+    startGame,
+    playerStakeRefunded,
+    connectToLobby,
+  } = useSocketUtils();
   const { data: txHash, writeContract } = useWriteContract();
   const [isRefunding, setIsRefunding] = useState(false);
   const { address } = useAccount();
@@ -188,64 +192,14 @@ export default function Lobby({
         </div>
         <div className="w-full flex flex-row items-center justify-between">
           <div className="font-medium text-xl text-white">Players in Lobby</div>
-          <div className="flex">
-            <button
-              className="p-2 rounded-full hover:bg-white/10 transition-colors"
-              title="Share game"
-              onClick={async () => {
-                await sdk.actions.composeCast({
-                  text:
-                    parseFloat(stakeAmount) > 0
-                      ? `🎲 Play Squabble with me, entry fee is $${stakeAmount}!`
-                      : "🎲 Play Squabble with me!",
-                  embeds: [`https://squabble.lol/games/${gameId}`],
-                });
-              }}
-            >
-              <Share size={20} color="white" />
-            </button>
-            <button
-              className="p-2 rounded-full hover:bg-white/10 transition-colors"
-              title="Copy game link"
-              onClick={async () => {
-                try {
-                  await navigator.clipboard.writeText(
-                    `https://squabble.lol/games/${gameId}`
-                  );
-                  toast.custom(
-                    (t) => (
-                      <div className="w-fit flex items-center gap-2 p-2 bg-white rounded-lg shadow animate-shake">
-                        <div className="text-green-600 font-medium text-sm">
-                          ✅ Game link copied to clipboard
-                        </div>
-                      </div>
-                    ),
-                    {
-                      position: "top-left",
-                      duration: 5000,
-                    }
-                  );
-                } catch (error) {
-                  console.error("Error copying game link:", error);
-                  toast.custom(
-                    (t) => (
-                      <div className="w-fit flex items-center gap-2 p-2 bg-white rounded-lg shadow animate-shake">
-                        <div className="text-red-600 font-medium text-sm">
-                          ❌ Failed to copy game link. Please try again.
-                        </div>
-                      </div>
-                    ),
-                    {
-                      position: "top-left",
-                      duration: 5000,
-                    }
-                  );
-                }
-              }}
-            >
-              <Copy size={20} color="white" />
-            </button>
-          </div>
+          <ShareButton
+            customUrl={`https://squabble.lol/games/${gameId}`}
+            customCastText={
+              parseFloat(stakeAmount) > 0
+                ? `🎲 Play Squabble with me, entry fee is $${stakeAmount}!`
+                : "🎲 Play Squabble with me!"
+            }
+          />
         </div>
         <div className="grid grid-cols-2 grid-rows-3 gap-4">
           <AnimatePresence mode="popLayout">
@@ -280,6 +234,29 @@ export default function Lobby({
             ))}
           </AnimatePresence>
         </div>
+        {!players.find(
+          (p) => p.fid.toString() === currentUser?.fid?.toString()
+        ) &&
+          !isCurrentUserPending && (
+            <p
+              className="text-yellow-200 text-sm cursor-pointer"
+              onClick={() => {
+                connectToLobby(
+                  {
+                    fid: currentUser?.fid!,
+                    displayName: currentUser?.displayName,
+                    username: currentUser?.username,
+                    avatarUrl: currentUser?.avatarUrl,
+                    address: address!,
+                  },
+                  gameId
+                );
+              }}
+            >
+              Don&apos;t see yourself?{" "}
+              <span className="underline font-bold">Click to refresh!</span>
+            </p>
+          )}
       </div>
       <div className="flex flex-col gap-2 items-center w-full pb-4">
         {isCurrentUserPending && currentUser && parseFloat(stakeAmount) > 0 ? (

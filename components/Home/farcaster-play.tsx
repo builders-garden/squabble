@@ -22,8 +22,19 @@ const BET_AMOUNTS = [
 
 export default function FarcasterPlay() {
   const router = useRouter();
-  const { mutate: createGame, isPending: isLoading, isSuccess } = useCreateGame({
-    onSuccess: (data) => {
+  const {
+    mutate: createGame,
+    isPending: isLoading,
+    isSuccess,
+  } = useCreateGame({
+    onSuccess: async (data) => {
+      // sdk.actions.composeCast({
+      //   text:
+      //     parseFloat(data.stakeAmount) > 0
+      //       ? `🎲 Play Squabble with me, entry fee is $${data.stakeAmount}!`
+      //       : "🎲 Play Squabble with me!",
+      //   embeds: [`https://squabble.lol/games/${data.id}`],
+      // });
       router.push(`/games/${data.id}`);
     },
   });

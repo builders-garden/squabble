@@ -55,6 +55,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       id: game.id,
+      stakeAmount: stakeAmount.toString(),
       contractGameId: contractGameIdNumber.toString(),
       txHash,
     });

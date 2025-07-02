@@ -157,7 +157,9 @@ export function GameProvider({
         // TODO: add Toast with new player that joined
       },
       game_full: (event: GameFullEvent) => {
-        setGameState("full");
+        if (!players.find((p) => p.fid.toString() === user?.data?.fid.toString())) {
+          setGameState("full");
+        }
       },
       game_update: (event: GameUpdateEvent) => {
         console.log("RECEIVED game_update", event.players);
