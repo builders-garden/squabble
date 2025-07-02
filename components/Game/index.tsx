@@ -77,28 +77,6 @@ function GameContent({ id }: { id: string }) {
     return <SignIn signIn={signIn} />;
   }
 
-  if (gameState === "lobby") {
-    return (
-      <Lobby
-        setGameState={setGameState}
-        players={players}
-        gameLeaderFid={4461}
-        currentUser={user || null}
-        userAddress={address as `0x${string}`}
-        gameId={id}
-        contractGameId={game?.contractGameId?.toString()!}
-        stakeAmount={stakeAmount!}
-      />
-    );
-  }
-
-  if (gameState === "loading") {
-    if (loadingTitle === "Starting game") {
-      return <Tutorial />;
-    }
-    return <Loading title={loadingTitle} body={loadingBody} />;
-  }
-
   if (game?.status === GameStatus.FINISHED || gameState === "ended") {
     return <Ended players={players} game={game!} refetchGame={refetchGame} />;
   }
@@ -122,6 +100,30 @@ function GameContent({ id }: { id: string }) {
   ) {
     return <GameStarted />;
   }
+
+  if (gameState === "lobby") {
+    return (
+      <Lobby
+        setGameState={setGameState}
+        players={players}
+        gameLeaderFid={4461}
+        currentUser={user || null}
+        userAddress={address as `0x${string}`}
+        gameId={id}
+        contractGameId={game?.contractGameId?.toString()!}
+        stakeAmount={stakeAmount!}
+      />
+    );
+  }
+
+  if (gameState === "loading") {
+    if (loadingTitle === "Starting game") {
+      return <Tutorial />;
+    }
+    return <Loading title={loadingTitle} body={loadingBody} />;
+  }
+
+  
 
   return (
     <>
