@@ -94,9 +94,6 @@ export function GameProvider({
   const { user, isSigningIn, signIn } = useRegisteredUser();
 
   const handleConnectToLobby = async () => {
-    if (hasConnectedToLobby.current) {
-      return;
-    }
     hasConnectedToLobby.current = true;
     connectToLobby(
       {
