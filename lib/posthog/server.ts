@@ -2,7 +2,7 @@ import { PostHog } from "posthog-node";
 import { env } from "@/lib/env";
 
 
-const posthog = new PostHog(env.NEXT_PUBLIC_POSTHOG_KEY || "", {
+const posthog = new PostHog(env.NEXT_PUBLIC_POSTHOG_KEY, {
   host: "https://eu.i.posthog.com",
 });
 
@@ -11,7 +11,7 @@ export const trackEvent = (
   properties: Record<string, unknown>,
   distinctId?: string,
 ) => {
-  if (!env.NEXT_PUBLIC_POSTHOG_KEY) {
+  if (env.NEXT_PUBLIC_POSTHOG_DISABLED === "true") {
     return;
   }
   console.log("[POSTHOG] Tracking event", event, properties);

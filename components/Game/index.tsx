@@ -16,12 +16,27 @@ import Loading from "./Loading";
 import Lobby from "./Lobby";
 import NoWallet from "./NoWallet";
 import SignIn from "./SignIn";
+import Tutorial from "./Tutorial";
 
 function GameContent({ id }: { id: string }) {
   const { data: game, refetch: refetchGame } = useFetchGame(id);
   const { address } = useAccount();
   const hasConnectedToLobby = useRef(false);
   const { user, isSignedIn, isSignInLoading, signIn } = useGame();
+
+  useEffect(() => {
+    if (game?.status === GameStatus.PLAYING) {
+      setGameState("live");
+    } else if (game?.status === GameStatus.FINISHED) {
+      setGameState("ended");
+    }
+    if (
+      game?.participants.length === 6 &&
+      !game?.participants.some((p) => p.fid.toString() === user?.fid.toString())
+    ) {
+      setGameState("full");
+    }
+  }, [game]);
 
   // Reset the connection flag when game ID changes or component unmounts
   useEffect(() => {
@@ -51,22 +66,6 @@ function GameContent({ id }: { id: string }) {
 
   const stakeAmount = game?.betAmount?.toString();
 
-  if (game?.status === GameStatus.FINISHED || gameState === "ended") {
-    return <Ended players={players} game={game!} refetchGame={refetchGame} />;
-  }
-
-  if (
-    gameState === "full" ||
-    players.length === 6 ||
-    game?.participants?.length === 6
-  ) {
-    return <GameFull />;
-  }
-
-  if (game?.status === GameStatus.PLAYING) {
-    return <GameStarted />;
-  }
-
   if (!address) {
     return <NoWallet />;
   }
@@ -95,7 +94,32 @@ function GameContent({ id }: { id: string }) {
   }
 
   if (gameState === "loading") {
+    if (loadingTitle === "Starting game") {
+      return <Tutorial />;
+    }
     return <Loading title={loadingTitle} body={loadingBody} />;
+  }
+
+  if (game?.status === GameStatus.FINISHED || gameState === "ended") {
+    return <Ended players={players} game={game!} refetchGame={refetchGame} />;
+  }
+
+  if (
+    (gameState === "full" ||
+      players.length === 6 ||
+      game?.participants?.length === 6) &&
+    !game?.participants?.some((p) => p.fid.toString() === user?.fid.toString())
+  ) {
+    return <GameFull />;
+  }
+
+  if (
+    game?.status === GameStatus.PLAYING &&
+    !game.participants.some(
+      (p) => p.fid.toString() === user?.fid.toString() && p.joined === true
+    )
+  ) {
+    return <GameStarted />;
   }
 
   return (
