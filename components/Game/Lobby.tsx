@@ -230,7 +230,7 @@ export default function Lobby({
                   player={p}
                   status={p.ready ? "ready" : "pending"}
                   isCurrentPlayer={
-                    p.fid?.toString() === currentUser?.fid?.toString()
+                    p?.fid?.toString() === currentUser?.fid?.toString()
                   }
                 />
               </motion.div>
@@ -249,7 +249,7 @@ export default function Lobby({
           </AnimatePresence>
         </div>
         {!players.find(
-          (p) => p.fid.toString() === currentUser?.fid?.toString()
+          (p) => p?.fid?.toString() === currentUser?.fid?.toString()
         ) &&
           !isCurrentUserPending && (
             <p
