@@ -841,15 +841,6 @@
     ox "^0.4.4"
     zod "^3.24.1"
 
-"@farcaster/frame-core@0.1.8":
-  version "0.1.8"
-  resolved "https://registry.yarnpkg.com/@farcaster/frame-core/-/frame-core-0.1.8.tgz#8c56c2ef083c80ff146fa785e8367a54f0c1a515"
-  integrity sha512-Y0JATQXa/iaqH3pCp8Dby4iCQbwqw7JJaGtfzUazdr7R+zs3EDP8DYQCkqJu6iGjE9gqgecB+b+DOZpnqMTDNw==
-  dependencies:
-    "@solana/web3.js" "^1.98.2"
-    ox "^0.4.4"
-    zod "^3.24.1"
-
 "@farcaster/frame-node@^0.0.31":
   version "0.0.31"
   resolved "https://registry.yarnpkg.com/@farcaster/frame-node/-/frame-node-0.0.31.tgz#e97d02ebbb7069d8ec0351479f7fcf012c9a5463"
@@ -880,12 +871,12 @@
     eventemitter3 "^5.0.1"
     ox "^0.4.4"
 
-"@farcaster/frame-sdk@^0.0.61":
-  version "0.0.61"
-  resolved "https://registry.yarnpkg.com/@farcaster/frame-sdk/-/frame-sdk-0.0.61.tgz#5c98f8a0f3de0abdb554f9c4dbff90f15f1baf4e"
-  integrity sha512-FvujZY/Xw7Ar6V4iFkZWK6b2s2oyuEWxB5Pb9KyNr5jSq8lGdF8HfsO+gWFBej+X13aEOQG1btm7nEvwhYrebQ==
+"@farcaster/frame-sdk@^0.1.1":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@farcaster/frame-sdk/-/frame-sdk-0.1.2.tgz#851d9693b89948430fa39a21097cf3c8158dfef6"
+  integrity sha512-5dLM492bRIhuoJL/e7Y1O0OOhGJ3AlQ93vIvEgspWGtNsEX+W7yg9f5/yBXM6EOKCxQ+JZhkKhePMP1QwL6ysA==
   dependencies:
-    "@farcaster/frame-core" "0.1.8"
+    "@farcaster/miniapp-sdk" "0.1.2"
     "@farcaster/quick-auth" "^0.0.6"
     comlink "^4.4.2"
     eventemitter3 "^5.0.1"
@@ -900,6 +891,26 @@
   version "0.0.46"
   resolved "https://registry.yarnpkg.com/@farcaster/frame-wagmi-connector/-/frame-wagmi-connector-0.0.46.tgz#875e50887e6a155986f11ce1b410b475cb02a833"
   integrity sha512-SCFrOw239PZsojXVL3w5faOAvSgi5t+weL1H8Mk86lb5BnI7zMrMKzaCTiaFfdG/Vh4JDlY0t9E33CqCAjOmCQ==
+
+"@farcaster/miniapp-core@0.3.2":
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/@farcaster/miniapp-core/-/miniapp-core-0.3.2.tgz#655480fadaec69e9efe97cecae7e825f2e5152ce"
+  integrity sha512-gxkQXfp3WeAd03tG5kbtihqkflBofgXy61lzQ55DgI94ROemG6AV8qwyl3uHp4Z6SPSX5QWwbjkOJJI2J0MaYA==
+  dependencies:
+    "@solana/web3.js" "^1.98.2"
+    ox "^0.4.4"
+    zod "^3.25.0"
+
+"@farcaster/miniapp-sdk@0.1.2":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@farcaster/miniapp-sdk/-/miniapp-sdk-0.1.2.tgz#35576a9d21109889667bf438337c6ec267b748ea"
+  integrity sha512-sBAUqVdzhTUaz7aNNvQh1Jc35j5NOVPlpN19eSC+yh/Ja0hu4xPdoOuV/IgLX5R3prSRSaMqB3qVfhy5TKz87g==
+  dependencies:
+    "@farcaster/miniapp-core" "0.3.2"
+    "@farcaster/quick-auth" "^0.0.6"
+    comlink "^4.4.2"
+    eventemitter3 "^5.0.1"
+    ox "^0.4.4"
 
 "@farcaster/quick-auth@^0.0.6":
   version "0.0.6"
@@ -9466,6 +9477,11 @@ zod@^3.24.2:
   version "3.25.32"
   resolved "https://registry.yarnpkg.com/zod/-/zod-3.25.32.tgz#769cc684072df780fc8f38130b0cd9283a8d3818"
   integrity sha512-OSm2xTIRfW8CV5/QKgngwmQW/8aPfGdaQFlrGoErlgg/Epm7cjb6K6VEyExfe65a3VybUOnu381edLb0dfJl0g==
+
+zod@^3.25.0:
+  version "3.25.67"
+  resolved "https://registry.yarnpkg.com/zod/-/zod-3.25.67.tgz#62987e4078e2ab0f63b491ef0c4f33df24236da8"
+  integrity sha512-idA2YXwpCdqUSKRCACDE6ItZD9TZzy3OZMtpfLoh6oPR47lipysRrJfjzMqFxQ3uJuUPyUeWe1r9vLH33xO/Qw==
 
 zod@^3.25.1:
   version "3.25.30"
