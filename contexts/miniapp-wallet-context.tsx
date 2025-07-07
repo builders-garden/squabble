@@ -52,7 +52,6 @@ function WalletDetector({ children }: { children: React.ReactNode }) {
         window.ethereum?.isCoinbaseWalletExtension ||
         window.ethereum?.isCoinbaseWalletBrowser
       );
-
       setIsCoinbaseWallet(isInCoinbaseWallet);
     } else {
       setIsCoinbaseWallet(false);
