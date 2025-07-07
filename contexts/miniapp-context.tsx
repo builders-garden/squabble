@@ -9,7 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import FrameWalletProvider from "./frame-wallet-context";
+import MiniAppWalletProvider from "./miniapp-wallet-context";
 
 interface MiniAppContextType {
   isMiniAppReady: boolean;
@@ -90,7 +90,7 @@ export function MiniAppProvider({
         context,
       }}
     >
-      <FrameWalletProvider>{children}</FrameWalletProvider>
+      <MiniAppWalletProvider>{children}</MiniAppWalletProvider>
     </MiniAppContext.Provider>
   );
 }

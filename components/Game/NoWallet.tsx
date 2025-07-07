@@ -1,8 +1,10 @@
+import { useMiniAppWallet } from "@/contexts/miniapp-wallet-context";
 import { farcasterFrame as miniAppConnector } from "@farcaster/frame-wagmi-connector";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
 import { useEffect } from "react";
 import { useAccount, useConnect } from "wagmi";
+import { coinbaseWallet } from "wagmi/connectors";
 import SquabbleButton from "../ui/squabble-button";
 
 const luckiestGuy = Luckiest_Guy({
@@ -13,9 +15,18 @@ const luckiestGuy = Luckiest_Guy({
 export default function NoWallet() {
   const { connect } = useConnect();
   const { address } = useAccount();
+  const { isCoinbaseWallet } = useMiniAppWallet();
   const handleConnectWallet = () => {
     console.log("connecting wallet");
-    connect({ connector: miniAppConnector() });
+    if (isCoinbaseWallet) {
+      connect({
+        connector: coinbaseWallet({
+          appName: "Squabble",
+        }),
+      });
+    } else {
+      connect({ connector: miniAppConnector() });
+    }
     console.log("wallet connected", address);
   };
   useEffect(() => {
