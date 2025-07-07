@@ -120,7 +120,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
         error: userError,
       },
       signIn: handleSignIn,
-      isSigningIn,
+      isSigningIn: isSigningIn || isFetchingUser,
       signInError,
     };
   }, [

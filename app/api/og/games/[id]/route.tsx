@@ -173,7 +173,7 @@ export async function GET(
                   borderRadius: "50%",
                 }}
               />
-              {game.betAmount} USDC
+              {game.betAmount === 0 ? "FREE" : `${game.betAmount} USDC`}
             </div>
           </div>
 
