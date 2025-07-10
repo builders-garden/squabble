@@ -125,8 +125,7 @@ export async function GET(
                 }}
               />
 
-              {game.betAmount > 0 ||
-                (true && (
+              {game.betAmount > 0 && (
                   <div
                     style={{
                       display: "flex",
@@ -154,7 +153,7 @@ export async function GET(
                     />
                     5 USDC
                   </div>
-                ))}
+                )}
             </div>
           </div>
 
