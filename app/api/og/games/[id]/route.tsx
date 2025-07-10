@@ -151,7 +151,7 @@ export async function GET(
                         borderRadius: "50%",
                       }}
                     />
-                    5 USDC
+                    {game.betAmount} USDC
                   </div>
                 )}
             </div>
