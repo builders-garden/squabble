@@ -3,6 +3,7 @@ import { useApiQuery } from "@/hooks/use-api-query";
 import { User } from "@prisma/client";
 import { QueryObserverResult } from "@tanstack/react-query";
 import posthog from "posthog-js";
+import { useAccount } from "wagmi";
 import {
   createContext,
   ReactNode,
