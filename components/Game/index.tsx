@@ -65,10 +65,6 @@ function GameContent({ id }: { id: string }) {
 
   const stakeAmount = game?.betAmount?.toString();
 
-  if (!address) {
-    return <NoWallet />;
-  }
-
   if (isSignInLoading) {
     return <Loading title="Signing in..." body="" />;
   }

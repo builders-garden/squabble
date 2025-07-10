@@ -197,7 +197,7 @@ export default function Lobby({
           )}
           {pendingStakes > 0 ? (
             <Chip
-              text={`${pendingStakes} Pending buy-ins`}
+              text={`${pendingStakes} Pending`}
               icon={<ClockCircle size={14} />}
               variant="warning"
             />
