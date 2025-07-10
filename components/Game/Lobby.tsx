@@ -1,4 +1,5 @@
 "use client";
+import { useAudio } from "@/contexts/audio-context";
 import { useGame } from "@/contexts/game-context";
 import { useMiniApp } from "@/contexts/miniapp-context";
 import useSocketUtils from "@/hooks/use-socket-utils";
@@ -16,6 +17,7 @@ import { PaymentCompletedEvent } from "@daimo/pay-common";
 import { User } from "@prisma/client";
 import { CheckCircle, ClockCircle } from "@solar-icons/react";
 import { AnimatePresence, motion } from "framer-motion";
+import { Volume2, VolumeX } from "lucide-react";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -52,6 +54,7 @@ export default function Lobby({
   contractGameId: string;
   stakeAmount: string;
 }) {
+  const { isMusicPlaying, toggleMusic } = useAudio();
   const {
     playerStakeConfirmed,
     startGame,
@@ -152,6 +155,19 @@ export default function Lobby({
   const pendingStakes = players.filter((p) => !p.ready).length;
   return (
     <div className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-between p-4">
+      {/* Mute Button */}
+      <button
+        onClick={toggleMusic}
+        className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+        aria-label={isMusicPlaying ? "Mute music" : "Unmute music"}
+      >
+        {isMusicPlaying ? (
+          <Volume2 size={16} color="white" />
+        ) : (
+          <VolumeX size={16} color="white" />
+        )}
+      </button>
+
       <div className="flex flex-col items-center justify-center">
         <div className="flex flex-row items-center">
           <Image

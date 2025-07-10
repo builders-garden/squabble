@@ -1,7 +1,9 @@
 "use client";
 
+import { useAudio } from "@/contexts/audio-context";
 import { useMiniApp } from "@/contexts/miniapp-context";
 import { FARCASTER_CLIENT_FID } from "@/lib/constants";
+import { Volume2, VolumeX } from "lucide-react";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
 import CoinbaseWalletPlay from "./coinbase-wallet-play";
@@ -15,6 +17,7 @@ const luckiestGuy = Luckiest_Guy({
 
 export default function Home() {
   const { context, isMiniAppReady } = useMiniApp();
+  const { isMusicPlaying, toggleMusic } = useAudio();
 
   if (!context || !isMiniAppReady) {
     return <Website />;
@@ -22,6 +25,19 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-center p-4">
+      {/* Mute Button */}
+      <button
+        onClick={toggleMusic}
+        className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+        aria-label={isMusicPlaying ? "Mute music" : "Unmute music"}
+      >
+        {isMusicPlaying ? (
+          <Volume2 size={16} color="white" />
+        ) : (
+          <VolumeX size={16} color="white" />
+        )}
+      </button>
+
       <div className="container mx-auto flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12 mb-8">
         {/* Left Column - Text Content */}
         <div className="flex-1 flex flex-col items-center gap-4 w-full lg:w-auto">
