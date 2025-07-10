@@ -57,6 +57,15 @@ export default function Live({
   const [placedLetters, setPlacedLetters] = useState<
     Array<{ letter: string; row: number; col: number }>
   >([]);
+
+  // Add new effect to sync placedLetters with board state
+  useEffect(() => {
+    // Remove any placedLetters that no longer match the board state
+    // This handles when another player submits a word that overlaps with our placed letters
+    setPlacedLetters((prev) =>
+      prev.filter((placed) => board[placed.row][placed.col] === placed.letter)
+    );
+  }, [board]);
   const [placementDirection, setPlacementDirection] = useState<
     "horizontal" | "vertical" | null
   >(null);
@@ -1243,8 +1252,15 @@ export default function Live({
                     `${
                       isWordHighlight
                         ? "bg-[#FFFDEB] font-bold text-yellow-400 text-xl"
-                        : letter
+                        : letter &&
+                          !placedLetters.some(
+                            (l) => l.row === rowIndex && l.col === colIndex
+                          )
                         ? "bg-[#FFFDEB] font-bold text-[#B5A16E] text-xl"
+                        : placedLetters.some(
+                            (l) => l.row === rowIndex && l.col === colIndex
+                          )
+                        ? "bg-yellow-400/30 text-yellow-400"
                         : validPlacementCells.some(
                             (cell) =>
                               cell.row === rowIndex && cell.col === colIndex
@@ -1252,7 +1268,11 @@ export default function Live({
                         ? "bg-[#FFFDEB]/25 hover:bg-[#FFFDEB]/25"
                         : "bg-[#1A6B5A]/20"
                     } ${selectedLetter ? "hover:bg-[#FFFDEB]" : ""}`,
-                    isPlacedThisTurn ? "bg-yellow-400/30 text-yellow-400" : ""
+                    placedLetters.some(
+                      (l) => l.row === rowIndex && l.col === colIndex
+                    )
+                      ? "bg-yellow-400/30 text-yellow-400"
+                      : ""
                   )}
                   style={{ width: 36, height: 36 }}
                   draggable={!!letter}

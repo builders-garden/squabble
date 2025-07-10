@@ -202,12 +202,17 @@ export function GameProvider({
         setBoard(event.board);
         setLetterPlacers((prev) => {
           const newLetterPlacers = { ...prev };
-          event.path.forEach((position) => {
-            const key = `${position.y}-${position.x}`;
+          // Clear all letter placers for this player
+          Object.keys(newLetterPlacers).forEach((key) => {
             newLetterPlacers[key] =
               newLetterPlacers[key]?.filter(
                 (p) => p.fid !== event.player.fid
               ) || [];
+          });
+          // Clear all players' letter placers from the submitted word path
+          event.path.forEach((position) => {
+            const key = `${position.y}-${position.x}`;
+            delete newLetterPlacers[key];
           });
           return newLetterPlacers;
         });
@@ -254,9 +259,10 @@ export function GameProvider({
       word_not_valid: (event: WordNotValidEvent) => {
         setLetterPlacers((prev) => {
           const newLetterPlacers = { ...prev };
-          event.path.forEach((position) => {
-            newLetterPlacers[`${position.y}-${position.x}`] =
-              newLetterPlacers[`${position.y}-${position.x}`]?.filter(
+          // Clear all letter placers for this player
+          Object.keys(newLetterPlacers).forEach((key) => {
+            newLetterPlacers[key] =
+              newLetterPlacers[key]?.filter(
                 (p) => p.fid !== event.player.fid
               ) || [];
           });

@@ -81,16 +81,6 @@ function GameContent({ id }: { id: string }) {
     return <Ended players={players} game={game!} refetchGame={refetchGame} />;
   }
 
-  console.log({
-    gameState,
-    players,
-    participants: game?.participants?.length,
-    userFid: user?.fid,
-    isPlayerInGame: game?.participants?.some(
-      (p) => p?.fid?.toString() === user?.fid?.toString()
-    ),
-  });
-
   if (
     (gameState === "full" ||
       players.length >= 6 ||
