@@ -16,8 +16,8 @@ import { DaimoPayButton } from "@daimo/pay";
 import { PaymentCompletedEvent } from "@daimo/pay-common";
 import { User } from "@prisma/client";
 import { CheckCircle, ClockCircle } from "@solar-icons/react";
-import { AnimatePresence, motion } from "framer-motion";
 import { Volume2, VolumeX } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -154,7 +154,13 @@ export default function Lobby({
 
   const pendingStakes = players.filter((p) => !p.ready).length;
   return (
-    <div className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-between p-4">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-between p-4"
+    >
       {/* Mute Button */}
       <button
         onClick={toggleMusic}
@@ -386,6 +392,6 @@ export default function Lobby({
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

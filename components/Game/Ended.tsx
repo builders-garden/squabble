@@ -4,11 +4,12 @@ import { cn, formatAvatarUrl } from "@/lib/utils";
 import { Player } from "@/types/socket-events";
 import sdk from "@farcaster/frame-sdk";
 import { Logout } from "@solar-icons/react";
+import { motion } from "motion/react";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
+import { useEffect } from "react";
 import SquabbleButton from "../ui/squabble-button";
 import UserAvatar from "../ui/user-avatar";
-import { useEffect } from "react";
 
 const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
@@ -195,7 +196,13 @@ export default function Ended({
     sortedParticipants.filter((p) => p.points === topLeaderboardPoints).length >
     1;
   return (
-    <div className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-between p-4">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-between p-4"
+    >
       {/* Header */}
       <div className="flex flex-row items-center justify-between w-full">
         <div className="flex flex-row items-center justify-center">
@@ -273,6 +280,6 @@ export default function Ended({
           onClick={handleExitGame}
         />
       </div>
-    </div>
+    </motion.div>
   );
 }

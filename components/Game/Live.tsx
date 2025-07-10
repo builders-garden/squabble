@@ -8,7 +8,7 @@ import { Player } from "@/types/socket-events";
 import sdk from "@farcaster/frame-sdk";
 import { User } from "@prisma/client";
 import { Logout, Shuffle } from "@solar-icons/react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion } from "motion/react";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
 import { DragEvent, useEffect, useState } from "react";
@@ -1094,7 +1094,13 @@ export default function Live({
   }
 
   return (
-    <div className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-between p-4">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-between p-4"
+    >
       {/* Header */}
       <div className="flex flex-row items-center justify-between w-full">
         <div className="flex flex-row items-center justify-center">
@@ -1397,6 +1403,6 @@ export default function Live({
           />
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

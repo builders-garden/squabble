@@ -1,3 +1,6 @@
+"use client";
+
+import { motion } from "motion/react";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
 import SquabbleButton from "../ui/squabble-button";
@@ -9,7 +12,13 @@ const luckiestGuy = Luckiest_Guy({
 
 export default function SignIn({ signIn }: { signIn: () => void }) {
   return (
-    <div className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-center p-4">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-center p-4"
+    >
       <div className="flex flex-col items-center gap-4">
         <div className="flex flex-row items-center justify-center">
           <Image
@@ -36,6 +45,6 @@ export default function SignIn({ signIn }: { signIn: () => void }) {
           disabled={false}
         />
       </div>
-    </div>
+    </motion.div>
   );
 }

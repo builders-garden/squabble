@@ -1,4 +1,6 @@
-import { AnimatePresence, motion } from "framer-motion";
+"use client";
+
+import { AnimatePresence, motion } from "motion/react";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
 import { useEffect, useState } from "react";

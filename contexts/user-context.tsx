@@ -44,6 +44,7 @@ export const useRegisteredUser = () => {
 export const UserProvider = ({ children }: UserProviderProps) => {
   const { context } = useMiniApp();
   const [signInError, setSignInError] = useState(false);
+  const { address } = useAccount();
   const [isSignedIn, setIsSignedIn] = useState(false);
 
   const {
@@ -101,10 +102,10 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
   // In case we are in a context, if the user is not there, sign the user in
   useEffect(() => {
-    if (context && !isSignedIn && !isFetchingUser) {
+    if (context && !isSignedIn && !isFetchingUser && address) {
       handleSignIn();
     }
-  }, [context, handleSignIn]);
+  }, [context, handleSignIn, address]);
 
   const value = useMemo(() => {
     return {
