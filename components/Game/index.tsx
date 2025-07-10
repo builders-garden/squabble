@@ -81,9 +81,19 @@ function GameContent({ id }: { id: string }) {
     return <Ended players={players} game={game!} refetchGame={refetchGame} />;
   }
 
+  console.log({
+    gameState,
+    players,
+    participants: game?.participants?.length,
+    userFid: user?.fid,
+    isPlayerInGame: game?.participants?.some(
+      (p) => p?.fid?.toString() === user?.fid?.toString()
+    ),
+  });
+
   if (
     (gameState === "full" ||
-      players.length === 6 ||
+      players.length >= 6 ||
       game?.participants?.length === 6) &&
     !game?.participants?.some(
       (p) => p?.fid?.toString() === user?.fid?.toString()
@@ -122,8 +132,6 @@ function GameContent({ id }: { id: string }) {
     }
     return <Loading title={loadingTitle} body={loadingBody} />;
   }
-
-  
 
   return (
     <>

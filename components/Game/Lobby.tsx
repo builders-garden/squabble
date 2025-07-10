@@ -241,27 +241,45 @@ export default function Lobby({
         </div>
         {!players.find(
           (p) => p?.fid?.toString() === currentUser?.fid?.toString()
-        ) &&
-          !isCurrentUserPending && (
-            <p
-              className="text-yellow-200 text-sm cursor-pointer"
-              onClick={() => {
-                connectToLobby(
-                  {
-                    fid: currentUser?.fid!,
-                    displayName: currentUser?.displayName,
-                    username: currentUser?.username,
-                    avatarUrl: currentUser?.avatarUrl,
-                    address: address!,
-                  },
-                  gameId
-                );
-              }}
-            >
-              Don&apos;t see yourself?{" "}
-              <span className="underline font-bold">Click to refresh!</span>
-            </p>
-          )}
+        ) && !isCurrentUserPending ? (
+          <p
+            className="text-yellow-200 text-sm cursor-pointer"
+            onClick={() => {
+              connectToLobby(
+                {
+                  fid: currentUser?.fid!,
+                  displayName: currentUser?.displayName,
+                  username: currentUser?.username,
+                  avatarUrl: currentUser?.avatarUrl,
+                  address: address!,
+                },
+                gameId
+              );
+            }}
+          >
+            Don&apos;t see yourself?{" "}
+            <span className="underline font-bold">Click to refresh!</span>
+          </p>
+        ) : (
+          <p
+            className="text-yellow-200 text-sm cursor-pointer"
+            onClick={() => {
+              connectToLobby(
+                {
+                  fid: currentUser?.fid!,
+                  displayName: currentUser?.displayName,
+                  username: currentUser?.username,
+                  avatarUrl: currentUser?.avatarUrl,
+                  address: address!,
+                },
+                gameId
+              );
+            }}
+          >
+            Don&apos;t see your friends?{" "}
+            <span className="underline font-bold">Click to refresh!</span>
+          </p>
+        )}
       </div>
       <div className="flex flex-col gap-2 items-center w-full pb-4">
         {isCurrentUserPending && currentUser && parseFloat(stakeAmount) > 0 ? (

@@ -1,5 +1,6 @@
 "use client";
 import { useAudio } from "@/contexts/audio-context";
+import { useGame } from "@/contexts/game-context";
 import useSocketUtils from "@/hooks/use-socket-utils";
 import { trackEvent } from "@/lib/posthog/client";
 import { cn, formatAvatarUrl } from "@/lib/utils";
@@ -15,7 +16,6 @@ import { toast } from "sonner";
 import SquabbleButton from "../ui/squabble-button";
 import UserAvatar from "../ui/user-avatar";
 import Loading from "./Loading";
-import { useGame } from "@/contexts/game-context";
 
 const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
@@ -67,6 +67,104 @@ export default function Live({
     Array<{ row: number; col: number }>
   >([]);
   const { currentPlayer } = useGame();
+
+  // Calculate submit button position based on placed letters
+  const getSubmitButtonPosition = () => {
+    if (placedLetters.length === 0) return null;
+
+    // Get the last placed letter position
+    const lastLetter = placedLetters[placedLetters.length - 1];
+
+    // Constants for positioning (36px is the cell size)
+    const CELL_SIZE = 36;
+    const MARGIN = 12; // Adding margin for better spacing
+
+    // If we have a placement direction, position the button at the end of the word
+    if (placementDirection) {
+      const allLetters = [...placedLetters].sort((a, b) => {
+        if (placementDirection === "horizontal") {
+          return b.col - a.col;
+        }
+        return b.row - a.row;
+      });
+
+      const lastPos = allLetters[0];
+
+      if (placementDirection === "horizontal") {
+        // Check if there's a valid placement cell to the right
+        const hasValidRight = validPlacementCells.some(
+          (cell) => cell.row === lastPos.row && cell.col === lastPos.col + 1
+        );
+
+        if (hasValidRight) {
+          // If there's a valid placement to the right, position the button above with margin
+          return {
+            left: `${lastPos.col * CELL_SIZE - MARGIN}px`,
+            top: `${(lastPos.row - 1) * CELL_SIZE - MARGIN}px`,
+          };
+        }
+
+        // Otherwise position to the right with margin
+        return {
+          left: `${(lastPos.col + 1) * CELL_SIZE + MARGIN}px`,
+          top: `${lastPos.row * CELL_SIZE}px`,
+        };
+      } else {
+        // Check if there's a valid placement cell below
+        const hasValidBelow = validPlacementCells.some(
+          (cell) => cell.col === lastPos.col && cell.row === lastPos.row + 1
+        );
+
+        if (hasValidBelow) {
+          // If there's a valid placement below, position the button to the right with margin
+          return {
+            left: `${(lastPos.col + 1) * CELL_SIZE + MARGIN}px`,
+            top: `${lastPos.row * CELL_SIZE}px`,
+          };
+        }
+
+        // Otherwise position below with margin
+        return {
+          left: `${lastPos.col * CELL_SIZE}px`,
+          top: `${(lastPos.row + 1) * CELL_SIZE + MARGIN}px`,
+        };
+      }
+    }
+
+    // For single letters, check valid placements in all directions
+    const hasValidRight = validPlacementCells.some(
+      (cell) => cell.row === lastLetter.row && cell.col === lastLetter.col + 1
+    );
+    const hasValidBelow = validPlacementCells.some(
+      (cell) => cell.col === lastLetter.col && cell.row === lastLetter.row + 1
+    );
+
+    if (!hasValidRight && !hasValidBelow) {
+      // If no valid placements right or below, put it to the right with margin
+      return {
+        left: `${(lastLetter.col + 1) * CELL_SIZE + MARGIN}px`,
+        top: `${lastLetter.row * CELL_SIZE}px`,
+      };
+    } else if (!hasValidRight) {
+      // If can't place right, put it to the right with margin
+      return {
+        left: `${(lastLetter.col + 1) * CELL_SIZE + MARGIN}px`,
+        top: `${lastLetter.row * CELL_SIZE}px`,
+      };
+    } else if (!hasValidBelow) {
+      // If can't place below, put it below with margin
+      return {
+        left: `${lastLetter.col * CELL_SIZE}px`,
+        top: `${(lastLetter.row + 1) * CELL_SIZE + MARGIN}px`,
+      };
+    } else {
+      // If both directions are valid, put it diagonally with margin
+      return {
+        left: `${(lastLetter.col + 1) * CELL_SIZE + MARGIN}px`,
+        top: `${(lastLetter.row + 1) * CELL_SIZE + MARGIN}px`,
+      };
+    }
+  };
 
   const handleDragStart = (
     e: DragEvent<HTMLDivElement>,
@@ -1096,7 +1194,29 @@ export default function Live({
       </div>
 
       {/* Game Board */}
-      <div className="bg-[#0F4C3A] rounded-xl p-2 flex flex-col items-center">
+      <div className="bg-[#0F4C3A] rounded-xl p-2 flex flex-col items-center relative">
+        {placedLetters.length > 0 &&
+          !hasGapInWord() &&
+          isWordConnectedToBoard() && (
+            <motion.button
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={handleSubmitWord}
+              style={getSubmitButtonPosition() || {}}
+              className={cn(
+                "absolute px-2 py-1 rounded-full text-xs font-medium shadow-lg z-10",
+                "bg-yellow-400 text-yellow-900",
+                "flex items-center gap-1 whitespace-nowrap",
+                "transition-all duration-200 ease-in-out"
+              )}
+            >
+              <span>Submit word</span>
+              <span className="text-[10px]">↵</span>
+            </motion.button>
+          )}
         <div className="gap-0 grid grid-cols-10 grid-rows-10 w-[360px] h-[360px] bg-[#1A6B5A]/30 border-2 border-[#2A8B7A]">
           {Array.from({ length: 10 }, (_, rowIndex) =>
             Array.from({ length: 10 }, (_, colIndex) => {
