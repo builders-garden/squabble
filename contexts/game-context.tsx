@@ -41,6 +41,7 @@ interface GameContextType {
   user: User | undefined;
   isSignedIn: boolean;
   isSignInLoading: boolean;
+  signInError: boolean;
   signIn: () => void;
   setBoard: (board: string[][]) => void;
   setPlayers: (players: Player[]) => void;
@@ -93,7 +94,7 @@ export function GameProvider({
   const { address } = useAccount();
   const { connectToLobby } = useSocketUtils();
   const hasConnectedToLobby = useRef(false);
-  const { user, isSigningIn, signIn } = useRegisteredUser();
+  const { user, isSigningIn, signIn, error: signInError } = useRegisteredUser();
 
   const handleConnectToLobby = async () => {
     hasConnectedToLobby.current = true;
@@ -381,6 +382,7 @@ export function GameProvider({
         timeRemaining,
         isSignedIn: !!user?.data,
         isSignInLoading: isSigningIn,
+        signInError,
         user: user?.data,
         signIn,
         setBoard,

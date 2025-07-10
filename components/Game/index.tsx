@@ -22,7 +22,7 @@ function GameContent({ id }: { id: string }) {
   const { data: game, refetch: refetchGame } = useFetchGame(id);
   const { address } = useAccount();
   const hasConnectedToLobby = useRef(false);
-  const { user, isSignedIn, isSignInLoading, signIn } = useGame();
+  const { user, isSignedIn, isSignInLoading, signIn, signInError } = useGame();
 
   useEffect(() => {
     if (game?.status === GameStatus.FINISHED) {
@@ -65,12 +65,14 @@ function GameContent({ id }: { id: string }) {
 
   const stakeAmount = game?.betAmount?.toString();
 
-  if (isSignInLoading) {
-    return <Loading title="Signing in..." body="" />;
-  }
-
-  if (!isSignedIn && !isSignInLoading) {
-    return <SignIn signIn={signIn} />;
+  if (!isSignedIn) {
+    if (isSignInLoading) {
+      return <Loading title="Signing in..." body="" />;
+    }
+    if (signInError) {
+      return <SignIn signIn={signIn} />;
+    }
+    return <Loading />;
   }
 
   if (game?.status === GameStatus.FINISHED || gameState === "ended") {

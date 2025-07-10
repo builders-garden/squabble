@@ -24,7 +24,7 @@ const UserProviderContext = createContext<
       };
       signIn: () => Promise<void>;
       isSigningIn: boolean;
-      signInError: boolean;
+      error: boolean;
     }
   | undefined
 >(undefined);
@@ -116,7 +116,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       },
       signIn: handleSignIn,
       isSigningIn: isSigningIn || isFetchingUser,
-      signInError,
+      error: signInError,
     };
   }, [
     user,
