@@ -16,6 +16,7 @@ import Loading from "./Loading";
 import Lobby from "./Lobby";
 import SignIn from "./SignIn";
 import Tutorial from "./Tutorial";
+import Splash from "./Splash";
 
 function GameContent({ id }: { id: string }) {
   const { data: game, refetch: refetchGame } = useFetchGame(id);
@@ -72,7 +73,7 @@ function GameContent({ id }: { id: string }) {
         ) : signInError ? (
           <SignIn key="signin" signIn={signIn} />
         ) : (
-          <Loading key="loading" />
+          <Splash key="splash" />
         )
       ) : game?.status === GameStatus.FINISHED || gameState === "ended" ? (
         <Ended
