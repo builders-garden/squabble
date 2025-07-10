@@ -78,7 +78,7 @@ export default function Lobby({
   const { context } = useMiniApp();
 
   // Check for paymaster capabilities with `useCapabilities`
-  const { data: availableCapabilities } = useCapabilities({
+  const { data: availableCapabilities, isLoading: areCapabilitiesLoading } = useCapabilities({
     account: address,
   });
   const capabilities = useMemo(() => {
@@ -417,9 +417,9 @@ export default function Lobby({
               <SquabbleButton
                 text="Withdraw Buy-in"
                 variant="outline"
-                disabled={false}
+                disabled={areCapabilitiesLoading}
                 onClick={handleGetStakeBack}
-                isLoading={isRefunding}
+                isLoading={isRefunding || areCallsPending}
                 loadingText="Refunding..."
               />
             )}
