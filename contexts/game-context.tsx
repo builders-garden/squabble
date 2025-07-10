@@ -231,13 +231,13 @@ export function GameProvider({
 
         toast.custom(
           (id) => (
-            <div className="flex items-center gap-4 p-3 bg-white rounded-2xl shadow-lg animate-bounce border-2 border-[#C8EFE3]">
+            <div className="flex items-center gap-4 p-2 bg-white rounded-lg shadow-lg animate-bounce border-2 border-[#C8EFE3]">
               <img
                 src={require("@/lib/utils").formatAvatarUrl(
                   event.player.avatarUrl || ""
                 )}
                 alt={event.player.displayName || event.player.username || ""}
-                className="w-12 h-12 rounded-full border-4 border-[#C8EFE3] object-cover shadow-sm"
+                className="w-10 h-10 rounded-full border-4 border-[#C8EFE3] object-cover shadow-sm"
               />
               <div className="flex flex-col">
                 <span className="font-bold text-xl text-[#7B5A2E]">
@@ -252,7 +252,7 @@ export function GameProvider({
           {
             position: "top-center",
             duration: 5000,
-            className: "!p-0",
+            className: "!p-2",
           }
         );
       },
