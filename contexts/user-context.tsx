@@ -45,7 +45,6 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   const { context } = useMiniApp();
   const [signInError, setSignInError] = useState(false);
   const [isSignedIn, setIsSignedIn] = useState(false);
-  const [isSigningIn, setIsSigningIn] = useState(false);
 
   const {
     data: user,
@@ -61,7 +60,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     enabled: isSignedIn,
   });
 
-  const { mutate: signIn } = useApiMutation<{
+  const { mutate: signIn, isPending: isSigningIn } = useApiMutation<{
     user: User;
   }>({
     // TODO: replace with /api/auth/sign-in when ready for PROD
@@ -71,14 +70,12 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     onSuccess: (data) => {
       posthog.identify(data.user.fid.toString());
       setIsSignedIn(true);
-      setIsSigningIn(false);
     },
   });
 
   const handleSignIn = useCallback(async () => {
     try {
       console.log("handleSignIn");
-      setIsSigningIn(true);
       setSignInError(false);
 
       if (!context) {
@@ -99,14 +96,12 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       });
     } catch {
       setSignInError(true);
-    } finally {
-      setIsSigningIn(false);
     }
   }, [context, refetchUser]);
 
   // In case we are in a context, if the user is not there, sign the user in
   useEffect(() => {
-    if (context && !isSignedIn && !isSigningIn) {
+    if (context && !isSignedIn && !isFetchingUser) {
       handleSignIn();
     }
   }, [context, handleSignIn]);

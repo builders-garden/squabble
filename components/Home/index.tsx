@@ -41,7 +41,7 @@ export default function Home() {
           </div>
 
           <p className="text-white text-xl lg:text-lg text-center">
-            Real-time Scrabble-like word game with micro stakes.
+            Real-time Scrabble-like word game with buy-ins.
           </p>
 
           {context.client.clientFid === FARCASTER_CLIENT_FID ? (

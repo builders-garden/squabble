@@ -1,4 +1,5 @@
 "use client";
+import { useGame } from "@/contexts/game-context";
 import { useMiniApp } from "@/contexts/miniapp-context";
 import useSocketUtils from "@/hooks/use-socket-utils";
 import {
@@ -26,7 +27,6 @@ import LobbyPlayerCard from "../ui/lobby-player-card";
 import LobbySpotAvailableCard from "../ui/lobby-spot-available-card";
 import ShareButton from "../ui/share-button";
 import SquabbleButton from "../ui/squabble-button";
-import { useGame } from "@/contexts/game-context";
 
 const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
@@ -115,7 +115,7 @@ export default function Lobby({
         (t) => (
           <div className="w-fit flex items-center gap-2 p-2 bg-white  rounded-lg shadow animate-shake">
             <div className="text-red-600 font-medium text-sm">
-              ❌ Failed to get stake back. Please try again.
+              ❌ Failed to get buy-in back. Please try again.
             </div>
           </div>
         ),
@@ -136,7 +136,7 @@ export default function Lobby({
         (t) => (
           <div className="w-fit flex items-center gap-2 p-2 bg-white  rounded-lg shadow animate-shake">
             <div className="text-green-600 font-medium text-sm">
-              ✅ Stake refunded.
+              ✅ Buy-in refunded.
             </div>
           </div>
         ),
@@ -177,11 +177,11 @@ export default function Lobby({
           <Chip text={`${players.length}/6 Players`} variant="info" />
           {/* TODO: add from game data */}
           {parseFloat(stakeAmount) > 0 && (
-            <Chip text={`$${stakeAmount} Stake`} variant="info" />
+            <Chip text={`$${stakeAmount} Buy-in`} variant="info" />
           )}
           {pendingStakes > 0 ? (
             <Chip
-              text={`${pendingStakes} Pending stakes`}
+              text={`${pendingStakes} Pending buy-ins`}
               icon={<ClockCircle size={14} />}
               variant="warning"
             />
@@ -200,7 +200,7 @@ export default function Lobby({
               customUrl={`https://squabble.lol/games/${gameId}`}
               customCastText={
                 parseFloat(stakeAmount) > 0
-                  ? `🎲 Play Squabble with me, entry fee is $${stakeAmount}!`
+                  ? `🎲 Play Squabble with me, buy-in is $${stakeAmount}!`
                   : "🎲 Play Squabble with me!"
               }
             />
@@ -268,8 +268,8 @@ export default function Lobby({
           <div className="flex flex-col gap-2 items-center w-full">
             <div className="text-white/75 mb-2">
               {currentUser.fid.toString() === gameLeaderFid.toString()
-                ? "Pay your stake to init the game"
-                : "Pay your stake to join the game"}
+                ? "Buy-in to init the game"
+                : "Buy-in to join the game"}
             </div>
             <DaimoPayButton.Custom
               appId={env.NEXT_PUBLIC_DAIMO_PAY_ID!}
@@ -316,7 +316,7 @@ export default function Lobby({
             >
               {({ show }) => (
                 <SquabbleButton
-                  text={`Stake $${stakeAmount}`}
+                  text={`Join for $${stakeAmount}`}
                   variant="primary"
                   disabled={false}
                   onClick={show}
@@ -341,7 +341,7 @@ export default function Lobby({
             />
             {currentPlayer?.ready && parseFloat(stakeAmount) > 0 && (
               <SquabbleButton
-                text="Get Stake Back"
+                text="Withdraw Buy-in"
                 variant="outline"
                 disabled={false}
                 onClick={handleGetStakeBack}

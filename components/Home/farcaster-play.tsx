@@ -37,9 +37,11 @@ export default function FarcasterPlay() {
   const [showCustom, setShowCustom] = useState(false);
 
   const handleCreateGame = () => {
-    const betAmount = customAmount ? parseFloat(customAmount) : selectedAmount;
-    if (betAmount !== null) {
-      createGame({ betAmount });
+    const buyInAmount = customAmount
+      ? parseFloat(customAmount)
+      : selectedAmount;
+    if (buyInAmount !== null) {
+      createGame({ betAmount: buyInAmount });
     }
   };
 
@@ -58,10 +60,10 @@ export default function FarcasterPlay() {
       <DialogContent className="bg-[#1B7A6E] border-2 border-[#C8EFE3] rounded-xl text-white max-w-md w-[90%] mx-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-white">
-            Select Bet Amount
+            Select Buy-in Amount
           </DialogTitle>
           <DialogDescription className="text-white/75">
-            Choose how much you want to bet for this game
+            Choose buy-in amount for this game
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4 py-4">
