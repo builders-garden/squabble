@@ -191,7 +191,7 @@ export async function GET(
                     backgroundColor: "#1B7A6E",
                     alignItems: "center",
                     justifyContent: "center",
-                    marginLeft: index > 0 ? "-24px" : "0",
+                    marginLeft: index > 0 ? "-12px" : "0",
                     zIndex: 10 - index,
                   }}
                 >
