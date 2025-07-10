@@ -38,15 +38,13 @@ export async function GET(
     const appUrl = env.NEXT_PUBLIC_URL;
 
     // Load the logo image from the public directory
-    const logoImage = await loadImage(`${appUrl}/images/icon.png`);
+    const logoImage = await loadImage(`${appUrl}/images/squabble-cover.png`);
     const usdcLogo = await loadImage(`${appUrl}/images/usdc-logo.png`);
 
     const fontDataBold = await loadGoogleFont(
       "Inter&weight=700",
       "Spot Available! Ready! Not staked USDC Player Real-time scrabble game"
     );
-
-    const luckiestGuyFont = await loadGoogleFont("Luckiest+Guy", "SQUABBLE");
 
     const game = await getGameById(id);
 
@@ -94,337 +92,69 @@ export async function GET(
             backgroundColor: "#1B7A6E",
             padding: "64px",
             color: "white",
+            justifyContent: "space-between",
           }}
         >
           <div
             style={{
               display: "flex",
-              flexDirection: "row",
+              flexDirection: "column",
               alignItems: "center",
-              justifyContent: "space-between",
-              gap: "24px",
-              marginBottom: "64px",
+              justifyContent: "center",
+              gap: "48px",
+              flex: 1,
             }}
           >
             <div
               style={{
                 display: "flex",
                 flexDirection: "column",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                }}
-              >
-                <img
-                  src={logoImage}
-                  alt="Squabble Logo"
-                  width="96"
-                  height="96"
-                />
-                <div
-                  style={{
-                    display: "flex",
-                    fontFamily: '"Luckiest Guy"',
-                    fontSize: "72px",
-                    letterSpacing: "0.05em",
-                  }}
-                >
-                  SQUABBLE
-                </div>
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  fontFamily: "Inter",
-                  fontSize: "24px",
-                  color: "#C8EFE3",
-                  fontWeight: 700,
-                }}
-              >
-                Outspell your friends in real-time
-              </div>
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                backgroundColor: "rgba(255, 255, 255, 0.15)",
-                padding: "16px 32px",
-                borderRadius: "999px",
-                border: "3px solid #C8EFE3",
-                fontSize: "32px",
-                fontFamily: "Inter",
-                fontWeight: 700,
-                color: "#34D399",
                 alignItems: "center",
-                gap: "12px",
+                justifyContent: "center",
+                textAlign: "center",
+                gap: "48px",
               }}
             >
               <img
-                src={usdcLogo}
-                alt="USDC"
-                width="32"
-                height="32"
+                src={logoImage}
+                alt="Squabble Logo"
+                width="900"
+                height="243"
                 style={{
-                  borderRadius: "50%",
+                  objectFit: "contain",
                 }}
               />
-              {game.betAmount === 0 ? "FREE" : `${game.betAmount} USDC`}
-            </div>
-          </div>
 
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "24px",
-              width: "100%",
-            }}
-          >
-            {/* First row */}
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                gap: "24px",
-                width: "100%",
-              }}
-            >
-              {[0, 1, 2].map((index) => {
-                const participant = game.participants[index];
-                return participant ? (
+              {game.betAmount > 0 ||
+                (true && (
                   <div
-                    key={participant.id}
                     style={{
                       display: "flex",
-                      alignItems: "center",
-                      gap: "16px",
-                      padding: "24px",
-                      borderRadius: "16px",
                       backgroundColor: "rgba(255, 255, 255, 0.15)",
-                      border: "3px solid #C8EFE3",
-                      flex: 1,
-                      height: "120px",
-                    }}
-                  >
-                    {/* Avatar */}
-                    <div
-                      style={{
-                        display: "flex",
-                        width: "72px",
-                        height: "72px",
-                        borderRadius: "50%",
-                        overflow: "hidden",
-                        border: "3px solid #C8EFE3",
-                        backgroundColor: "#1B7A6E",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      {participantAvatars[index] ? (
-                        <img
-                          src={participantAvatars[index] as string}
-                          alt="Avatar"
-                          width="72"
-                          height="72"
-                          style={{
-                            objectFit: "cover",
-                          }}
-                        />
-                      ) : null}
-                    </div>
-
-                    {/* Player Info */}
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "8px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          fontSize: "24px",
-                          fontFamily: "Inter",
-                          fontWeight: 700,
-                          color: "white",
-                        }}
-                      >
-                        {participant.user.displayName ||
-                          participant.user.username ||
-                          `Player ${participant.fid}`}
-                      </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          fontSize: "20px",
-                          fontFamily: "Inter",
-                          fontWeight: 700,
-                          color: participant.paid ? "#34D399" : "#FDE68A",
-                          alignItems: "center",
-                          gap: "8px",
-                        }}
-                      >
-                        {participant.paid ? "Ready!" : "Not staked"}
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div
-                    key={`empty-${index}`}
-                    style={{
-                      display: "flex",
+                      padding: "16px 32px",
+                      borderRadius: "999px",
+                      border: "4px solid #ffffff",
+                      fontSize: "48px",
+                      fontFamily: "Inter",
+                      fontWeight: 900,
+                      color: "#ffffff",
                       alignItems: "center",
                       justifyContent: "center",
-                      gap: "12px",
-                      padding: "24px",
-                      borderRadius: "16px",
-                      backgroundColor: "rgba(255, 255, 255, 0.05)",
-                      border: "3px dashed rgba(255, 255, 255, 0.15)",
-                      flex: 1,
-                      height: "120px",
+                      gap: "8px",
                     }}
                   >
-                    <div
+                    <img
+                      src={usdcLogo}
+                      alt="USDC"
+                      width="64"
+                      height="64"
                       style={{
-                        display: "flex",
-                        fontSize: "24px",
-                        fontFamily: "Inter",
-                        fontWeight: 700,
-                        color: "rgba(255, 255, 255, 0.5)",
-                      }}
-                    >
-                      Spot Available!
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Second row */}
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                gap: "24px",
-                width: "100%",
-              }}
-            >
-              {[3, 4, 5].map((index) => {
-                const participant = game.participants[index];
-                return participant ? (
-                  <div
-                    key={participant.id}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "16px",
-                      padding: "24px",
-                      borderRadius: "16px",
-                      backgroundColor: "rgba(255, 255, 255, 0.15)",
-                      border: "3px solid #C8EFE3",
-                      flex: 1,
-                      height: "120px",
-                    }}
-                  >
-                    {/* Avatar */}
-                    <div
-                      style={{
-                        display: "flex",
-                        width: "72px",
-                        height: "72px",
                         borderRadius: "50%",
-                        overflow: "hidden",
-                        border: "3px solid #C8EFE3",
-                        backgroundColor: "#1B7A6E",
-                        alignItems: "center",
-                        justifyContent: "center",
                       }}
-                    >
-                      {participantAvatars[index] ? (
-                        <img
-                          src={participantAvatars[index] as string}
-                          alt="Avatar"
-                          width="72"
-                          height="72"
-                          style={{
-                            objectFit: "cover",
-                          }}
-                        />
-                      ) : null}
-                    </div>
-
-                    {/* Player Info */}
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "8px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          fontSize: "24px",
-                          fontFamily: "Inter",
-                          fontWeight: 700,
-                          color: "white",
-                        }}
-                      >
-                        {participant.user.displayName ||
-                          participant.user.username ||
-                          `Player ${participant.fid}`}
-                      </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          fontSize: "20px",
-                          fontFamily: "Inter",
-                          fontWeight: 700,
-                          color: participant.paid ? "#34D399" : "#FDE68A",
-                          alignItems: "center",
-                          gap: "8px",
-                        }}
-                      >
-                        {participant.paid ? "Ready!" : "Not staked"}
-                      </div>
-                    </div>
+                    />
+                    5 USDC
                   </div>
-                ) : (
-                  <div
-                    key={`empty-${index}`}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "12px",
-                      padding: "24px",
-                      borderRadius: "16px",
-                      backgroundColor: "rgba(255, 255, 255, 0.05)",
-                      border: "3px dashed rgba(255, 255, 255, 0.15)",
-                      flex: 1,
-                      height: "120px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        fontSize: "24px",
-                        fontFamily: "Inter",
-                        fontWeight: 700,
-                        color: "rgba(255, 255, 255, 0.5)",
-                      }}
-                    >
-                      Spot Available!
-                    </div>
-                  </div>
-                );
-              })}
+                ))}
             </div>
           </div>
 
@@ -433,9 +163,11 @@ export async function GET(
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "12px",
+              justifyContent: "center",
+              gap: "16px",
               marginTop: "auto",
-              paddingTop: "24px",
+              paddingTop: "48px",
+              width: "100%",
             }}
           >
             {/* Top Users Avatars */}
@@ -443,7 +175,8 @@ export async function GET(
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "-12px",
+                justifyContent: "center",
+                gap: "-24px",
               }}
             >
               {topUsers.slice(0, 5).map((user, index) => (
@@ -451,15 +184,15 @@ export async function GET(
                   key={user.fid}
                   style={{
                     display: "flex",
-                    width: "48px",
-                    height: "48px",
+                    width: "80px",
+                    height: "80px",
                     borderRadius: "50%",
                     overflow: "hidden",
-                    border: "3px solid #C8EFE3",
+                    border: "4px solid #C8EFE3",
                     backgroundColor: "#1B7A6E",
                     alignItems: "center",
                     justifyContent: "center",
-                    marginLeft: index > 0 ? "-12px" : "0",
+                    marginLeft: index > 0 ? "-24px" : "0",
                     zIndex: 10 - index,
                   }}
                 >
@@ -467,8 +200,8 @@ export async function GET(
                     <img
                       src={topUserAvatars[index] as string}
                       alt={`Top player ${index + 1}`}
-                      width="48"
-                      height="48"
+                      width="80"
+                      height="80"
                       style={{
                         objectFit: "cover",
                       }}
@@ -482,13 +215,13 @@ export async function GET(
             <div
               style={{
                 display: "flex",
-                fontSize: "20px",
+                fontSize: "36px",
                 fontFamily: "Inter",
                 fontWeight: 700,
                 color: "#C8EFE3",
               }}
             >
-              +{Math.max(0, totalCount - 5)} others
+              +{Math.max(0, totalCount - 5)} players
             </div>
           </div>
         </div>
@@ -497,12 +230,6 @@ export async function GET(
         ...size,
         // Configure the custom font for use in the image
         fonts: [
-          {
-            name: "Luckiest Guy",
-            data: luckiestGuyFont,
-            style: "normal",
-            weight: 400,
-          },
           {
             name: "Inter",
             data: fontDataBold,

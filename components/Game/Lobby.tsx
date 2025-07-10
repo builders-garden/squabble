@@ -278,7 +278,7 @@ export default function Lobby({
           </p>
         ) : (
           <p
-            className="text-yellow-200 text-sm cursor-pointer"
+            className="text-white text-sm cursor-pointer"
             onClick={() => {
               connectToLobby(
                 {
