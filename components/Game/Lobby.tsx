@@ -20,10 +20,15 @@ import { Volume2, VolumeX } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { base } from "viem/chains";
-import { useAccount, useWriteContract } from "wagmi";
+import {
+  useAccount,
+  useCapabilities,
+  useSendCalls,
+  useWriteContract,
+} from "wagmi";
 import Chip from "../ui/chip";
 import LobbyPlayerCard from "../ui/lobby-player-card";
 import LobbySpotAvailableCard from "../ui/lobby-spot-available-card";
@@ -62,9 +67,35 @@ export default function Lobby({
     connectToLobby,
   } = useSocketUtils();
   const { data: txHash, writeContract } = useWriteContract();
+  const {
+    sendCalls,
+    data: callsHash,
+    error: callsError,
+    isPending: areCallsPending,
+  } = useSendCalls();
   const [isRefunding, setIsRefunding] = useState(false);
   const { address } = useAccount();
   const { context } = useMiniApp();
+
+  // Check for paymaster capabilities with `useCapabilities`
+  const { data: availableCapabilities } = useCapabilities({
+    account: address,
+  });
+  const capabilities = useMemo(() => {
+    if (!availableCapabilities || !address) return {};
+    const capabilitiesForChain = availableCapabilities[base.id];
+    if (
+      capabilitiesForChain["paymasterService"] &&
+      capabilitiesForChain["paymasterService"].supported
+    ) {
+      return {
+        paymasterService: {
+          url: `/paymaster/${env.NEXT_PUBLIC_PAYMASTER_URL}`, // Using Next.js rewrite to proxy the request
+        },
+      };
+    }
+    return {};
+  }, [availableCapabilities, address]);
 
   // Find current user in players list to check their status
   const { currentPlayer } = useGame();
@@ -103,14 +134,17 @@ export default function Lobby({
   const handleGetStakeBack = async () => {
     // onchain call to get stake back using wagmi
     try {
-      console.log("Getting stake back");
-      console.log(userAddress);
       setIsRefunding(true);
-      await writeContract({
-        address: SQUABBLE_CONTRACT_ADDRESS as `0x${string}`,
-        abi: SQUABBLE_CONTRACT_ABI,
-        functionName: "withdrawFromGame",
-        args: [BigInt(contractGameId)],
+      await sendCalls({
+        calls: [
+          {
+            to: SQUABBLE_CONTRACT_ADDRESS as `0x${string}`,
+            abi: SQUABBLE_CONTRACT_ABI,
+            functionName: "withdrawFromGame",
+            args: [BigInt(contractGameId)],
+          },
+        ],
+        capabilities,
       });
     } catch (error) {
       console.error(error);
