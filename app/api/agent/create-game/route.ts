@@ -5,17 +5,18 @@ import { createNewGame } from "@/lib/viem";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
-  console.log("Agent create-game endpoint called");
+  if (!req.body) {
+    return NextResponse.json(
+      { error: "Request body is required" },
+      { status: 400 }
+    );
+  }
 
   const { betAmount, conversationId } = await req.json();
 
-  console.log("Request data:", {
-    betAmount,
-    conversationId,
-  });
   let adjBetAmount = betAmount;
 
-  if (betAmount === "no bet") {
+  if (betAmount === "no buy-in") {
     adjBetAmount = 0;
   }
 
