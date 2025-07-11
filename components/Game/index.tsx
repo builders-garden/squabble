@@ -15,8 +15,8 @@ import Live from "./Live";
 import Loading from "./Loading";
 import Lobby from "./Lobby";
 import SignIn from "./SignIn";
-import Tutorial from "./Tutorial";
 import Splash from "./Splash";
+import Tutorial from "./Tutorial";
 
 function GameContent({ id }: { id: string }) {
   const { data: game, refetch: refetchGame } = useFetchGame(id);
@@ -65,6 +65,29 @@ function GameContent({ id }: { id: string }) {
 
   const stakeAmount = game?.betAmount?.toString();
 
+  console.log('gameState === "full":', gameState === "full");
+  console.log("players.length >= 2:", players.length >= 2);
+  console.log(
+    "game?.participants?.length === 2:",
+    game?.participants?.length === 2
+  );
+  console.log(
+    "!game?.participants?.some(p => p?.fid?.toString() === user?.fid?.toString()):",
+    !game?.participants?.some(
+      (p) => p?.fid?.toString() === user?.fid?.toString()
+    )
+  );
+  console.log("game?.participants:", game?.participants);
+  console.log(
+    "Combined condition:",
+    (gameState === "full" ||
+      players.length >= 2 ||
+      game?.participants?.length === 2) &&
+      !game?.participants?.some(
+        (p) => p?.fid?.toString() === user?.fid?.toString()
+      )
+  );
+
   return (
     <AnimatePresence mode="wait">
       {!isSignedIn ? (
@@ -87,7 +110,8 @@ function GameContent({ id }: { id: string }) {
           game?.participants?.length === 6) &&
         !game?.participants?.some(
           (p) => p?.fid?.toString() === user?.fid?.toString()
-        ) ? (
+        ) &&
+        !players.some((p) => p?.fid?.toString() === user?.fid?.toString()) ? (
         <GameFull key="game-full" />
       ) : game?.status === GameStatus.PLAYING &&
         !game.participants.some(

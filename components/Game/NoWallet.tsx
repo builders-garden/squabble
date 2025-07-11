@@ -1,5 +1,5 @@
 import { useMiniAppWallet } from "@/contexts/miniapp-wallet-context";
-import { farcasterFrame as miniAppConnector } from "@farcaster/frame-wagmi-connector";
+import { farcasterFrame as miniAppConnector } from "@farcaster/miniapp-wagmi-connector";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
 import { useEffect } from "react";

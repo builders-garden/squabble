@@ -26,6 +26,7 @@ import { base } from "viem/chains";
 import {
   useAccount,
   useCapabilities,
+  useConnections,
   useSendCalls,
   useWriteContract,
 } from "wagmi";
@@ -59,6 +60,8 @@ export default function Lobby({
   contractGameId: string;
   stakeAmount: string;
 }) {
+  const connections = useConnections();
+  console.log(connections);
   const { isMusicPlaying, toggleMusic } = useAudio();
   const {
     playerStakeConfirmed,
@@ -72,15 +75,22 @@ export default function Lobby({
     data: callsHash,
     error: callsError,
     isPending: areCallsPending,
-  } = useSendCalls();
+  } = useSendCalls({
+    mutation: {
+      onSuccess: (data) => {
+        console.log(data);
+      },
+    },
+  });
   const [isRefunding, setIsRefunding] = useState(false);
   const { address } = useAccount();
   const { context } = useMiniApp();
 
   // Check for paymaster capabilities with `useCapabilities`
-  const { data: availableCapabilities, isLoading: areCapabilitiesLoading } = useCapabilities({
-    account: address,
-  });
+  const { data: availableCapabilities, isLoading: areCapabilitiesLoading } =
+    useCapabilities({
+      account: address,
+    });
   const capabilities = useMemo(() => {
     if (!availableCapabilities || !address) return {};
     const capabilitiesForChain = availableCapabilities[base.id];
@@ -90,7 +100,7 @@ export default function Lobby({
     ) {
       return {
         paymasterService: {
-          url: `/paymaster/${env.NEXT_PUBLIC_PAYMASTER_URL}`, // Using Next.js rewrite to proxy the request
+          url: `https://api.developer.coinbase.com/rpc/v1/base/DHt48UwD1CwX5JiCIApOYkd6C7zv2Cxt`, // Using Next.js rewrite to proxy the request
         },
       };
     }
@@ -135,7 +145,8 @@ export default function Lobby({
     // onchain call to get stake back using wagmi
     try {
       setIsRefunding(true);
-      await sendCalls({
+      console.log(capabilities);
+      const calls = await sendCalls({
         calls: [
           {
             to: SQUABBLE_CONTRACT_ADDRESS as `0x${string}`,
@@ -146,6 +157,7 @@ export default function Lobby({
         ],
         capabilities,
       });
+      console.log(calls);
     } catch (error) {
       console.error(error);
       toast.custom(
@@ -167,8 +179,9 @@ export default function Lobby({
   };
 
   useEffect(() => {
-    if (txHash) {
-      playerStakeRefunded(currentPlayer!, gameId, txHash as `0x${string}`);
+    if (callsHash) {
+      console.log(callsHash);
+      playerStakeRefunded(currentPlayer!, gameId, "txHash");
       toast.custom(
         (t) => (
           <div className="w-fit flex items-center gap-2 p-2 bg-white  rounded-lg shadow animate-shake">
@@ -184,7 +197,7 @@ export default function Lobby({
       );
       setIsRefunding(false);
     }
-  }, [txHash]);
+  }, [callsHash]);
 
   const pendingStakes = players.filter((p) => !p.ready).length;
   return (
@@ -417,7 +430,7 @@ export default function Lobby({
               <SquabbleButton
                 text="Withdraw Buy-in"
                 variant="outline"
-                disabled={areCapabilitiesLoading}
+                disabled={areCapabilitiesLoading || areCallsPending}
                 onClick={handleGetStakeBack}
                 isLoading={isRefunding || areCallsPending}
                 loadingText="Refunding..."

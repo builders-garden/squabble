@@ -5,7 +5,7 @@ import useSocketUtils from "@/hooks/use-socket-utils";
 import { trackEvent } from "@/lib/posthog/client";
 import { cn, formatAvatarUrl } from "@/lib/utils";
 import { Player } from "@/types/socket-events";
-import sdk from "@farcaster/frame-sdk";
+import sdk from "@farcaster/miniapp-sdk";
 import { User } from "@prisma/client";
 import { Logout, Shuffle } from "@solar-icons/react";
 import { AnimatePresence, motion } from "motion/react";

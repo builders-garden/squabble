@@ -3,7 +3,6 @@ import { useApiQuery } from "@/hooks/use-api-query";
 import { User } from "@prisma/client";
 import { QueryObserverResult } from "@tanstack/react-query";
 import posthog from "posthog-js";
-import { useAccount } from "wagmi";
 import {
   createContext,
   ReactNode,
@@ -13,6 +12,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { useAccount } from "wagmi";
 import { useMiniApp } from "./miniapp-context";
 
 const UserProviderContext = createContext<
@@ -103,7 +103,12 @@ export const UserProvider = ({ children }: UserProviderProps) => {
 
   // In case we are in a context, if the user is not there, sign the user in
   useEffect(() => {
-    if (context && !isSignedIn && !isFetchingUser && address) {
+    console.log("useEffect", context, address, isSignedIn, isFetchingUser);
+    if (
+      context &&
+      address &&
+      ((!isSignedIn && !isFetchingUser) || userError)
+    ) {
       handleSignIn();
     }
   }, [context, handleSignIn, address]);

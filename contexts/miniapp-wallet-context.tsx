@@ -1,5 +1,5 @@
 import { getDefaultConfig } from "@daimo/pay";
-import { farcasterFrame as miniAppConnector } from "@farcaster/frame-wagmi-connector";
+import { farcasterMiniApp as miniAppConnector } from "@farcaster/miniapp-wagmi-connector";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createContext, useContext, useEffect, useState } from "react";
 import { createConfig, useAccount, WagmiProvider } from "wagmi";

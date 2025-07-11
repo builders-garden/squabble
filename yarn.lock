@@ -810,10 +810,10 @@
     neverthrow "^6.1.0"
     siwe "^2.1.4"
 
-"@farcaster/auth-client@^0.6.0":
-  version "0.6.0"
-  resolved "https://registry.yarnpkg.com/@farcaster/auth-client/-/auth-client-0.6.0.tgz#dbe9bc722b47f85fbd3af3d7e1fcb1b2df2001e5"
-  integrity sha512-YXTol6FHglYLXgpQg49ZG0262NzseFV2xf1gzrgvHh4iQqBY9pwSS2+hmW+N16H/tm/UgNg6JUTNAakFsjrJ2Q==
+"@farcaster/auth-client@^0.7.0":
+  version "0.7.0"
+  resolved "https://registry.yarnpkg.com/@farcaster/auth-client/-/auth-client-0.7.0.tgz#13b15d2d4180e3abfbd41567da5e195dfe3b96c3"
+  integrity sha512-WtQ/dNAlS8VXA73bMjlgdV49vuUJyoPJz6QfSj0rMbv3JFw3SrRDxP5d6fDQxFcYHiDsWCm6ZOe6X03DBNnbaA==
   dependencies:
     neverthrow "^6.1.0"
     viem "^2.29.2"
@@ -886,22 +886,6 @@
     eventemitter3 "^5.0.1"
     ox "^0.4.4"
 
-"@farcaster/frame-sdk@^0.1.1":
-  version "0.1.6"
-  resolved "https://registry.yarnpkg.com/@farcaster/frame-sdk/-/frame-sdk-0.1.6.tgz#e4701fbfbfc3e6ce408a246c27018760259e10cc"
-  integrity sha512-vaLeLDCX6Mr4KYcdRx2XiX30dT3QPPerO5ggsRfJ5Sm2AoQcqwToMBlKTr59kqspYxEb+Oc8eYcywP5AsXfamw==
-  dependencies:
-    "@farcaster/miniapp-sdk" "0.1.6"
-    "@farcaster/quick-auth" "^0.0.6"
-    comlink "^4.4.2"
-    eventemitter3 "^5.0.1"
-    ox "^0.4.4"
-
-"@farcaster/frame-wagmi-connector@^0.0.46":
-  version "0.0.46"
-  resolved "https://registry.yarnpkg.com/@farcaster/frame-wagmi-connector/-/frame-wagmi-connector-0.0.46.tgz#875e50887e6a155986f11ce1b410b475cb02a833"
-  integrity sha512-SCFrOw239PZsojXVL3w5faOAvSgi5t+weL1H8Mk86lb5BnI7zMrMKzaCTiaFfdG/Vh4JDlY0t9E33CqCAjOmCQ==
-
 "@farcaster/frame-wagmi-connector@^0.0.53":
   version "0.0.53"
   resolved "https://registry.yarnpkg.com/@farcaster/frame-wagmi-connector/-/frame-wagmi-connector-0.0.53.tgz#c1364d8ab60ba6480959c8cba153a40a49cb6a3f"
@@ -916,7 +900,7 @@
     ox "^0.4.4"
     zod "^3.25.0"
 
-"@farcaster/miniapp-sdk@0.1.6":
+"@farcaster/miniapp-sdk@^0.1.5":
   version "0.1.6"
   resolved "https://registry.yarnpkg.com/@farcaster/miniapp-sdk/-/miniapp-sdk-0.1.6.tgz#2e5b72a957ab4ee53cbd7d6aa75d04a997822ccc"
   integrity sha512-WXvX51UrqD1rHiB4GtGenFzCT1aYEoHNhUA44GuGbI534HUNLuH4cm60J8I0C1SkNy9CnQcHzc3Nek7hnTbXHw==
@@ -926,6 +910,11 @@
     comlink "^4.4.2"
     eventemitter3 "^5.0.1"
     ox "^0.4.4"
+
+"@farcaster/miniapp-wagmi-connector@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@farcaster/miniapp-wagmi-connector/-/miniapp-wagmi-connector-1.0.0.tgz#77454ffd4c70772a40d2480b2d59cfe9439182d0"
+  integrity sha512-vMRZbekUUctnAUvBFhNoEsJlujRRdxop94fDy5LrKiRR9ax0wtp8gCvLYO+LpaP2PtGs0HFpRwlHNDJWvBR8bg==
 
 "@farcaster/quick-auth@^0.0.5":
   version "0.0.5"

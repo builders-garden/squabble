@@ -2,7 +2,7 @@
 import { GameWithParticipants } from "@/hooks/use-fetch-game";
 import { cn, formatAvatarUrl } from "@/lib/utils";
 import { Player } from "@/types/socket-events";
-import sdk from "@farcaster/frame-sdk";
+import sdk from "@farcaster/miniapp-sdk";
 import { Logout } from "@solar-icons/react";
 import { motion } from "motion/react";
 import { Luckiest_Guy } from "next/font/google";

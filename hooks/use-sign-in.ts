@@ -1,5 +1,5 @@
 import { useMiniApp } from "@/contexts/miniapp-context";
-import sdk from "@farcaster/frame-sdk";
+import sdk from "@farcaster/miniapp-sdk";
 import { User } from "@prisma/client";
 import { useCallback, useEffect, useState } from "react";
 import { useAccount } from "wagmi";

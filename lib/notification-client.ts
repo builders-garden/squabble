@@ -3,7 +3,7 @@ import {
   MiniAppNotificationDetails,
   type SendNotificationRequest,
   sendNotificationResponseSchema,
-} from "@farcaster/frame-sdk";
+} from "@farcaster/miniapp-sdk";
 import { env } from "./env";
 
 const appUrl = env.NEXT_PUBLIC_URL || "";
