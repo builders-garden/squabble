@@ -26,56 +26,44 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  try {
-    const { betAmount } = await req.json();
-    const fid = req.headers.get("x-user-fid")!;
+  const { betAmount } = await req.json();
+  const fid = req.headers.get("x-user-fid")!;
 
-    const game = await createGame({
-      betAmount: parseFloat(betAmount),
-    });
+  const game = await createGame({
+    betAmount: parseFloat(betAmount),
+  });
 
-    const gameId = game.id;
-    const stakeAmount = game.betAmount;
+  const gameId = game.id;
+  const stakeAmount = game.betAmount;
 
-    // Convert UUID to integer for database (ensure it's a proper integer)
-    const contractGameIdBigInt = uuidToBigInt(gameId);
-    const contractGameIdNumber = Math.floor(Number(contractGameIdBigInt));
+  // Convert UUID to integer for database (ensure it's a proper integer)
+  const contractGameIdBigInt = uuidToBigInt(gameId);
+  const contractGameIdNumber = Math.floor(Number(contractGameIdBigInt));
 
-    console.log("Updating game with contractGameId:", contractGameIdNumber);
-    // Update the game with the contractGameId as a proper integer
-    await updateGame(gameId, {
-      contractGameId: contractGameIdNumber,
-    });
+  console.log("Updating game with contractGameId:", contractGameIdNumber);
+  // Update the game with the contractGameId as a proper integer
+  await updateGame(gameId, {
+    contractGameId: contractGameIdNumber,
+  });
 
-    console.log("Calling smart contract...");
-    const txHash = await createNewGame(
-      BigInt(contractGameIdNumber),
-      stakeAmount
-    );
+  console.log("Calling smart contract...");
+  const txHash = await createNewGame(BigInt(contractGameIdNumber), stakeAmount);
 
-    console.log("Smart contract call successful:", txHash);
+  console.log("Smart contract call successful:", txHash);
 
-    trackEvent("game_created", {
-        gameId: game.id,
-        stakeAmount: stakeAmount,
-      },
-      fid
-    );
+  trackEvent(
+    "game_created",
+    {
+      gameId: game.id,
+      stakeAmount: stakeAmount,
+    },
+    fid
+  );
 
-    return NextResponse.json({
-      id: game.id,
-      stakeAmount: stakeAmount.toString(),
-      contractGameId: contractGameIdNumber.toString(),
-      txHash,
-    });
-  } catch (error) {
-    console.error("Error in create-game:", error);
-    return NextResponse.json(
-      {
-        error: "Internal server error",
-        details: (error as Error).message,
-      },
-      { status: 500 }
-    );
-  }
+  return NextResponse.json({
+    id: game.id,
+    stakeAmount: stakeAmount.toString(),
+    contractGameId: contractGameIdNumber.toString(),
+    txHash,
+  });
 }
