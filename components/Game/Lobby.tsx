@@ -314,6 +314,19 @@ export default function Lobby({
           <p
             className="text-yellow-200 text-sm cursor-pointer"
             onClick={() => {
+              toast.custom(
+                (t) => (
+                  <div className="w-fit flex items-center gap-2 p-2 bg-white rounded-lg shadow">
+                    <div className="text-green-600 font-medium text-sm">
+                      🔄 Refreshing lobby state...
+                    </div>
+                  </div>
+                ),
+                {
+                  position: "top-left",
+                  duration: 2000,
+                }
+              );
               connectToLobby(
                 {
                   fid: currentUser?.fid!,
@@ -333,6 +346,19 @@ export default function Lobby({
           <p
             className="text-white text-sm cursor-pointer"
             onClick={() => {
+              toast.custom(
+                (t) => (
+                  <div className="w-fit flex items-center gap-2 p-2 bg-white rounded-lg shadow">
+                    <div className="text-green-600 font-medium text-sm">
+                      🔄 Checking for new players...
+                    </div>
+                  </div>
+                ),
+                {
+                  position: "top-left",
+                  duration: 2000,
+                }
+              );
               connectToLobby(
                 {
                   fid: currentUser?.fid!,
