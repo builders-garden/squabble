@@ -1,8 +1,10 @@
 "use client";
 
+import { useGame } from "@/contexts/game-context";
 import { motion } from "motion/react";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
+import { useEffect } from "react";
 
 const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
@@ -10,6 +12,18 @@ const luckiestGuy = Luckiest_Guy({
 });
 
 export default function Splash() {
+  const { isSignedIn, signIn } = useGame();
+
+  useEffect(() => {
+    if (!isSignedIn) {
+      const timer = setTimeout(() => {
+        signIn();
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isSignedIn, signIn]);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
