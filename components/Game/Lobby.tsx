@@ -318,7 +318,7 @@ export default function Lobby({
                 (t) => (
                   <div className="w-fit flex items-center gap-2 p-2 bg-white rounded-lg shadow">
                     <div className="text-green-600 font-medium text-sm">
-                      🔄 Refreshing lobby state...
+                      🔄 Refreshing...
                     </div>
                   </div>
                 ),
