@@ -379,64 +379,66 @@ export default function Lobby({
       <div className="flex flex-col gap-2 items-center w-full pb-4">
         {isCurrentUserPending && currentUser && parseFloat(stakeAmount) > 0 ? (
           <div className="flex flex-col gap-2 items-center w-full">
-            <div className="text-white/75 mb-2">
-              {currentUser.fid.toString() === gameLeaderFid.toString()
-                ? "Buy-in to init the game"
-                : "Buy-in to join the game"}
-            </div>
             {userAddress ? (
-              <DaimoPayButton.Custom
-                appId={env.NEXT_PUBLIC_DAIMO_PAY_ID!}
-                toAddress={SQUABBLE_CONTRACT_ADDRESS}
-                toChain={8453} // Base
-                toUnits={stakeAmount}
-                toToken="0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913" // Base USDC
-                intent="Join Squabble Game"
-                toCallData={joinGameCalldata(contractGameId, userAddress)}
-                preferredChains={[base.id]} // Prefer Base
-                preferredTokens={[
-                  {
-                    chain: base.id,
-                    address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
-                  }, // Base USDC
-                ]}
-                externalId={`${gameId}-${currentUser.fid}-${Date.now()}`}
-                metadata={{
-                  gameId,
-                  playerFid: currentUser.fid.toString(),
-                  playerName:
-                    currentUser.displayName || currentUser.username || "",
-                }}
-                onPaymentStarted={(e) => console.log("Payment started:", e)}
-                onPaymentCompleted={handlePaymentCompleted}
-                onPaymentBounced={(e) => {
-                  console.log("Payment bounced:", e);
-                  toast.custom(
-                    (t) => (
-                      <div className="w-fit flex items-center gap-2 p-2 bg-white  rounded-lg shadow animate-shake">
-                        <div className="text-red-600 font-medium text-sm">
-                          ❌ Payment was bounced. Please try again.
-                        </div>
-                      </div>
-                    ),
+              <>
+                <div className="text-white/75 mb-2">
+                  {currentUser.fid.toString() === gameLeaderFid.toString()
+                    ? "Buy-in to init the game"
+                    : "Buy-in to join the game"}
+                </div>
+                <DaimoPayButton.Custom
+                  appId={env.NEXT_PUBLIC_DAIMO_PAY_ID!}
+                  toAddress={SQUABBLE_CONTRACT_ADDRESS}
+                  toChain={8453} // Base
+                  toUnits={stakeAmount}
+                  toToken="0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913" // Base USDC
+                  intent="Join Squabble Game"
+                  toCallData={joinGameCalldata(contractGameId, userAddress)}
+                  preferredChains={[base.id]} // Prefer Base
+                  preferredTokens={[
                     {
-                      position: "top-left",
-                      duration: 5000,
-                    }
-                  );
-                }}
-                closeOnSuccess={true}
-                resetOnSuccess={true}
-              >
-                {({ show }) => (
-                  <SquabbleButton
-                    text={`Join for $${stakeAmount}`}
-                    variant="primary"
-                    disabled={false}
-                    onClick={show}
-                  />
-                )}
-              </DaimoPayButton.Custom>
+                      chain: base.id,
+                      address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+                    }, // Base USDC
+                  ]}
+                  externalId={`${gameId}-${currentUser.fid}-${Date.now()}`}
+                  metadata={{
+                    gameId,
+                    playerFid: currentUser.fid.toString(),
+                    playerName:
+                      currentUser.displayName || currentUser.username || "",
+                  }}
+                  onPaymentStarted={(e) => console.log("Payment started:", e)}
+                  onPaymentCompleted={handlePaymentCompleted}
+                  onPaymentBounced={(e) => {
+                    console.log("Payment bounced:", e);
+                    toast.custom(
+                      (t) => (
+                        <div className="w-fit flex items-center gap-2 p-2 bg-white  rounded-lg shadow animate-shake">
+                          <div className="text-red-600 font-medium text-sm">
+                            ❌ Payment was bounced. Please try again.
+                          </div>
+                        </div>
+                      ),
+                      {
+                        position: "top-left",
+                        duration: 5000,
+                      }
+                    );
+                  }}
+                  closeOnSuccess={true}
+                  resetOnSuccess={true}
+                >
+                  {({ show }) => (
+                    <SquabbleButton
+                      text={`Join for $${stakeAmount}`}
+                      variant="primary"
+                      disabled={false}
+                      onClick={show}
+                    />
+                  )}
+                </DaimoPayButton.Custom>
+              </>
             ) : (
               <p className="text-white/75">
                 No wallet connected, try refreshing the page.
