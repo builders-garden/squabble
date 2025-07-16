@@ -72,46 +72,56 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     onSuccess: (data) => {
       posthog.identify(data.user.fid.toString());
       setIsSignedIn(true);
+      setSignInError(false);
+    },
+    onError: () => {
+      setSignInError(true);
+      setIsSignedIn(false);
     },
   });
 
   const handleSignIn = useCallback(async () => {
-    try {
-      console.log("handleSignIn");
-      setSignInError(false);
+    console.log("handleSignIn");
 
-      if (!context) {
-        console.error("Not in mini app");
-        throw new Error("Not in mini app");
-      }
-
-      const referrerFid =
-        context.location?.type === "cast_embed"
-          ? context.location.cast.fid
-          : undefined;
-
-      // TODO: add sdk.quickAuth.getToken()
-
-      await signIn({
-        fid: context.user.fid,
-        referrerFid,
-      });
-    } catch {
+    if (!context) {
+      console.error("Not in mini app");
       setSignInError(true);
+      return;
     }
-  }, [context, refetchUser]);
+
+    const referrerFid =
+      context.location?.type === "cast_embed"
+        ? context.location.cast.fid
+        : undefined;
+
+    // TODO: add sdk.quickAuth.getToken()
+
+    signIn({
+      fid: context.user.fid,
+      referrerFid,
+    });
+  }, [context, signIn]);
 
   // In case we are in a context, if the user is not there, sign the user in
   useEffect(() => {
-    console.log("useEffect", context, address, isSignedIn, isFetchingUser);
-    if (
-      context &&
-      address &&
-      ((!isSignedIn && !isFetchingUser) || userError)
-    ) {
+    console.log(
+      "useEffect",
+      context,
+      address,
+      isSignedIn,
+      isFetchingUser,
+      userError
+    );
+
+    // If there's a user error, reset the signed in state
+    if (userError) {
+      setIsSignedIn(false);
+    }
+
+    if (context && address && ((!isSignedIn && !isFetchingUser) || userError)) {
       handleSignIn();
     }
-  }, [context, handleSignIn, address]);
+  }, [context, handleSignIn, address, userError]);
 
   const value = useMemo(() => {
     return {
