@@ -95,8 +95,9 @@ export default function Lobby({
     if (!availableCapabilities || !address) return {};
     const capabilitiesForChain = availableCapabilities[base.id];
     if (
+      capabilitiesForChain &&
       capabilitiesForChain["paymasterService"] &&
-      capabilitiesForChain["paymasterService"].supported
+      capabilitiesForChain["paymasterService"]?.supported
     ) {
       return {
         paymasterService: {
