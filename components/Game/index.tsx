@@ -1,10 +1,13 @@
 "use client";
 
+import { farcasterMiniApp as miniAppConnector } from "@farcaster/miniapp-wagmi-connector";
 import { GameStatus } from "@prisma/client";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef } from "react";
-import { useAccount } from "wagmi";
+import { useAccount, useConnect } from "wagmi";
+import { coinbaseWallet } from "wagmi/connectors";
 import { GameProvider, useGame } from "@/contexts/game-context";
+import { useMiniAppWallet } from "@/contexts/miniapp-wallet-context";
 import { SocketProvider } from "@/contexts/socket-context";
 import useFetchGame from "@/hooks/use-fetch-game";
 import { useMiniApp } from "@/hooks/use-miniapp";
@@ -24,7 +27,9 @@ import Tutorial from "./Tutorial";
 function GameContent({ id }: { id: string }) {
   const { context, isMiniAppReady } = useMiniApp();
   const { data: game, refetch: refetchGame } = useFetchGame(id);
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
+  const { connect } = useConnect();
+  const { isCoinbaseWallet } = useMiniAppWallet();
   const hasConnectedToLobby = useRef(false);
   const { user } = useUser();
   const {
@@ -33,6 +38,21 @@ function GameContent({ id }: { id: string }) {
     error: signInError,
     signIn,
   } = useSignIn({});
+
+  useEffect(() => {
+    if (!isConnected) {
+      console.log("connecting wallet");
+      if (isCoinbaseWallet) {
+        connect({
+          connector: coinbaseWallet({
+            appName: "Squabble",
+          }),
+        });
+      } else if (context) {
+        connect({ connector: miniAppConnector() });
+      }
+    }
+  }, [isConnected, context, isCoinbaseWallet, connect]);
 
   useEffect(() => {
     if (game?.status === GameStatus.FINISHED) {
@@ -131,8 +151,7 @@ function GameContent({ id }: { id: string }) {
         <GameFull key="game-full" />
       ) : game?.status === GameStatus.PLAYING &&
         !game.participants.some(
-          (p) =>
-            p?.fid?.toString() === user?.fid.toString() && p.joined === true,
+          (p) => p.fid.toString() === user?.fid.toString() && p.joined === true,
         ) ? (
         <GameStarted key="game-started" />
       ) : gameState === "lobby" ? (
@@ -208,20 +227,22 @@ function GameContent({ id }: { id: string }) {
               </motion.div>
             )}
           </AnimatePresence>
-          <Live
-            key="live"
-            user={user!}
-            gameId={id}
-            board={board}
-            timeRemaining={timeRemaining}
-            availableLetters={availableLetters}
-            setAvailableLetters={setAvailableLetters}
-            setBoard={setBoard}
-            setTimeRemaining={setTimeRemaining}
-            letterPlacers={letterPlacers}
-            players={players}
-            highlightedCells={highlightedCells}
-          />
+          {user && (
+            <Live
+              key="live"
+              user={user}
+              gameId={id}
+              board={board}
+              timeRemaining={timeRemaining}
+              availableLetters={availableLetters}
+              setAvailableLetters={setAvailableLetters}
+              setBoard={setBoard}
+              setTimeRemaining={setTimeRemaining}
+              letterPlacers={letterPlacers}
+              players={players}
+              highlightedCells={highlightedCells}
+            />
+          )}
         </>
       )}
     </AnimatePresence>

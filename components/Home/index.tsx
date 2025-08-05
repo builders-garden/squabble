@@ -1,10 +1,15 @@
 "use client";
 
+import { farcasterMiniApp as miniAppConnector } from "@farcaster/miniapp-wagmi-connector";
 import { Volume2, VolumeX } from "lucide-react";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
+import { useEffect } from "react";
+import { useAccount, useConnect } from "wagmi";
+import { coinbaseWallet } from "wagmi/connectors";
 import { FarcasterLink } from "@/components/shared/farcaster-link";
 import { useAudio } from "@/contexts/audio-context";
+import { useMiniAppWallet } from "@/contexts/miniapp-wallet-context";
 import { useMiniApp } from "@/hooks/use-miniapp";
 import { FARCASTER_CLIENT_FID } from "@/lib/constants";
 import CoinbaseWalletPlay from "./coinbase-wallet-play";
@@ -19,6 +24,24 @@ const luckiestGuy = Luckiest_Guy({
 export default function Home() {
   const { context, isMiniAppReady } = useMiniApp();
   const { isMusicPlaying, toggleMusic } = useAudio();
+  const { isConnected } = useAccount();
+  const { connect } = useConnect();
+  const { isCoinbaseWallet } = useMiniAppWallet();
+
+  useEffect(() => {
+    if (!isConnected) {
+      console.log("connecting wallet");
+      if (isCoinbaseWallet) {
+        connect({
+          connector: coinbaseWallet({
+            appName: "Squabble",
+          }),
+        });
+      } else if (context) {
+        connect({ connector: miniAppConnector() });
+      }
+    }
+  }, [isConnected, context, isCoinbaseWallet, connect]);
 
   if (!context || !isMiniAppReady) {
     return <Website />;
