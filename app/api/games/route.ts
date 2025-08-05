@@ -1,19 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { trackEvent } from "@/lib/posthog/server";
-import { prisma } from "@/lib/prisma/client";
-import { createGame, updateGame } from "@/lib/prisma/games";
+import { createGame, getLatestGame, updateGame } from "@/lib/prisma/games";
 import { getUserByFid } from "@/lib/prisma/user";
 import { uuidToBigInt } from "@/lib/utils";
 import { createNewGame } from "@/lib/viem";
 
 export async function GET() {
   try {
-    const game = await prisma.game.findFirst({
-      orderBy: { createdAt: "desc" },
-      include: { participants: true },
-    });
-
+    const game = await getLatestGame();
     if (!game) {
+      console.error("No latest game found");
       return NextResponse.json({ error: "No games found" }, { status: 404 });
     }
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma/client";
+import { getGameByContractId, getGameById } from "@/lib/prisma/games";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -17,15 +17,11 @@ export async function GET(req: NextRequest) {
   try {
     if (id) {
       // Convert database ID (UUID) to contract ID
-      const game = await prisma.game.findUnique({
-        where: { id },
-        select: { id: true, contractGameId: true },
-      });
-
+      const game = await getGameById(id);
       if (!game) {
+        console.error("Game not found", id);
         return NextResponse.json({ error: "Game not found" }, { status: 404 });
       }
-
       return NextResponse.json({
         id: game.id,
         contractId: game.contractGameId,
@@ -36,20 +32,17 @@ export async function GET(req: NextRequest) {
     if (contractId) {
       // Convert contract ID to database ID (UUID)
       const contractIdNumber = parseInt(contractId);
-
       if (isNaN(contractIdNumber)) {
+        console.error("Invalid contractId: NaN", contractId);
         return NextResponse.json(
           { error: "Invalid contractId: must be a number" },
           { status: 400 },
         );
       }
 
-      const game = await prisma.game.findUnique({
-        where: { contractGameId: contractIdNumber },
-        select: { id: true, contractGameId: true },
-      });
-
+      const game = await getGameByContractId(contractIdNumber);
       if (!game) {
+        console.error("Game not found", contractId);
         return NextResponse.json({ error: "Game not found" }, { status: 404 });
       }
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma/client";
+import { getGameById, getLatestGame } from "@/lib/prisma/games";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -7,18 +7,12 @@ export async function GET(req: NextRequest) {
 
   let game;
   if (id) {
-    game = await prisma.game.findUnique({
-      where: { id },
-      include: { participants: true },
-    });
+    game = await getGameById(id);
     if (!game) {
       return NextResponse.json({ error: "Game not found" }, { status: 404 });
     }
   } else {
-    game = await prisma.game.findFirst({
-      orderBy: { createdAt: "desc" },
-      include: { participants: true },
-    });
+    game = await getLatestGame();
     if (!game) {
       return NextResponse.json({ error: "No games found" }, { status: 404 });
     }

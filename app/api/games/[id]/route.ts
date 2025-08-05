@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma/client";
+import { getGameById } from "@/lib/prisma/games";
 
 export async function GET(
   request: NextRequest,
@@ -8,21 +8,9 @@ export async function GET(
   const { id } = await params;
 
   try {
-    const game = await prisma.game.findUnique({
-      where: { id },
-      include: {
-        participants: {
-          include: {
-            user: true,
-          },
-          orderBy: {
-            points: "desc",
-          },
-        },
-      },
-    });
-
+    const game = await getGameById(id);
     if (!game) {
+      console.error("Game not found", id);
       return NextResponse.json({ error: "Game not found" }, { status: 404 });
     }
 

@@ -34,6 +34,36 @@ export async function getGameById(
   });
 }
 
+// Get game by contractId
+export async function getGameByContractId(
+  contractId: number,
+): Promise<GameWithParticipants | null> {
+  return prisma.game.findUnique({
+    where: { contractGameId: contractId },
+    include: {
+      participants: {
+        include: {
+          user: true,
+        },
+      },
+    },
+  });
+}
+
+// get latest game
+export async function getLatestGame(): Promise<GameWithParticipants | null> {
+  return prisma.game.findFirst({
+    orderBy: { createdAt: "desc" },
+    include: {
+      participants: {
+        include: {
+          user: true,
+        },
+      },
+    },
+  });
+}
+
 // Get all games with optional filters
 export async function getGames(filters?: {
   status?: GameStatus;
@@ -85,5 +115,22 @@ export async function getGamesByStatus(status: GameStatus): Promise<Game[]> {
     orderBy: {
       createdAt: "desc",
     },
+  });
+}
+
+// Count games
+export async function countGames({
+  status = GameStatus.FINISHED,
+  conversationId,
+}: {
+  status?: GameStatus;
+  conversationId?: string;
+}): Promise<number> {
+  const whereClause = {
+    status,
+    ...(conversationId ? { conversationId } : {}),
+  };
+  return prisma.game.count({
+    where: whereClause,
   });
 }

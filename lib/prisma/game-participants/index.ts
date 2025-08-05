@@ -1,4 +1,4 @@
-import { GameParticipant, User } from "@prisma/client";
+import { GameParticipant, GameStatus, User } from "@prisma/client";
 import { prisma } from "@/lib/prisma/client";
 
 // Types
@@ -166,4 +166,62 @@ export async function getGameWinners(
   } catch (error) {
     throw new Error(`Failed to get game winners: ${error}`);
   }
+}
+
+export async function getWinCounts({
+  status = GameStatus.FINISHED,
+  conversationId,
+}: {
+  status?: GameStatus;
+  conversationId?: string;
+}) {
+  const whereClause = {
+    status,
+    ...(conversationId ? { conversationId } : {}),
+  };
+
+  return await prisma.gameParticipant.groupBy({
+    by: ["fid"],
+    where: {
+      game: whereClause,
+      winner: true,
+    },
+    _count: {
+      _all: true,
+    },
+  });
+}
+
+export async function getTotalWinnings({
+  status = GameStatus.FINISHED,
+  conversationId,
+}: {
+  status?: GameStatus;
+  conversationId?: string;
+}) {
+  const whereClause = {
+    status,
+    ...(conversationId ? { conversationId } : {}),
+  };
+  return await prisma.gameParticipant.findMany({
+    where: {
+      game: whereClause,
+      winner: true,
+    },
+    include: {
+      game: {
+        select: {
+          betAmount: true,
+          participants: {
+            where: {
+              paid: true,
+            },
+            select: {
+              fid: true,
+            },
+          },
+        },
+      },
+    },
+  });
 }

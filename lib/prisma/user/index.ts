@@ -140,3 +140,13 @@ export const fetchTopUsers = async (
     totalCount: result[1],
   };
 };
+
+export async function getUsersByIds(ids: number[]): Promise<User[]> {
+  return await prisma.user.findMany({
+    where: {
+      fid: {
+        in: ids,
+      },
+    },
+  });
+}

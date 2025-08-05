@@ -1,6 +1,8 @@
-import { GameStatus } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma/client";
+import { getTotalWinnings, getWinCounts } from "@/lib/prisma/game-participants";
+import { countGames } from "@/lib/prisma/games";
+import { getLeaderboard } from "@/lib/prisma/leaderboard";
+import { getUsersByIds } from "@/lib/prisma/user";
 import { formatAvatarUrl } from "@/lib/utils";
 
 interface LeaderboardEntry {
@@ -28,14 +30,9 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const conversationId = searchParams.get("conversationId");
 
-  const whereClause = {
-    status: GameStatus.FINISHED,
-    ...(conversationId ? { conversationId } : {}),
-  };
-
   // Get total finished games count
-  const totalFinishedGames = await prisma.game.count({
-    where: whereClause,
+  const totalFinishedGames = await countGames({
+    conversationId: conversationId || undefined,
   });
 
   if (totalFinishedGames === 0) {
@@ -50,45 +47,17 @@ export async function GET(req: NextRequest) {
   }
 
   // Get leaderboard data directly from the database
-  const leaderboard = await prisma.gameParticipant.groupBy({
-    by: ["fid"],
-    where: {
-      game: whereClause,
-    },
-    _sum: {
-      points: true,
-    },
-    _count: {
-      _all: true,
-    },
+  const leaderboard = await getLeaderboard({
+    conversationId: conversationId || undefined,
   });
 
   // Get user details for all participants
   const userIds = leaderboard.map((item) => item.fid);
-  const users = await prisma.user.findMany({
-    where: {
-      fid: {
-        in: userIds,
-      },
-    },
-    select: {
-      fid: true,
-      displayName: true,
-      username: true,
-      avatarUrl: true,
-    },
-  });
+  const users = await getUsersByIds(userIds);
 
   // Get win counts separately
-  const winCounts = await prisma.gameParticipant.groupBy({
-    by: ["fid"],
-    where: {
-      game: whereClause,
-      winner: true,
-    },
-    _count: {
-      _all: true,
-    },
+  const winCounts = await getWinCounts({
+    conversationId: conversationId || undefined,
   });
 
   const winCountMap = new Map(
@@ -99,26 +68,8 @@ export async function GET(req: NextRequest) {
   const totalWinningsMap = new Map<number, number>();
 
   // Get all games where users were winners with their bet amounts and participant counts
-  const winnerGames = await prisma.gameParticipant.findMany({
-    where: {
-      game: whereClause,
-      winner: true,
-    },
-    include: {
-      game: {
-        select: {
-          betAmount: true,
-          participants: {
-            where: {
-              paid: true,
-            },
-            select: {
-              fid: true,
-            },
-          },
-        },
-      },
-    },
+  const winnerGames = await getTotalWinnings({
+    conversationId: conversationId || undefined,
   });
 
   // Calculate total winnings for each winner
