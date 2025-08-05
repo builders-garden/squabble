@@ -1,27 +1,71 @@
 import { User } from "@prisma/client";
-import { prisma } from "../client";
+import { fetchUserFromNeynar } from "@/lib/neynar";
+import { prisma } from "@/lib/prisma/client";
+import { formatAvatarUrl } from "@/lib/utils";
 
 // Create or update a user
-export const createOrUpdateUser = async (
-  fid: number,
-  displayName: string,
-  username: string,
-  avatarUrl: string
-) => {
+export const createOrUpdateUser = async ({
+  fid,
+  displayName,
+  username,
+  avatarUrl,
+  referrerFid,
+}: {
+  fid: number;
+  displayName: string;
+  username: string;
+  avatarUrl: string;
+  referrerFid?: number;
+}) => {
   return await prisma.user.upsert({
     where: { fid },
     update: {
       displayName,
       username,
-      avatarUrl,
+      avatarUrl: formatAvatarUrl(avatarUrl),
+      referrerFid,
     },
     create: {
       fid,
       displayName,
       username,
-      avatarUrl,
+      avatarUrl: formatAvatarUrl(avatarUrl),
+      referrerFid,
     },
   });
+};
+
+/**
+ * Get a user by their fid, or create a new user if they don't exist.
+ *
+ * This function gets a user by their fid, or creates a new user if they don't exist.
+ * It takes a fid and a referrerFid, and returns the user.
+ *
+ * @param fid - The fid of the user to get or create
+ * @param referrerFid - The fid of the referrer user
+ * @returns The user if found, otherwise the created user
+ */
+export const getOrCreateUserFromFid = async (
+  fid: number,
+  referrerFid?: number,
+): Promise<User> => {
+  if (!fid) throw new Error("Fid is required");
+  const user = await getUserByFid(fid);
+  if (!user) {
+    const userFromNeynar = await fetchUserFromNeynar(fid.toString());
+    if (!userFromNeynar) throw new Error("Farcaster user not found in Neynar");
+
+    const dbUser = await createOrUpdateUser({
+      fid,
+      username: userFromNeynar.username,
+      displayName: userFromNeynar.display_name,
+      avatarUrl: userFromNeynar.pfp_url || "",
+      referrerFid: referrerFid ? referrerFid : undefined,
+    });
+
+    return dbUser;
+  }
+  return user;
 };
 
 // Get a user by their FID
@@ -51,7 +95,7 @@ export const updateUser = async (
     displayName?: string;
     username?: string;
     avatarUrl?: string;
-  }
+  },
 ) => {
   return await prisma.user.update({
     where: { fid },
@@ -76,7 +120,7 @@ export const listUsers = async () => {
 };
 
 export const fetchTopUsers = async (
-  limit = 5
+  limit = 5,
 ): Promise<{
   users: User[];
   totalCount: number;

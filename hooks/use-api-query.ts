@@ -1,5 +1,5 @@
-import { useMiniApp } from "@/contexts/miniapp-context";
 import { useQuery, UseQueryOptions } from "@tanstack/react-query";
+import ky from "ky";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
@@ -12,7 +12,7 @@ interface UseApiQueryOptions<TData, TBody = unknown>
 }
 
 export const useApiQuery = <TData, TBody = unknown>(
-  options: UseApiQueryOptions<TData, TBody>
+  options: UseApiQueryOptions<TData, TBody>,
 ) => {
   const {
     url,
@@ -25,14 +25,15 @@ export const useApiQuery = <TData, TBody = unknown>(
   return useQuery<TData>({
     ...queryOptions,
     queryFn: async () => {
-      const response = await fetch(url, {
+      const response = await ky(url, {
         method,
         headers: {
           ...(body && { "Content-Type": "application/json" }),
         },
-        ...(isProtected && {credentials: "include",
+        ...(isProtected && {
+          credentials: "include",
         }),
-        ...(body && { body: JSON.stringify(body) }),
+        ...(body && { json: body }),
       });
 
       if (!response.ok) {

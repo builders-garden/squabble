@@ -1,22 +1,30 @@
-import { Errors, createClient } from "@farcaster/quick-auth";
-
-import { env } from "@/lib/env";
-import { fetchUser } from "@/lib/neynar";
-import { createOrUpdateUser } from "@/lib/prisma/user";
+import { createClient, Errors } from "@farcaster/quick-auth";
 import * as jose from "jose";
 import { NextRequest, NextResponse } from "next/server";
-import { Address, zeroAddress } from "viem";
+import { env } from "@/lib/env";
+import { getOrCreateUserFromFid } from "@/lib/prisma/user";
 
 export const dynamic = "force-dynamic";
 
 const quickAuthClient = createClient();
 
 export const POST = async (req: NextRequest) => {
-  const { referrerFid, token: farcasterToken } = await req.json();
+  const {
+    referrerFid,
+    token: farcasterToken,
+    fid: contextFid,
+  } = await req.json();
+  if (!farcasterToken || !contextFid)
+    return NextResponse.json(
+      { success: false, error: "Invalid arguments" },
+      { status: 400 },
+    );
+
   let fid;
   let isValidSignature;
-  let walletAddress: Address = zeroAddress;
-  let expirationTime = Date.now() + 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
+  const weekInMs = 7 * 24 * 60 * 60 * 1000;
+  let expirationTime = new Date(Date.now() + weekInMs); // 7 days in milliseconds
+
   // Verify signature matches custody address and auth address
   try {
     const payload = await quickAuthClient.verifyJwt({
@@ -24,9 +32,10 @@ export const POST = async (req: NextRequest) => {
       token: farcasterToken,
     });
     isValidSignature = !!payload;
-    fid = Number(payload.sub);
-    walletAddress = payload.address as `0x${string}`;
-    expirationTime = payload.exp ?? Date.now() + 7 * 24 * 60 * 60 * 1000;
+    fid = payload.sub;
+    expirationTime = payload.exp
+      ? new Date(Number(payload.exp) * 1000 + weekInMs)
+      : new Date(Date.now() + weekInMs);
   } catch (e) {
     if (e instanceof Errors.InvalidTokenError) {
       console.error("Invalid token", e);
@@ -35,33 +44,27 @@ export const POST = async (req: NextRequest) => {
     console.error("Error verifying token", e);
   }
 
-  if (!isValidSignature || !fid) {
+  if (!isValidSignature || !fid || isNaN(Number(fid)) || fid !== contextFid)
     return NextResponse.json(
       { success: false, error: "Invalid token" },
-      { status: 401 }
+      { status: 401 },
     );
-  }
-
-  const neynarUser = await fetchUser(fid.toString());
-
-  const user = await createOrUpdateUser(
-    fid,
-    neynarUser.display_name,
-    neynarUser.username,
-    neynarUser.pfp_url
-  );
 
   // Generate JWT token
   const secret = new TextEncoder().encode(env.JWT_SECRET);
   const token = await new jose.SignJWT({
     fid,
-    walletAddress,
     timestamp: Date.now(),
   })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime(expirationTime)
     .sign(secret);
+
+  const user = await getOrCreateUserFromFid(
+    Number(fid),
+    referrerFid ? Number(referrerFid) : undefined,
+  );
 
   // Create the response
   const response = NextResponse.json({ success: true, user });

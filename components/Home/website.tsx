@@ -1,5 +1,8 @@
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
+import Link from "next/link";
+import { BaseIcon, FarcasterIcon } from "@/components/icons";
+import { Button } from "@/components/ui/button";
 
 const luckiestGuy = Luckiest_Guy({
   weight: "400",
@@ -21,8 +24,7 @@ export default function Website() {
               height={96}
             />
             <div
-              className={`${luckiestGuy.className} text-4xl lg:text-6xl text-white tracking-wider`}
-            >
+              className={`${luckiestGuy.className} text-4xl lg:text-6xl text-white tracking-wider`}>
               SQUABBLE
             </div>
           </div>
@@ -36,10 +38,27 @@ export default function Website() {
             </p>
           </div>
 
+          <div className="py-4 lg:py-6 rounded-lg w-full justify-start">
+            <h3
+              className={`${luckiestGuy.className} text-xl lg:text-2xl text-white mb-3`}>
+              Play Now
+            </h3>
+            <div className="flex flex-row gap-2 ">
+              <PlayButton href="https://farcaster.xyz/miniapps/rbT1cmfnn2Yo/squabble">
+                <FarcasterIcon className="w-4 h-4" />
+                Farcaster
+              </PlayButton>
+
+              <PlayButton href="https://squabble.lol">
+                <BaseIcon className="w-4 h-4" />
+                Base
+              </PlayButton>
+            </div>
+          </div>
+
           <div className="bg-white/10 backdrop-blur-sm p-4 lg:p-6 rounded-lg border border-white/20 w-full">
             <h3
-              className={`${luckiestGuy.className} text-xl lg:text-2xl text-white mb-3`}
-            >
+              className={`${luckiestGuy.className} text-xl lg:text-2xl text-white mb-3`}>
               How to Play
             </h3>
             <ul className="text-white space-y-2 text-sm lg:text-base">
@@ -91,11 +110,29 @@ export default function Website() {
           href="https://builders.garden"
           target="_blank"
           rel="noopener noreferrer"
-          className="underline hover:text-white transition-colors"
-        >
+          className="underline hover:text-white transition-colors">
           builders.garden
         </a>
       </div>
     </div>
   );
 }
+
+const PlayButton = ({
+  children,
+  href,
+}: {
+  children: React.ReactNode;
+  href: string;
+}) => {
+  return (
+    <Button
+      variant="outline"
+      className="px-4 py-2 rounded-md min-w-[120px] flex flex-row items-center gap-2"
+      asChild>
+      <Link href={href} target="_blank" rel="noopener noreferrer">
+        {children}
+      </Link>
+    </Button>
+  );
+};

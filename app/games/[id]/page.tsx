@@ -1,6 +1,6 @@
+import { Metadata } from "next";
 import GamePage from "@/components/pages/game";
 import { env } from "@/lib/env";
-import { Metadata } from "next";
 
 const appUrl = env.NEXT_PUBLIC_URL;
 
@@ -12,7 +12,7 @@ export async function generateMetadata({
   const gameId = params.id;
 
   const imageUrl = `${appUrl}/api/og/games/${gameId}`;
-  const frame = {
+  const farcasterMiniapp = {
     version: "next",
     imageUrl,
     button: {
@@ -39,7 +39,7 @@ export async function generateMetadata({
       ],
     },
     other: {
-      "fc:frame": JSON.stringify(frame),
+      "fc:miniapp": JSON.stringify(farcasterMiniapp),
     },
   };
 }

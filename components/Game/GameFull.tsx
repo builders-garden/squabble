@@ -19,8 +19,7 @@ export default function GameFull() {
             height={36}
           />
           <div
-            className={`${luckiestGuy.className} text-xl text-white tracking-wider`}
-          >
+            className={`${luckiestGuy.className} text-xl text-white tracking-wider`}>
             SQUABBLE
           </div>
         </div>

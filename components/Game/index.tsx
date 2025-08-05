@@ -1,16 +1,19 @@
 "use client";
 
+import { GameStatus } from "@prisma/client";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef } from "react";
 import { useAccount } from "wagmi";
-
 import { GameProvider, useGame } from "@/contexts/game-context";
 import { SocketProvider } from "@/contexts/socket-context";
 import useFetchGame from "@/hooks/use-fetch-game";
-import { GameStatus } from "@prisma/client";
+import { useMiniApp } from "@/hooks/use-miniapp";
+import { useSignIn } from "@/hooks/use-sign-in";
+import { useUser } from "@/hooks/use-user";
 import Ended from "./Ended";
 import GameFull from "./GameFull";
 import GameStarted from "./GameStarted";
+import GameWebsite from "./GameWebsite";
 import Live from "./Live";
 import Loading from "./Loading";
 import Lobby from "./Lobby";
@@ -19,23 +22,31 @@ import Splash from "./Splash";
 import Tutorial from "./Tutorial";
 
 function GameContent({ id }: { id: string }) {
+  const { context, isMiniAppReady } = useMiniApp();
   const { data: game, refetch: refetchGame } = useFetchGame(id);
   const { address } = useAccount();
   const hasConnectedToLobby = useRef(false);
-  const { user, isSignedIn, isSignInLoading, signIn, signInError } = useGame();
+  const { user } = useUser();
+  const {
+    isSignedIn,
+    isLoading: isSignInLoading,
+    error: signInError,
+    signIn,
+  } = useSignIn({});
 
   useEffect(() => {
     if (game?.status === GameStatus.FINISHED) {
       setGameState("ended");
-    } else if (
-      game?.participants.length === 6 &&
-      !game?.participants.some(
-        (p) => p?.fid?.toString() === user?.fid?.toString()
-      )
-    ) {
-      setGameState("full");
+    } else if (game?.participants && game.participants.length === 6 && user) {
+      const foundUser = game.participants.some(
+        (p) => p.fid.toString() === user.fid.toString(),
+      );
+      if (!foundUser) {
+        setGameState("full");
+      }
     }
-  }, [game]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game, user]);
 
   // Reset the connection flag when game ID changes or component unmounts
   useEffect(() => {
@@ -69,13 +80,13 @@ function GameContent({ id }: { id: string }) {
   console.log("players.length >= 2:", players.length >= 2);
   console.log(
     "game?.participants?.length === 2:",
-    game?.participants?.length === 2
+    game?.participants?.length === 2,
   );
   console.log(
     "!game?.participants?.some(p => p?.fid?.toString() === user?.fid?.toString()):",
     !game?.participants?.some(
-      (p) => p?.fid?.toString() === user?.fid?.toString()
-    )
+      (p) => p?.fid?.toString() === user?.fid?.toString(),
+    ),
   );
   console.log("game?.participants:", game?.participants);
   console.log(
@@ -84,9 +95,14 @@ function GameContent({ id }: { id: string }) {
       players.length >= 2 ||
       game?.participants?.length === 2) &&
       !game?.participants?.some(
-        (p) => p?.fid?.toString() === user?.fid?.toString()
-      )
+        (p) => p?.fid?.toString() === user?.fid?.toString(),
+      ),
   );
+
+  // if we arent in a miniapp, show the website and redirect to a farcaster client
+  if (!context || !isMiniAppReady) {
+    return <GameWebsite gameId={id} />;
+  }
 
   return (
     <AnimatePresence mode="wait">
@@ -109,14 +125,14 @@ function GameContent({ id }: { id: string }) {
           players.length >= 6 ||
           game?.participants?.length === 6) &&
         !game?.participants?.some(
-          (p) => p?.fid?.toString() === user?.fid?.toString()
+          (p) => p?.fid?.toString() === user?.fid?.toString(),
         ) &&
         !players.some((p) => p?.fid?.toString() === user?.fid?.toString()) ? (
         <GameFull key="game-full" />
       ) : game?.status === GameStatus.PLAYING &&
         !game.participants.some(
           (p) =>
-            p?.fid?.toString() === user?.fid.toString() && p.joined === true
+            p?.fid?.toString() === user?.fid.toString() && p.joined === true,
         ) ? (
         <GameStarted key="game-started" />
       ) : gameState === "lobby" ? (
@@ -161,8 +177,7 @@ function GameContent({ id }: { id: string }) {
                     duration: 0.2,
                   },
                 }}
-                className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-white/15 rounded-lg px-6 py-3 shadow-lg border-2 border-[#C8EFE3] z-50"
-              >
+                className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-white/15 rounded-lg px-6 py-3 shadow-lg border-2 border-[#C8EFE3] z-50">
                 <motion.div
                   initial={{ scale: 0.9, rotate: -2 }}
                   animate={{
@@ -174,8 +189,7 @@ function GameContent({ id }: { id: string }) {
                       damping: 20,
                     },
                   }}
-                  className="text-xl font-bold text-white flex items-center gap-2"
-                >
+                  className="text-xl font-bold text-white flex items-center gap-2">
                   <motion.span
                     initial={{ scale: 0 }}
                     animate={{
@@ -186,8 +200,7 @@ function GameContent({ id }: { id: string }) {
                         stiffness: 300,
                       },
                     }}
-                    className="text-[#7B5A2E]"
-                  >
+                    className="text-[#7B5A2E]">
                     ✓
                   </motion.span>
                   {highlightedWord}

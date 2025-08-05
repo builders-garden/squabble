@@ -1,10 +1,10 @@
 "use client";
 
-import { useGame } from "@/contexts/game-context";
 import { motion } from "motion/react";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
 import { useEffect } from "react";
+import { useSignIn } from "@/hooks/use-sign-in";
 
 const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
@@ -12,7 +12,7 @@ const luckiestGuy = Luckiest_Guy({
 });
 
 export default function Splash() {
-  const { isSignedIn, signIn } = useGame();
+  const { isSignedIn, signIn } = useSignIn({});
 
   useEffect(() => {
     if (!isSignedIn) {
@@ -30,8 +30,7 @@ export default function Splash() {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-center p-4"
-    >
+      className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-center p-4">
       <div className="flex flex-col items-center gap-4">
         <div className="flex flex-row items-center justify-center">
           <Image
@@ -42,8 +41,7 @@ export default function Splash() {
             height={36}
           />
           <div
-            className={`${luckiestGuy.className} text-xl text-white tracking-wider`}
-          >
+            className={`${luckiestGuy.className} text-xl text-white tracking-wider`}>
             SQUABBLE
           </div>
         </div>

@@ -182,8 +182,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
         toggleSound,
         startBackgroundMusic,
         stopBackgroundMusic,
-      }}
-    >
+      }}>
       {children}
     </AudioContext.Provider>
   );

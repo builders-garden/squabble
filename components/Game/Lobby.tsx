@@ -1,7 +1,29 @@
 "use client";
+
+import { DaimoPayButton } from "@daimo/pay";
+import { PaymentCompletedEvent } from "@daimo/pay-common";
+import { User } from "@prisma/client";
+import { CheckCircleIcon, ClockIcon, Volume2, VolumeX } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { Luckiest_Guy } from "next/font/google";
+import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import { basePreconf } from "viem/chains";
+import {
+  useAccount,
+  useCapabilities,
+  useConnections,
+  useSendCalls,
+} from "wagmi";
+import Chip from "@/components/ui/chip";
+import LobbyPlayerCard from "@/components/ui/lobby-player-card";
+import LobbySpotAvailableCard from "@/components/ui/lobby-spot-available-card";
+import ShareButton from "@/components/ui/share-button";
+import SquabbleButton from "@/components/ui/squabble-button";
 import { useAudio } from "@/contexts/audio-context";
 import { useGame } from "@/contexts/game-context";
-import { useMiniApp } from "@/contexts/miniapp-context";
+import { useMiniApp } from "@/hooks/use-miniapp";
 import useSocketUtils from "@/hooks/use-socket-utils";
 import {
   FARCASTER_CLIENT_FID,
@@ -11,30 +33,8 @@ import {
 import { joinGameCalldata } from "@/lib/daimo";
 import { env } from "@/lib/env";
 import { trackEvent } from "@/lib/posthog/client";
-import { Player } from "@/types/socket-events";
-import { DaimoPayButton } from "@daimo/pay";
-import { PaymentCompletedEvent } from "@daimo/pay-common";
-import { User } from "@prisma/client";
-import { CheckCircle, ClockCircle } from "@solar-icons/react";
-import { Volume2, VolumeX } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
-import { Luckiest_Guy } from "next/font/google";
-import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
-import { base } from "viem/chains";
-import {
-  useAccount,
-  useCapabilities,
-  useConnections,
-  useSendCalls,
-  useWriteContract,
-} from "wagmi";
-import Chip from "../ui/chip";
-import LobbyPlayerCard from "../ui/lobby-player-card";
-import LobbySpotAvailableCard from "../ui/lobby-spot-available-card";
-import ShareButton from "../ui/share-button";
-import SquabbleButton from "../ui/squabble-button";
+import { formatAvatarUrl } from "@/lib/utils";
+import { Player } from "@/types/socket";
 
 const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
@@ -69,7 +69,6 @@ export default function Lobby({
     playerStakeRefunded,
     connectToLobby,
   } = useSocketUtils();
-  const { data: txHash, writeContract } = useWriteContract();
   const {
     sendCalls,
     data: callsHash,
@@ -93,7 +92,7 @@ export default function Lobby({
     });
   const capabilities = useMemo(() => {
     if (!availableCapabilities || !address) return {};
-    const capabilitiesForChain = availableCapabilities[base.id];
+    const capabilitiesForChain = availableCapabilities[basePreconf.id];
     if (
       capabilitiesForChain &&
       capabilitiesForChain["paymasterService"] &&
@@ -116,29 +115,33 @@ export default function Lobby({
     console.log("Payment completed:", event);
     if (currentUser && event.txHash) {
       // Emit socket event to confirm stake payment
-      playerStakeConfirmed(
-        {
+      playerStakeConfirmed({
+        player: {
           fid: currentUser.fid,
           displayName: currentUser.displayName,
           username: currentUser.username,
-          avatarUrl: currentUser.avatarUrl,
+          avatarUrl: formatAvatarUrl(currentUser.avatarUrl || ""),
           address: address!,
         },
         gameId,
-        event.txHash as string,
-        event.payment.source?.payerAddress as string
-      );
+        paymentHash: event.txHash as string,
+        payerAddress: event.payment.source?.payerAddress as string,
+      });
     }
   };
 
   const handleStartGame = () => {
+    if (!currentPlayer) {
+      console.warn("Cannot handle start game: No current player found");
+      return;
+    }
     setGameState("loading");
-    startGame(currentPlayer!, gameId);
+    startGame({ player: currentPlayer, gameId });
     trackEvent("game_started", {
       gameId,
       stakeAmount: stakeAmount,
-      fid: currentPlayer?.fid,
-      players: players?.length,
+      fid: currentPlayer.fid,
+      players: players.length,
     });
   };
 
@@ -172,7 +175,7 @@ export default function Lobby({
         {
           position: "top-left",
           duration: 5000,
-        }
+        },
       );
     } finally {
       setIsRefunding(false);
@@ -180,9 +183,13 @@ export default function Lobby({
   };
 
   useEffect(() => {
-    if (callsHash) {
+    if (currentPlayer && callsHash) {
       console.log(callsHash);
-      playerStakeRefunded(currentPlayer!, gameId, "txHash");
+      playerStakeRefunded({
+        player: currentPlayer,
+        gameId,
+        transactionHash: "txHash", // TODO: get from callsHash
+      });
       toast.custom(
         (t) => (
           <div className="w-fit flex items-center gap-2 p-2 bg-white  rounded-lg shadow animate-shake">
@@ -194,7 +201,7 @@ export default function Lobby({
         {
           position: "top-left",
           duration: 5000,
-        }
+        },
       );
       setIsRefunding(false);
     }
@@ -207,14 +214,12 @@ export default function Lobby({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-between p-4"
-    >
+      className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-between p-4">
       {/* Mute Button */}
       <button
         onClick={toggleMusic}
         className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-        aria-label={isMusicPlaying ? "Mute music" : "Unmute music"}
-      >
+        aria-label={isMusicPlaying ? "Mute music" : "Unmute music"}>
         {isMusicPlaying ? (
           <Volume2 size={16} color="white" />
         ) : (
@@ -232,8 +237,7 @@ export default function Lobby({
             height={80}
           />
           <div
-            className={`${luckiestGuy.className} text-4xl text-white tracking-wider`}
-          >
+            className={`${luckiestGuy.className} text-4xl text-white tracking-wider`}>
             SQUABBLE
           </div>
         </div>
@@ -252,13 +256,13 @@ export default function Lobby({
           {pendingStakes > 0 ? (
             <Chip
               text={`${pendingStakes} Pending`}
-              icon={<ClockCircle size={14} />}
+              icon={<ClockIcon size={14} />}
               variant="warning"
             />
           ) : players?.length > 0 ? (
             <Chip
               text="Ready"
-              icon={<CheckCircle size={14} />}
+              icon={<CheckCircleIcon size={14} />}
               variant="success"
             />
           ) : null}
@@ -285,8 +289,7 @@ export default function Lobby({
                 initial={{ opacity: 0, scale: 0.8, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.8, y: -20 }}
-                transition={{ duration: 0.3, ease: "easeOut" }}
-              >
+                transition={{ duration: 0.3, ease: "easeOut" }}>
                 <LobbyPlayerCard
                   player={p}
                   status={p.ready ? "ready" : "pending"}
@@ -302,15 +305,14 @@ export default function Lobby({
                 className="w-full h-full"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 0.2 }}
-              >
+                transition={{ duration: 0.2 }}>
                 <LobbySpotAvailableCard />
               </motion.div>
             ))}
           </AnimatePresence>
         </div>
         {!players.find(
-          (p) => p?.fid?.toString() === currentUser?.fid?.toString()
+          (p) => p?.fid?.toString() === currentUser?.fid?.toString(),
         ) && !isCurrentUserPending ? (
           <p
             className="text-yellow-200 text-sm cursor-pointer"
@@ -326,20 +328,19 @@ export default function Lobby({
                 {
                   position: "top-left",
                   duration: 2000,
-                }
+                },
               );
-              connectToLobby(
-                {
+              connectToLobby({
+                player: {
                   fid: currentUser?.fid!,
                   displayName: currentUser?.displayName,
                   username: currentUser?.username,
-                  avatarUrl: currentUser?.avatarUrl,
+                  avatarUrl: formatAvatarUrl(currentUser?.avatarUrl || ""),
                   address: address!,
                 },
-                gameId
-              );
-            }}
-          >
+                gameId,
+              });
+            }}>
             Don&apos;t see yourself?{" "}
             <span className="underline font-bold">Click to refresh!</span>
           </p>
@@ -358,20 +359,19 @@ export default function Lobby({
                 {
                   position: "top-left",
                   duration: 2000,
-                }
+                },
               );
-              connectToLobby(
-                {
+              connectToLobby({
+                player: {
                   fid: currentUser?.fid!,
                   displayName: currentUser?.displayName,
                   username: currentUser?.username,
-                  avatarUrl: currentUser?.avatarUrl,
+                  avatarUrl: formatAvatarUrl(currentUser?.avatarUrl || ""),
                   address: address!,
                 },
-                gameId
-              );
-            }}
-          >
+                gameId,
+              });
+            }}>
             Don&apos;t see your friends?{" "}
             <span className="underline font-bold">Click to refresh!</span>
           </p>
@@ -395,10 +395,10 @@ export default function Lobby({
                   toToken="0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913" // Base USDC
                   intent="Join Squabble Game"
                   toCallData={joinGameCalldata(contractGameId, userAddress)}
-                  preferredChains={[base.id]} // Prefer Base
+                  preferredChains={[basePreconf.id]} // Prefer Base
                   preferredTokens={[
                     {
-                      chain: base.id,
+                      chain: basePreconf.id,
                       address: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
                     }, // Base USDC
                   ]}
@@ -424,12 +424,11 @@ export default function Lobby({
                       {
                         position: "top-left",
                         duration: 5000,
-                      }
+                      },
                     );
                   }}
                   closeOnSuccess={true}
-                  resetOnSuccess={true}
-                >
+                  resetOnSuccess={true}>
                   {({ show }) => (
                     <SquabbleButton
                       text={`Join for $${stakeAmount}`}
@@ -452,8 +451,8 @@ export default function Lobby({
               {pendingStakes
                 ? "Waiting for everyone to pay their stake..."
                 : players.length < 2
-                ? "Need at least 2 players to start the game"
-                : "Everyone is ready, start the game!"}
+                  ? "Need at least 2 players to start the game"
+                  : "Everyone is ready, start the game!"}
             </div>
             <SquabbleButton
               text="Start Game"

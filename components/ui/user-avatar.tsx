@@ -14,9 +14,7 @@ export default function UserAvatar({
     <div
       className={cn(
         "relative overflow-hidden rounded-full",
-        size === "xs"
-          ? "h-6 w-6"
-          : "h-8 w-8",
+        size === "xs" ? "h-6 w-6" : "h-8 w-8",
         size === "md"
           ? "h-10 w-10"
           : size === "lg"

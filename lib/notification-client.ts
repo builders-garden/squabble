@@ -1,52 +1,56 @@
-import { getUserNotificationDetails } from "@/lib/notifications";
 import {
   MiniAppNotificationDetails,
-  type SendNotificationRequest,
   sendNotificationResponseSchema,
+  type SendNotificationRequest,
 } from "@farcaster/miniapp-sdk";
-import { env } from "./env";
+import ky from "ky";
+import { env } from "@/lib/env";
 
-const appUrl = env.NEXT_PUBLIC_URL || "";
-
-type SendFrameNotificationResult =
+export type SendFarcasterNotificationResult =
   | {
       state: "error";
       error: unknown;
     }
   | { state: "no_token" }
-  | { state: "rate_limit" }
+  | { state: "invalid_token"; invalidTokens: string[] }
+  | { state: "rate_limit"; rateLimitedTokens: string[] }
   | { state: "success" };
 
-export async function sendFrameNotification({
+/**
+ * Send a notification to a Farcaster user.
+ *
+ * @param fid - The Farcaster user ID
+ * @param title - The title of the notification
+ * @param body - The body of the notification
+ * @param targetUrl - The URL to redirect to when the notification is clicked (optional)
+ * @param notificationDetails - The notification details of the user (required)
+ * @returns The result of the notification
+ */
+export async function sendFarcasterNotification({
   fid,
   title,
   body,
+  targetUrl,
   notificationDetails,
 }: {
   fid: number;
   title: string;
   body: string;
+  targetUrl?: string;
   notificationDetails?: MiniAppNotificationDetails | null;
-}): Promise<SendFrameNotificationResult> {
-  if (!notificationDetails) {
-    notificationDetails = await getUserNotificationDetails(fid);
-  }
+}): Promise<SendFarcasterNotificationResult> {
   if (!notificationDetails) {
     return { state: "no_token" };
   }
 
-  const response = await fetch(notificationDetails.url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
+  const response = await ky.post(notificationDetails.url, {
+    json: {
       notificationId: crypto.randomUUID(),
       title,
       body,
-      targetUrl: appUrl,
+      targetUrl: targetUrl ?? env.NEXT_PUBLIC_URL,
       tokens: [notificationDetails.token],
-    } satisfies SendNotificationRequest),
+    } satisfies SendNotificationRequest,
   });
 
   const responseJson = await response.json();
@@ -58,7 +62,10 @@ export async function sendFrameNotification({
     }
 
     if (responseBody.data.result.rateLimitedTokens.length) {
-      return { state: "rate_limit" };
+      return {
+        state: "rate_limit",
+        rateLimitedTokens: responseBody.data.result.rateLimitedTokens,
+      };
     }
 
     return { state: "success" };

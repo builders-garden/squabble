@@ -1,8 +1,13 @@
 "use client";
 
-import { useAudio } from "@/contexts/audio-context";
-import { useSocket } from "@/contexts/socket-context";
+import Image from "next/image";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import { useAccount } from "wagmi";
+import { useSocket } from "@/hooks/use-socket";
 import useSocketUtils from "@/hooks/use-socket-utils";
+import { useUser } from "@/hooks/use-user";
+import { formatAvatarUrl } from "@/lib/utils";
 import {
   AdjacentWordsNotValidEvent,
   GameEndedEvent,
@@ -19,12 +24,8 @@ import {
   TimerTickEvent,
   WordNotValidEvent,
   WordSubmittedEvent,
-} from "@/types/socket-events";
-import { User } from "@prisma/client";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
-import { useAccount } from "wagmi";
-import { useRegisteredUser } from "./user-context";
+} from "@/types/socket";
+import { useAudio } from "./audio-context";
 
 interface GameContextType {
   board: string[][];
@@ -38,15 +39,10 @@ interface GameContextType {
   letterPlacers: { [key: string]: Player[] };
   availableLetters: { letter: string; value: number }[];
   timeRemaining: number;
-  user: User | undefined;
-  isSignedIn: boolean;
-  isSignInLoading: boolean;
-  signInError: boolean;
-  signIn: () => void;
   setBoard: (board: string[][]) => void;
   setPlayers: (players: Player[]) => void;
   setGameState: (
-    state: "lobby" | "live" | "loading" | "ended" | "full"
+    state: "lobby" | "live" | "loading" | "ended" | "full",
   ) => void;
   setHighlightedCells: (cells: Array<{ row: number; col: number }>) => void;
   setHighlightedWord: (word: string) => void;
@@ -94,44 +90,43 @@ export function GameProvider({
   const { address } = useAccount();
   const { connectToLobby } = useSocketUtils();
   const hasConnectedToLobby = useRef(false);
-  const { user, isSigningIn, signIn, error: signInError } = useRegisteredUser();
+  const { user } = useUser();
 
   const handleConnectToLobby = async () => {
     hasConnectedToLobby.current = true;
-    connectToLobby(
-      {
-        fid: user?.data?.fid!,
-        displayName: user?.data?.displayName,
-        username: user?.data?.username,
-        avatarUrl: user?.data?.avatarUrl || "",
-        address: address as `0x${string}`,
+    if (!user?.fid) {
+      console.warn("Cannot connect to lobby: User not signed in");
+      return;
+    }
+    if (!address) {
+      console.warn("Cannot connect to lobby: User not connected to wallet");
+      return;
+    }
+    connectToLobby({
+      player: {
+        fid: user.fid,
+        displayName: user.displayName,
+        address,
       },
-      gameId
-    );
+      gameId,
+    });
   };
 
   useEffect(() => {
-    if (user?.data) {
+    if (user) {
       // Check if user is already in the game
-      if (
-        players.find((p) => p.fid.toString() === user?.data?.fid.toString())
-      ) {
+      const userInPlayers = players.find(
+        (p) => p.fid.toString() === user.fid.toString(),
+      );
+      if (userInPlayers) {
         console.log("User already in game");
         return;
+      } else if (players.length < 6) {
+        handleConnectToLobby();
       }
-
-      handleConnectToLobby();
     }
-  }, [user?.data]);
-
-  useEffect(() => {
-    if (
-      !players.find((p) => p?.fid?.toString() === user?.data?.fid.toString()) &&
-      players.length < 6
-    ) {
-      handleConnectToLobby();
-    }
-  }, [players]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, players]);
 
   useEffect(() => {
     const eventHandlers = {
@@ -139,9 +134,14 @@ export function GameProvider({
         // TODO: add Toast with new player that joined
       },
       game_full: (event: GameFullEvent) => {
-        if (
-          !players.find((p) => p.fid.toString() === user?.data?.fid.toString())
-        ) {
+        if (!user) {
+          console.warn("Cannot set game state to full: User not signed in");
+          return;
+        }
+        const userInPlayers = players.find(
+          (p) => p.fid.toString() === user.fid.toString(),
+        );
+        if (!userInPlayers) {
           setGameState("full");
         }
       },
@@ -155,10 +155,9 @@ export function GameProvider({
         setTimeRemaining(event.timeRemaining);
       },
       refreshed_available_letters: (event: RefreshedAvailableLettersEvent) => {
-        if (!user?.data || (event.playerId && event.playerId !== user.data.fid))
-          return;
+        if (!user || (event.playerId && event.playerId !== user.fid)) return;
         const availableLetters = event.players.find(
-          (p) => p.fid.toString() === user?.data?.fid.toString()
+          (p) => p.fid.toString() === user.fid.toString(),
         )?.availableLetters;
         setAvailableLetters(availableLetters || []);
       },
@@ -207,7 +206,7 @@ export function GameProvider({
           Object.keys(newLetterPlacers).forEach((key) => {
             newLetterPlacers[key] =
               newLetterPlacers[key]?.filter(
-                (p) => p.fid !== event.player.fid
+                (p) => p.fid !== event.player.fid,
               ) || [];
           });
           // Clear all players' letter placers from the submitted word path
@@ -219,7 +218,7 @@ export function GameProvider({
         });
 
         setHighlightedCells(
-          event.path.map((pos) => ({ row: pos.y, col: pos.x }))
+          event.path.map((pos) => ({ row: pos.y, col: pos.x })),
         );
         setHighlightedWord(event.words.map((w) => w.toUpperCase()).join(", "));
 
@@ -233,13 +232,15 @@ export function GameProvider({
         toast.custom(
           (id) => (
             <div className="flex items-center gap-4 p-2 bg-white rounded-lg shadow-lg animate-bounce border-2 border-[#C8EFE3]">
-              <img
-                src={require("@/lib/utils").formatAvatarUrl(
-                  event.player.avatarUrl || ""
-                )}
-                alt={event.player.displayName || event.player.username || ""}
-                className="w-10 h-10 rounded-full border-4 border-[#C8EFE3] object-cover shadow-sm"
-              />
+              {event.player.avatarUrl ? (
+                <Image
+                  src={formatAvatarUrl(event.player.avatarUrl)}
+                  width={40}
+                  height={40}
+                  alt={event.player.displayName || event.player.username || ""}
+                  className="w-10 h-10 rounded-full border-4 border-[#C8EFE3] object-cover shadow-sm"
+                />
+              ) : null}
               <div className="flex flex-col">
                 <span className="font-bold text-xl text-[#7B5A2E]">
                   {event.words.map((w) => w.toUpperCase()).join(", ")}
@@ -254,7 +255,7 @@ export function GameProvider({
             position: "top-center",
             duration: 5000,
             className: "!p-2",
-          }
+          },
         );
       },
       word_not_valid: (event: WordNotValidEvent) => {
@@ -264,14 +265,14 @@ export function GameProvider({
           Object.keys(newLetterPlacers).forEach((key) => {
             newLetterPlacers[key] =
               newLetterPlacers[key]?.filter(
-                (p) => p.fid !== event.player.fid
+                (p) => p.fid !== event.player.fid,
               ) || [];
           });
           return newLetterPlacers;
         });
-        if (event.player.fid === user?.data?.fid) {
+        if (event.player.fid === user?.fid) {
           setBoard(event.board);
-          refreshAvailableLetters(user?.data?.fid!, gameId);
+          refreshAvailableLetters({ playerId: user.fid, gameId });
           playSound("wordNotValid");
           toast.custom(
             (t) => (
@@ -285,7 +286,7 @@ export function GameProvider({
             {
               position: "top-left",
               duration: 5000,
-            }
+            },
           );
         }
       },
@@ -295,14 +296,14 @@ export function GameProvider({
           event.path.forEach((position) => {
             newLetterPlacers[`${position.y}-${position.x}`] =
               newLetterPlacers[`${position.y}-${position.x}`]?.filter(
-                (p) => p.fid !== event.player.fid
+                (p) => p.fid !== event.player.fid,
               ) || [];
           });
           return newLetterPlacers;
         });
-        if (event.player.fid === user?.data?.fid) {
+        if (event.player.fid === user?.fid) {
           setBoard(event.board);
-          refreshAvailableLetters(user?.data?.fid!, gameId);
+          refreshAvailableLetters({ playerId: user.fid, gameId });
           playSound("wordNotValid");
           toast.custom(
             (t) => (
@@ -316,7 +317,7 @@ export function GameProvider({
             {
               position: "top-left",
               duration: 5000,
-            }
+            },
           );
         }
       },
@@ -324,7 +325,7 @@ export function GameProvider({
         setPlayers((prev) => {
           const newPlayers = [...prev];
           const playerIndex = newPlayers.findIndex(
-            (p) => p.fid === event.player.fid
+            (p) => p.fid === event.player.fid,
           );
           if (playerIndex !== -1) {
             newPlayers[playerIndex].score = event.newScore;
@@ -351,20 +352,20 @@ export function GameProvider({
     playSound,
     refreshAvailableLetters,
     gameId,
+    players,
   ]);
 
   // Keep currentPlayer in sync with players array and user FID
   useEffect(() => {
-    const userData = user?.data;
-    if (userData && players.length > 0) {
+    if (user && players.length > 0) {
       const player = players.find(
-        (p) => p.fid.toString() === userData.fid.toString()
+        (p) => p.fid.toString() === user.fid.toString(),
       );
       setCurrentPlayer(player);
     } else {
       setCurrentPlayer(undefined);
     }
-  }, [players, user?.data?.fid]);
+  }, [players, user]);
 
   return (
     <GameContext.Provider
@@ -380,11 +381,6 @@ export function GameProvider({
         letterPlacers,
         availableLetters,
         timeRemaining,
-        isSignedIn: !!user?.data,
-        isSignInLoading: isSigningIn,
-        signInError,
-        user: user?.data,
-        signIn,
         setBoard,
         setPlayers,
         setGameState,
@@ -393,8 +389,7 @@ export function GameProvider({
         setLetterPlacers,
         setAvailableLetters,
         setTimeRemaining,
-      }}
-    >
+      }}>
       {children}
     </GameContext.Provider>
   );

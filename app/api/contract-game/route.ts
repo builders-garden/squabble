@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
   if ((!id && !contractId) || (id && contractId)) {
     return NextResponse.json(
       { error: "Provide exactly one parameter: either 'id' or 'contractId'" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
       if (isNaN(contractIdNumber)) {
         return NextResponse.json(
           { error: "Invalid contractId: must be a number" },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
@@ -63,7 +63,7 @@ export async function GET(req: NextRequest) {
     console.error("Game ID conversion error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -1,11 +1,11 @@
-import { useMiniAppWallet } from "@/contexts/miniapp-wallet-context";
-import { farcasterFrame as miniAppConnector } from "@farcaster/miniapp-wagmi-connector";
+import { farcasterMiniApp as miniAppConnector } from "@farcaster/miniapp-wagmi-connector";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
 import { useEffect } from "react";
 import { useAccount, useConnect } from "wagmi";
 import { coinbaseWallet } from "wagmi/connectors";
-import SquabbleButton from "../ui/squabble-button";
+import SquabbleButton from "@/components/ui/squabble-button";
+import { useMiniAppWallet } from "@/contexts/miniapp-wallet-context";
 
 const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
@@ -45,8 +45,7 @@ export default function NoWallet() {
             height={36}
           />
           <div
-            className={`${luckiestGuy.className} text-xl text-white tracking-wider`}
-          >
+            className={`${luckiestGuy.className} text-xl text-white tracking-wider`}>
             SQUABBLE
           </div>
         </div>

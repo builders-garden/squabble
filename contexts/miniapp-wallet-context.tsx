@@ -3,7 +3,7 @@ import { farcasterMiniApp as miniAppConnector } from "@farcaster/miniapp-wagmi-c
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createContext, useContext, useEffect, useState } from "react";
 import { createConfig, useAccount, WagmiProvider } from "wagmi";
-import { base } from "wagmi/chains";
+import { basePreconf } from "wagmi/chains";
 import { coinbaseWallet } from "wagmi/connectors";
 
 export const config = createConfig(
@@ -15,8 +15,8 @@ export const config = createConfig(
         appName: "Squabble",
       }),
     ],
-    chains: [base],
-  })
+    chains: [basePreconf],
+  }),
 );
 
 const queryClient = new QueryClient();
@@ -33,7 +33,7 @@ export function useMiniAppWallet() {
   const context = useContext(MiniAppWalletContext);
   if (context === undefined) {
     throw new Error(
-      "useMiniAppWallet must be used within a MiniAppWalletProvider"
+      "useMiniAppWallet must be used within a MiniAppWalletProvider",
     );
   }
   return context;

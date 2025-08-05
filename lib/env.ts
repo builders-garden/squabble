@@ -10,6 +10,7 @@ export const env = createEnv({
     TURSO_DATABASE_AUTH_TOKEN: z.string().min(1),
     BACKEND_PRIVATE_KEY: z.string().min(1),
     AGENT_SECRET: z.string().min(1),
+    NOTIFICATION_SECRET: z.string().min(1),
   },
   client: {
     NEXT_PUBLIC_URL: z.string().min(1),
@@ -25,7 +26,6 @@ export const env = createEnv({
     NEXT_PUBLIC_DAIMO_PAY_ID: z.string().min(1),
     NEXT_PUBLIC_POSTHOG_KEY: z.string().min(1),
     NEXT_PUBLIC_POSTHOG_DISABLED: z.string().default("false"),
-    NEXT_PUBLIC_PAYMASTER_URL: z.string().min(1),
   },
   // For Next.js >= 13.4.4, you only need to destructure client variables:
   experimental__runtimeEnv: {
@@ -34,11 +34,11 @@ export const env = createEnv({
     NEXT_PUBLIC_MINIKIT_PROJECT_ID: process.env.NEXT_PUBLIC_MINIKIT_PROJECT_ID,
     NEXT_PUBLIC_FARCASTER_HEADER: process.env.NEXT_PUBLIC_FARCASTER_HEADER,
     NEXT_PUBLIC_FARCASTER_PAYLOAD: process.env.NEXT_PUBLIC_FARCASTER_PAYLOAD,
-    NEXT_PUBLIC_FARCASTER_SIGNATURE: process.env.NEXT_PUBLIC_FARCASTER_SIGNATURE,
+    NEXT_PUBLIC_FARCASTER_SIGNATURE:
+      process.env.NEXT_PUBLIC_FARCASTER_SIGNATURE,
     NEXT_PUBLIC_SOCKET_URL: process.env.NEXT_PUBLIC_SOCKET_URL,
     NEXT_PUBLIC_DAIMO_PAY_ID: process.env.NEXT_PUBLIC_DAIMO_PAY_ID,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_DISABLED: process.env.NEXT_PUBLIC_POSTHOG_DISABLED,
-    NEXT_PUBLIC_PAYMASTER_URL: process.env.NEXT_PUBLIC_PAYMASTER_URL,
   },
 });

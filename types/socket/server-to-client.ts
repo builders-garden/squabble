@@ -1,15 +1,4 @@
-export interface Player {
-  id?: number;
-  fid: number;
-  address: `0x${string}`;
-  displayName?: string;
-  username?: string;
-  avatarUrl?: string;
-  ready?: boolean;
-  staked?: boolean;
-  score?: number;
-  availableLetters?: { letter: string; value: number }[];
-}
+import { Player } from "./player";
 
 export interface PlayerJoinedEvent {
   player: Player;
@@ -44,11 +33,6 @@ export interface GameStartedEvent {
 export interface RefreshedAvailableLettersEvent {
   gameId: string;
   players: Array<Player>;
-  playerId: number;
-}
-
-export interface RefreshAvailableLettersEvent {
-  gameId: string;
   playerId: number;
 }
 
@@ -119,58 +103,6 @@ export interface GameLoadingEvent {
   body: string;
 }
 
-export interface ConnectToLobbyEvent {
-  player: Player;
-  gameId: string;
-}
-
-export interface PlayerReadyEvent {
-  player: Player;
-  gameId: string;
-}
-
-export interface PlayerStakeConfirmedEvent {
-  player: Player;
-  gameId: string;
-  paymentHash: string;
-  payerAddress: string;
-}
-
-export interface PlayerStakeRefundedEvent {
-  player: Player;
-  gameId: string;
-  transactionHash: string;
-}
-
-export interface StartGameEvent {
-  player: Player;
-  gameId: string;
-}
-
-export interface SubmitWordEvent {
-  player: Player;
-  gameId: string;
-  word: string;
-  path: Array<{ x: number; y: number }>;
-  isNew: boolean;
-  placedLetters: Array<{ letter: string; x: number; y: number }>;
-}
-
-export interface PlaceLetterEvent {
-  player: Player;
-  gameId: string;
-  letter: string;
-  x: number;
-  y: number;
-}
-
-export interface RemoveLetterEvent {
-  player: Player;
-  gameId: string;
-  x: number;
-  y: number;
-}
-
 export interface WordNotValidEvent {
   gameId: string;
   player: Player;
@@ -188,7 +120,7 @@ export interface AdjacentWordsNotValidEvent {
 }
 
 // Type map for all events
-export type SocketEventMap = {
+export type ServerToClientEvents = {
   player_joined: PlayerJoinedEvent;
   player_left: PlayerLeftEvent;
   game_update: GameUpdateEvent;
@@ -200,16 +132,7 @@ export type SocketEventMap = {
   score_update: ScoreUpdateEvent;
   timer_tick: TimerTickEvent;
   game_ended: GameEndedEvent;
-  connect_to_lobby: ConnectToLobbyEvent;
-  player_ready: PlayerReadyEvent;
-  player_stake_confirmed: PlayerStakeConfirmedEvent;
-  player_stake_refunded: PlayerStakeRefundedEvent;
-  start_game: StartGameEvent;
-  submit_word: SubmitWordEvent;
-  place_letter: PlaceLetterEvent;
-  remove_letter: RemoveLetterEvent;
   refreshed_available_letters: RefreshedAvailableLettersEvent;
-  refresh_available_letters: RefreshAvailableLettersEvent;
   word_not_valid: WordNotValidEvent;
   adjacent_words_not_valid: AdjacentWordsNotValidEvent;
   game_loading: GameLoadingEvent;

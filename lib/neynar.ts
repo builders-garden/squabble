@@ -1,30 +1,42 @@
+import ky from "ky";
 import { env } from "@/lib/env";
+import { NeynarUser } from "@/types/neynar";
 
-export interface NeynarUser {
-  fid: string;
-  username: string;
-  display_name: string;
-  pfp_url: string;
-  custody_address: string;
-  verifications: string[];
-}
+/**
+ * Fetch multiple users from Neynar
+ * @param fids - comma separated FIDs of the users to fetch
+ * @returns The users
+ */
+export const fetchBulkUsersFromNeynar = async (
+  fids: string,
+  viewerFid?: string,
+): Promise<NeynarUser[]> => {
+  if (!fids) return [];
 
-export const fetchUser = async (fid: string): Promise<NeynarUser> => {
-  const response = await fetch(
-    `https://api.neynar.com/v2/farcaster/user/bulk?fids=${fid}`,
-    {
-      headers: {
-        "x-api-key": env.NEYNAR_API_KEY!,
+  const data = await ky
+    .get<{ users: NeynarUser[] }>(
+      `https://api.neynar.com/v2/farcaster/user/bulk?fids=${fids}${viewerFid ? `&viewer_fid=${viewerFid}` : ""}`,
+      {
+        headers: {
+          "x-api-key": env.NEYNAR_API_KEY,
+        },
       },
-    }
-  );
-  if (!response.ok) {
-    console.error(
-      "Failed to fetch Farcaster user on Neynar",
-      await response.json()
-    );
-    throw new Error("Failed to fetch Farcaster user on Neynar");
-  }
-  const data = await response.json();
-  return data.users[0];
+    )
+    .json();
+
+  return data.users || [];
+};
+
+/**
+ * Fetch a single user from Neynar
+ * @param fid - The FID of the user to fetch
+ * @returns The user
+ */
+export const fetchUserFromNeynar = async (
+  fid: string,
+): Promise<NeynarUser | null> => {
+  if (!fid) return null;
+  const users = await fetchBulkUsersFromNeynar(fid);
+  if (!users || users.length === 0) return null;
+  return users[0];
 };

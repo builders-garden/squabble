@@ -1,15 +1,16 @@
 "use client";
-import { GameWithParticipants } from "@/hooks/use-fetch-game";
-import { cn, formatAvatarUrl } from "@/lib/utils";
-import { Player } from "@/types/socket-events";
+
 import sdk from "@farcaster/miniapp-sdk";
-import { Logout } from "@solar-icons/react";
+import { LogOutIcon } from "lucide-react";
 import { motion } from "motion/react";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
 import { useEffect } from "react";
-import SquabbleButton from "../ui/squabble-button";
-import UserAvatar from "../ui/user-avatar";
+import SquabbleButton from "@/components/ui/squabble-button";
+import UserAvatar from "@/components/ui/user-avatar";
+import type { GameWithParticipants } from "@/hooks/use-fetch-game";
+import { cn, formatAvatarUrl } from "@/lib/utils";
+import type { Player } from "@/types/socket/player";
 
 const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
@@ -35,12 +36,12 @@ export default function Ended({
 
   useEffect(() => {
     refetchGame();
-  }, []);
+  }, [refetchGame]);
 
   // If no game participants but we have players, use players data
   if (!hasGameParticipants && hasPlayers) {
     const sortedPlayers = [...players].sort(
-      (a, b) => (b.score || 0) - (a.score || 0)
+      (a, b) => (b.score || 0) - (a.score || 0),
     );
     const topLeaderboardScore = sortedPlayers[0]?.score || 0;
     const isDraw =
@@ -59,15 +60,14 @@ export default function Ended({
               height={36}
             />
             <div
-              className={`${luckiestGuy.className} text-xl text-white tracking-wider`}
-            >
+              className={`${luckiestGuy.className} text-xl text-white tracking-wider`}>
               SQUABBLE
             </div>
           </div>
           <div className="flex flex-row items-center gap-2">
             <div className="flex flex-row items-center gap-1 text-red-600 bg-red-600/25 py-1 px-4 rounded-full text-xs">
               <p>Exit</p>
-              <Logout size={12} />
+              <LogOutIcon size={12} />
             </div>
           </div>
         </div>
@@ -91,9 +91,8 @@ export default function Ended({
                 "flex flex-row items-center bg-white/15 rounded-md px-4 py-3 gap-3 border-2 border-[#C8EFE3]",
                 player.score === topLeaderboardScore
                   ? "border-2 border-yellow-200 bg-yellow-200/10"
-                  : ""
-              )}
-            >
+                  : "",
+              )}>
               <div className="text-lg text-white font-bold w-8">
                 {index + 1}
               </div>
@@ -146,15 +145,14 @@ export default function Ended({
               height={36}
             />
             <div
-              className={`${luckiestGuy.className} text-xl text-white tracking-wider`}
-            >
+              className={`${luckiestGuy.className} text-xl text-white tracking-wider`}>
               SQUABBLE
             </div>
           </div>
           <div className="flex flex-row items-center gap-2">
             <div className="flex flex-row items-center gap-1 text-red-600 bg-red-600/25 py-1 px-4 rounded-full text-xs">
               <p>Exit</p>
-              <Logout size={12} />
+              <LogOutIcon size={12} />
             </div>
           </div>
         </div>
@@ -189,7 +187,7 @@ export default function Ended({
 
   // Use game.participants data (original logic)
   const sortedParticipants = [...game.participants].sort(
-    (a, b) => (b.points || 0) - (a.points || 0)
+    (a, b) => (b.points || 0) - (a.points || 0),
   );
   const topLeaderboardPoints = sortedParticipants[0]?.points || 0;
   const isDraw =
@@ -201,8 +199,7 @@ export default function Ended({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-between p-4"
-    >
+      className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-between p-4">
       {/* Header */}
       <div className="flex flex-row items-center justify-between w-full">
         <div className="flex flex-row items-center justify-center">
@@ -214,15 +211,14 @@ export default function Ended({
             height={36}
           />
           <div
-            className={`${luckiestGuy.className} text-xl text-white tracking-wider`}
-          >
+            className={`${luckiestGuy.className} text-xl text-white tracking-wider`}>
             SQUABBLE
           </div>
         </div>
         <div className="flex flex-row items-center gap-2">
           <div className="flex flex-row items-center gap-1 text-red-600 bg-red-600/25 py-1 px-4 rounded-full text-xs">
             <p>Exit</p>
-            <Logout size={12} />
+            <LogOutIcon size={12} />
           </div>
         </div>
       </div>
@@ -246,9 +242,8 @@ export default function Ended({
               "flex flex-row items-center bg-white/15 rounded-md px-4 py-3 gap-3 border-2 border-[#C8EFE3]",
               player.points === topLeaderboardPoints
                 ? "border-2 border-yellow-200 bg-yellow-200/10"
-                : ""
-            )}
-          >
+                : "",
+            )}>
             <div className="text-lg text-white font-bold w-8">{index + 1}</div>
             <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center overflow-hidden">
               <UserAvatar

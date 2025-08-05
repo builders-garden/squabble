@@ -3,7 +3,7 @@
 import { motion } from "motion/react";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
-import SquabbleButton from "../ui/squabble-button";
+import SquabbleButton from "@/components/ui/squabble-button";
 
 const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
@@ -17,8 +17,7 @@ export default function SignIn({ signIn }: { signIn: () => void }) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-center p-4"
-    >
+      className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-center p-4">
       <div className="flex flex-col items-center gap-4">
         <div className="flex flex-row items-center justify-center">
           <Image
@@ -29,8 +28,7 @@ export default function SignIn({ signIn }: { signIn: () => void }) {
             height={36}
           />
           <div
-            className={`${luckiestGuy.className} text-xl text-white tracking-wider`}
-          >
+            className={`${luckiestGuy.className} text-xl text-white tracking-wider`}>
             SQUABBLE
           </div>
         </div>

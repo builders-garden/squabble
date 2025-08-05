@@ -1,41 +1,39 @@
 import {
-  createWalletClient,
-  createPublicClient,
-  http,
-  type Address,
   Abi,
-  SendTransactionParameters,
-  parseEther,
+  createPublicClient,
+  createWalletClient,
+  http,
   parseUnits,
 } from "viem";
-import { base, baseSepolia } from "viem/chains";
 import { privateKeyToAccount } from "viem/accounts";
-import { SQUABBLE_CONTRACT_ABI, SQUABBLE_CONTRACT_ADDRESS } from "../constants";
-import { env } from "../env";
+import { basePreconf } from "viem/chains";
+import {
+  SQUABBLE_CONTRACT_ABI,
+  SQUABBLE_CONTRACT_ADDRESS,
+} from "@/lib/constants";
+import { env } from "@/lib/env";
 
-export async function createNewGame(
-  gameId: bigint,
-  stakeAmount: number
-) {
+export async function createNewGame(gameId: bigint, stakeAmount: number) {
   const privateKey = env.BACKEND_PRIVATE_KEY as `0x${string}`;
-
   if (!privateKey) {
+    console.error("BACKEND_PRIVATE_KEY environment variable is not set");
     throw new Error("BACKEND_PRIVATE_KEY environment variable is not set");
   }
 
   const account = privateKeyToAccount(privateKey);
 
   if (!account) {
+    console.error("No viem account found for private key");
     throw new Error("No account found");
   }
 
   const publicClient = createPublicClient({
-    chain: base,
+    chain: basePreconf,
     transport: http(),
   });
 
   const walletClient = createWalletClient({
-    chain: base,
+    chain: basePreconf,
     transport: http(),
     account: account,
   });

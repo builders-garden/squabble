@@ -7,6 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const formatAvatarUrl = (avatarUrl: string) => {
+  if (!avatarUrl) return "";
   if (
     avatarUrl.endsWith("/rectcrop3") ||
     avatarUrl.endsWith("/original") ||
@@ -14,15 +15,15 @@ export const formatAvatarUrl = (avatarUrl: string) => {
   ) {
     avatarUrl = avatarUrl.replace(
       "/rectcrop3",
-      "/anim=false,fit=contain,f=auto,w=512"
+      "/anim=false,fit=contain,f=auto,w=512",
     );
     avatarUrl = avatarUrl.replace(
       "/public",
-      "/anim=false,fit=contain,f=auto,w=512"
+      "/anim=false,fit=contain,f=auto,w=512",
     );
     avatarUrl = avatarUrl.replace(
       "/original",
-      "/anim=false,fit=contain,f=auto,w=512"
+      "/anim=false,fit=contain,f=auto,w=512",
     );
   }
   return avatarUrl;

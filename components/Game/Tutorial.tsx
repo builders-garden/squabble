@@ -29,8 +29,7 @@ const tutorialSteps = [
             repeat: Infinity,
             repeatType: "reverse",
           }}
-          className="w-6 h-6 text-white"
-        >
+          className="w-6 h-6 text-white">
           ↓
         </motion.div>
         <div className="w-10 h-10 bg-[#1A6B5A]/20 border-2 border-[#1A6B5A] rounded-md" />
@@ -48,8 +47,7 @@ const tutorialSteps = [
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.2 }}
-            className="w-10 h-10 bg-[#FFFDEB] border-2 border-[#E6E6E6] rounded-md uppercase flex items-center justify-center text-2xl font-bold text-[#B5A16E] shadow"
-          >
+            className="w-10 h-10 bg-[#FFFDEB] border-2 border-[#E6E6E6] rounded-md uppercase flex items-center justify-center text-2xl font-bold text-[#B5A16E] shadow">
             {letter}
           </motion.div>
         ))}
@@ -72,8 +70,7 @@ const tutorialSteps = [
                 duration: 1.5,
                 repeat: Infinity,
               }}
-              className="w-10 h-10 border-2 border-[#E6E6E6] rounded-md uppercase flex items-center justify-center text-2xl font-bold text-[#B5A16E] shadow"
-            >
+              className="w-10 h-10 border-2 border-[#E6E6E6] rounded-md uppercase flex items-center justify-center text-2xl font-bold text-[#B5A16E] shadow">
               {letter}
             </motion.div>
           ))}
@@ -86,8 +83,7 @@ const tutorialSteps = [
             duration: 1.5,
             repeat: Infinity,
           }}
-          className="text-yellow-400 font-bold text-xl"
-        >
+          className="text-yellow-400 font-bold text-xl">
           +10
         </motion.div>
       </div>
@@ -117,8 +113,7 @@ export default function Tutorial() {
             height={36}
           />
           <div
-            className={`${luckiestGuy.className} text-xl text-white tracking-wider`}
-          >
+            className={`${luckiestGuy.className} text-xl text-white tracking-wider`}>
             SQUABBLE
           </div>
         </div>
@@ -131,8 +126,7 @@ export default function Tutorial() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="flex flex-col items-center gap-6 text-center"
-          >
+            className="flex flex-col items-center gap-6 text-center">
             <div className="text-white font-medium text-xl">
               {tutorialSteps[currentStep].title}
             </div>

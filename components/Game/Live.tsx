@@ -1,20 +1,21 @@
 "use client";
-import { useAudio } from "@/contexts/audio-context";
-import { useGame } from "@/contexts/game-context";
-import useSocketUtils from "@/hooks/use-socket-utils";
-import { trackEvent } from "@/lib/posthog/client";
-import { cn, formatAvatarUrl } from "@/lib/utils";
-import { Player } from "@/types/socket-events";
+
 import sdk from "@farcaster/miniapp-sdk";
 import { User } from "@prisma/client";
-import { Logout, Shuffle } from "@solar-icons/react";
+import { LogOutIcon, ShuffleIcon } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
 import { DragEvent, useEffect, useState } from "react";
 import { toast } from "sonner";
-import SquabbleButton from "../ui/squabble-button";
-import UserAvatar from "../ui/user-avatar";
+import SquabbleButton from "@/components/ui/squabble-button";
+import UserAvatar from "@/components/ui/user-avatar";
+import { useAudio } from "@/contexts/audio-context";
+import { useGame } from "@/contexts/game-context";
+import useSocketUtils from "@/hooks/use-socket-utils";
+import { trackEvent } from "@/lib/posthog/client";
+import { cn, formatAvatarUrl } from "@/lib/utils";
+import { Player } from "@/types/socket";
 import Loading from "./Loading";
 
 const luckiestGuy = Luckiest_Guy({
@@ -63,7 +64,7 @@ export default function Live({
     // Remove any placedLetters that no longer match the board state
     // This handles when another player submits a word that overlaps with our placed letters
     setPlacedLetters((prev) =>
-      prev.filter((placed) => board[placed.row][placed.col] === placed.letter)
+      prev.filter((placed) => board[placed.row][placed.col] === placed.letter),
     );
   }, [board]);
   const [placementDirection, setPlacementDirection] = useState<
@@ -102,7 +103,7 @@ export default function Live({
       if (placementDirection === "horizontal") {
         // Check if there's a valid placement cell to the right
         const hasValidRight = validPlacementCells.some(
-          (cell) => cell.row === lastPos.row && cell.col === lastPos.col + 1
+          (cell) => cell.row === lastPos.row && cell.col === lastPos.col + 1,
         );
 
         if (hasValidRight) {
@@ -121,7 +122,7 @@ export default function Live({
       } else {
         // Check if there's a valid placement cell below
         const hasValidBelow = validPlacementCells.some(
-          (cell) => cell.col === lastPos.col && cell.row === lastPos.row + 1
+          (cell) => cell.col === lastPos.col && cell.row === lastPos.row + 1,
         );
 
         if (hasValidBelow) {
@@ -142,10 +143,10 @@ export default function Live({
 
     // For single letters, check valid placements in all directions
     const hasValidRight = validPlacementCells.some(
-      (cell) => cell.row === lastLetter.row && cell.col === lastLetter.col + 1
+      (cell) => cell.row === lastLetter.row && cell.col === lastLetter.col + 1,
     );
     const hasValidBelow = validPlacementCells.some(
-      (cell) => cell.col === lastLetter.col && cell.row === lastLetter.row + 1
+      (cell) => cell.col === lastLetter.col && cell.row === lastLetter.row + 1,
     );
 
     if (!hasValidRight && !hasValidBelow) {
@@ -178,7 +179,7 @@ export default function Live({
   const handleDragStart = (
     e: DragEvent<HTMLDivElement>,
     letter: { letter: string; value: number },
-    index: number
+    index: number,
   ) => {
     e.dataTransfer.setData("text/plain", letter.letter);
     e.dataTransfer.setData("index", index.toString());
@@ -192,7 +193,7 @@ export default function Live({
   const isAdjacentToExistingLetter = (
     row: number,
     col: number,
-    board: string[][]
+    board: string[][],
   ) => {
     // Check all adjacent cells (up, down, left, right)
     const adjacentPositions = [
@@ -484,9 +485,13 @@ export default function Live({
   const handleDrop = (
     e: DragEvent<HTMLDivElement>,
     row: number,
-    col: number
+    col: number,
   ) => {
     e.preventDefault();
+    if (!currentPlayer) {
+      console.warn("Cannot handle drop: No current player found");
+      return;
+    }
     const letter = e.dataTransfer.getData("text/plain");
     const index = parseInt(e.dataTransfer.getData("index"));
 
@@ -494,7 +499,7 @@ export default function Live({
     if (!board[row][col]) {
       // Check if this is a valid placement cell
       const isValidPlacement = validPlacementCells.some(
-        (cell) => cell.row === row && cell.col === col
+        (cell) => cell.row === row && cell.col === col,
       );
 
       if (!isValidPlacement) {
@@ -509,7 +514,7 @@ export default function Live({
           {
             position: "top-left",
             duration: 5000,
-          }
+          },
         );
         return;
       }
@@ -546,12 +551,18 @@ export default function Live({
 
       // Remove the letter from available letters
       setAvailableLetters(availableLetters.filter((_, i) => i !== index));
-      placeLetter(currentPlayer!, gameId, letter, row, col);
+      placeLetter({
+        player: currentPlayer,
+        gameId,
+        letter,
+        x: row,
+        y: col,
+      });
       setSelectedLetter(null);
       playSound("letterPlaced");
 
       trackEvent("letter_placed", {
-        fid: currentPlayer?.fid,
+        fid: currentPlayer.fid,
         letter,
         row,
         col,
@@ -561,13 +572,17 @@ export default function Live({
   };
 
   const handleCellClick = (row: number, col: number) => {
+    if (!currentPlayer) {
+      console.warn("Cannot handle cell click: No current player found");
+      return;
+    }
     const existingLetter = board[row][col];
 
     // If we have a selected letter and click on a placed letter, swap them
     if (selectedLetter && existingLetter) {
       // Find if this letter was placed in current turn
       const placedLetterIndex = placedLetters.findIndex(
-        (l) => l.row === row && l.col === col
+        (l) => l.row === row && l.col === col,
       );
 
       // Only allow replacing letters placed in current turn
@@ -587,17 +602,23 @@ export default function Live({
 
         // Update available letters: add the old letter and remove the selected one
         const newAvailableLetters = availableLetters.filter(
-          (_, i) => i !== selectedLetter.index
+          (_, i) => i !== selectedLetter.index,
         );
         newAvailableLetters.push({ letter: existingLetter, value: 1 });
         setAvailableLetters(newAvailableLetters);
 
-        placeLetter(currentPlayer!, gameId, selectedLetter.letter, row, col);
+        placeLetter({
+          player: currentPlayer,
+          gameId,
+          letter: selectedLetter.letter,
+          x: row,
+          y: col,
+        });
         setSelectedLetter(null);
         playSound("letterPlaced");
 
         trackEvent("letter_replaced", {
-          fid: currentPlayer?.fid,
+          fid: currentPlayer.fid,
           letter: selectedLetter.letter,
           row,
           col,
@@ -611,7 +632,7 @@ export default function Live({
     if (!selectedLetter && existingLetter) {
       // Only allow removing letters that were placed in the current turn
       const placedLetterIndex = placedLetters.findIndex(
-        (l) => l.row === row && l.col === col
+        (l) => l.row === row && l.col === col,
       );
 
       if (placedLetterIndex !== -1) {
@@ -644,7 +665,7 @@ export default function Live({
     if (selectedLetter && !existingLetter) {
       // Check if this is a valid placement cell
       const isValidPlacement = validPlacementCells.some(
-        (cell) => cell.row === row && cell.col === col
+        (cell) => cell.row === row && cell.col === col,
       );
 
       if (!isValidPlacement) {
@@ -659,7 +680,7 @@ export default function Live({
           {
             position: "top-left",
             duration: 5000,
-          }
+          },
         );
         return;
       }
@@ -700,9 +721,15 @@ export default function Live({
 
       // Remove the letter from available letters
       setAvailableLetters(
-        availableLetters.filter((_, i) => i !== selectedLetter.index)
+        availableLetters.filter((_, i) => i !== selectedLetter.index),
       );
-      placeLetter(currentPlayer!, gameId, selectedLetter.letter, row, col);
+      placeLetter({
+        player: currentPlayer,
+        gameId,
+        letter: selectedLetter.letter,
+        x: row,
+        y: col,
+      });
       setSelectedLetter(null);
       playSound("letterPlaced");
     }
@@ -710,7 +737,7 @@ export default function Live({
 
   const handleLetterClick = (
     letter: { letter: string; value: number },
-    index: number
+    index: number,
   ) => {
     // If clicking the same letter that's already selected, deselect it
     if (selectedLetter?.index === index) {
@@ -721,6 +748,10 @@ export default function Live({
   };
 
   const handleShuffle = () => {
+    if (!currentPlayer) {
+      console.warn("Cannot handle shuffle: No current player found");
+      return;
+    }
     // Clear placed letters from the board
     const newBoard = [...board];
     placedLetters.forEach(({ row, col }) => {
@@ -739,11 +770,11 @@ export default function Live({
 
     // Start the animation
     setTimeout(() => {
-      refreshAvailableLetters(user.fid, gameId);
+      refreshAvailableLetters({ playerId: user.fid, gameId });
     }, 125); // Small delay to let sounds start first
 
     trackEvent("shuffle_letters", {
-      fid: currentPlayer?.fid,
+      fid: currentPlayer.fid,
       gameId,
     });
   };
@@ -754,6 +785,11 @@ export default function Live({
 
   const handleSubmitWord = () => {
     if (placedLetters.length === 0) return;
+
+    if (!currentPlayer) {
+      console.warn("Cannot handle submit word: No current player found");
+      return;
+    }
 
     // Special handling for single letter placement
     if (placedLetters.length === 1) {
@@ -791,21 +827,25 @@ export default function Live({
       const word = mainWord.map((l) => l.letter).join("");
       const path = mainWord.map((l) => ({ x: l.col, y: l.row }));
 
-      submitWord(
-        currentPlayer!,
+      submitWord({
+        player: currentPlayer,
         gameId,
         word,
         path,
-        true,
-        placedLetters.map((l) => ({ letter: l.letter, x: l.col, y: l.row }))
-      );
+        isNew: true,
+        placedLetters: placedLetters.map((l) => ({
+          letter: l.letter,
+          x: l.col,
+          y: l.row,
+        })),
+      });
 
       // Reset the placed letters and direction after submission
       setPlacedLetters([]);
       setPlacementDirection(null);
 
       trackEvent("word_submitted", {
-        fid: currentPlayer?.fid,
+        fid: currentPlayer.fid,
         word,
         path,
         letters: placedLetters.map((l) => l.letter),
@@ -826,7 +866,7 @@ export default function Live({
     const getConnectedLetters = (
       row: number,
       col: number,
-      direction: "horizontal" | "vertical"
+      direction: "horizontal" | "vertical",
     ) => {
       const key = `${row}-${col}`;
       if (visited.has(key)) return;
@@ -874,14 +914,18 @@ export default function Live({
     const word = sortedLetters.map((l) => l.letter).join("");
     const path = sortedLetters.map((l) => ({ x: l.col, y: l.row }));
 
-    submitWord(
-      currentPlayer!,
+    submitWord({
+      player: currentPlayer,
       gameId,
       word,
       path,
-      true,
-      placedLetters.map((l) => ({ letter: l.letter, x: l.col, y: l.row }))
-    );
+      isNew: true,
+      placedLetters: placedLetters.map((l) => ({
+        letter: l.letter,
+        x: l.col,
+        y: l.row,
+      })),
+    });
 
     // Reset the placed letters and direction after submission
     setPlacedLetters([]);
@@ -902,7 +946,7 @@ export default function Live({
     const getConnectedLetters = (
       row: number,
       col: number,
-      direction: "horizontal" | "vertical"
+      direction: "horizontal" | "vertical",
     ) => {
       const key = `${row}-${col}`;
       if (visited.has(key)) return;
@@ -972,8 +1016,8 @@ export default function Live({
     // Special case: if the board is empty except for placedLetters, allow the first word
     const boardHasOtherLetters = board.some((rowArr, rIdx) =>
       rowArr.some(
-        (cell, cIdx) => cell !== "" && !placedSet.has(`${rIdx}-${cIdx}`)
-      )
+        (cell, cIdx) => cell !== "" && !placedSet.has(`${rIdx}-${cIdx}`),
+      ),
     );
     return !boardHasOtherLetters;
   };
@@ -983,6 +1027,7 @@ export default function Live({
   // 1. Find all horizontal words (including cross words)
   // 2. Find all vertical words (including cross words)
   // 3. Handle special case for new words not touching existing letters
+  // biome-ignore lint/correctness/useExhaustiveDependencies: not needed
   useEffect(() => {
     let highlightCells: Array<{ row: number; col: number }> = [];
 
@@ -1041,7 +1086,7 @@ export default function Live({
     if (placedLetters.length > 1) {
       // Check if all placed letters are in the same row
       const sameRow = placedLetters.every(
-        (l) => l.row === placedLetters[0].row
+        (l) => l.row === placedLetters[0].row,
       );
       if (sameRow) {
         const row = placedLetters[0].row;
@@ -1049,7 +1094,7 @@ export default function Live({
 
         // Check if letters are contiguous
         const isContiguous = cols.every(
-          (col, i) => i === 0 || col === cols[i - 1] + 1
+          (col, i) => i === 0 || col === cols[i - 1] + 1,
         );
         if (isContiguous && cols.length > 1) {
           highlightCells.push(...cols.map((col) => ({ row, col })));
@@ -1058,7 +1103,7 @@ export default function Live({
 
       // Check if all placed letters are in the same column
       const sameCol = placedLetters.every(
-        (l) => l.col === placedLetters[0].col
+        (l) => l.col === placedLetters[0].col,
       );
       if (sameCol) {
         const col = placedLetters[0].col;
@@ -1066,7 +1111,7 @@ export default function Live({
 
         // Check if letters are contiguous
         const isContiguous = rows.every(
-          (row, i) => i === 0 || row === rows[i - 1] + 1
+          (row, i) => i === 0 || row === rows[i - 1] + 1,
         );
 
         if (isContiguous && rows.length > 1) {
@@ -1077,7 +1122,7 @@ export default function Live({
 
     // Remove any duplicate cells
     const uniqueCells = Array.from(
-      new Set(highlightCells.map((cell) => `${cell.row}-${cell.col}`))
+      new Set(highlightCells.map((cell) => `${cell.row}-${cell.col}`)),
     ).map((key) => {
       const [r, c] = key.split("-").map(Number);
       return { row: r, col: c };
@@ -1099,8 +1144,7 @@ export default function Live({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-between p-4"
-    >
+      className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-between p-4">
       {/* Header */}
       <div className="flex flex-row items-center justify-between w-full">
         <div className="flex flex-row items-center justify-center">
@@ -1112,19 +1156,18 @@ export default function Live({
             height={36}
           />
           <div
-            className={`${luckiestGuy.className} text-xl text-white tracking-wider`}
-          >
+            className={`${luckiestGuy.className} text-xl text-white tracking-wider`}>
             SQUABBLE
           </div>
         </div>
         <div className="flex flex-row items-center gap-2">
-          <div
+          <button
+            type="button"
             className="flex flex-row items-center gap-1 text-white font-medium bg-red-800/75  py-1 px-4 rounded-full text-xs cursor-pointer"
-            onClick={handleExitGame}
-          >
+            onClick={handleExitGame}>
             <p>Exit</p>
-            <Logout size={12} />
-          </div>
+            <LogOutIcon size={12} />
+          </button>
 
           <motion.div
             key={timeRemaining}
@@ -1162,8 +1205,7 @@ export default function Live({
             }
             className={`text-black bg-white py-1 px-4 rounded-full text-xs w-16 text-center ${
               timeRemaining <= 60 ? "text-red-600" : ""
-            }`}
-          >
+            }`}>
             {Math.floor(timeRemaining / 60)}:
             {String(timeRemaining % 60).padStart(2, "0")}
           </motion.div>
@@ -1184,8 +1226,7 @@ export default function Live({
                 p.fid === user?.fid
                   ? "bg-blue-300/15 border-2 border-blue-300"
                   : ""
-              }`}
-            >
+              }`}>
               <div className="text-xs text-white rounded-full font-bold">
                 {i + 1}
               </div>
@@ -1225,9 +1266,8 @@ export default function Live({
                 "absolute px-2 py-1 rounded-full text-xs font-medium shadow-lg z-10",
                 "bg-yellow-400 text-yellow-900",
                 "flex items-center gap-1 whitespace-nowrap",
-                "transition-all duration-200 ease-in-out"
-              )}
-            >
+                "transition-all duration-200 ease-in-out",
+              )}>
               <span>Submit word</span>
               <span className="text-[10px]">↵</span>
             </motion.button>
@@ -1240,45 +1280,46 @@ export default function Live({
               const isHighlighted = highlightedCells.some(
                 (cell) =>
                   cell.row.toString() === rowIndex.toString() &&
-                  cell.col.toString() === colIndex.toString()
+                  cell.col.toString() === colIndex.toString(),
               );
               const isWordHighlight = wordCellsToHighlight.some(
                 (cell) =>
                   cell.row.toString() === rowIndex.toString() &&
-                  cell.col.toString() === colIndex.toString()
+                  cell.col.toString() === colIndex.toString(),
               );
               const isPlacedThisTurn = placedLetters.some(
-                (l) => l.row === rowIndex && l.col === colIndex
+                (l) => l.row === rowIndex && l.col === colIndex,
               );
               return (
                 <motion.div
-                  key={`${rowIndex}-${colIndex}`}
+                  key={`letter-${rowIndex}-${colIndex}`}
                   className={cn(
                     "flex items-center border-2 justify-center uppercase cursor-pointer relative border-[#1A6B5A]",
                     `${
                       isWordHighlight
                         ? "bg-[#FFFDEB] font-bold text-yellow-400 text-xl"
                         : letter &&
-                          !placedLetters.some(
-                            (l) => l.row === rowIndex && l.col === colIndex
-                          )
-                        ? "bg-[#FFFDEB] font-bold text-[#B5A16E] text-xl"
-                        : placedLetters.some(
-                            (l) => l.row === rowIndex && l.col === colIndex
-                          )
-                        ? "bg-yellow-400/30 text-yellow-400"
-                        : validPlacementCells.some(
-                            (cell) =>
-                              cell.row === rowIndex && cell.col === colIndex
-                          )
-                        ? "bg-[#FFFDEB]/25 hover:bg-[#FFFDEB]/25"
-                        : "bg-[#1A6B5A]/20"
+                            !placedLetters.some(
+                              (l) => l.row === rowIndex && l.col === colIndex,
+                            )
+                          ? "bg-[#FFFDEB] font-bold text-[#B5A16E] text-xl"
+                          : placedLetters.some(
+                                (l) => l.row === rowIndex && l.col === colIndex,
+                              )
+                            ? "bg-yellow-400/30 text-yellow-400"
+                            : validPlacementCells.some(
+                                  (cell) =>
+                                    cell.row === rowIndex &&
+                                    cell.col === colIndex,
+                                )
+                              ? "bg-[#FFFDEB]/25 hover:bg-[#FFFDEB]/25"
+                              : "bg-[#1A6B5A]/20"
                     } ${selectedLetter ? "hover:bg-[#FFFDEB]" : ""}`,
                     placedLetters.some(
-                      (l) => l.row === rowIndex && l.col === colIndex
+                      (l) => l.row === rowIndex && l.col === colIndex,
                     )
                       ? "bg-yellow-400/30 text-yellow-400"
-                      : ""
+                      : "",
                   )}
                   style={{ width: 36, height: 36 }}
                   draggable={!!letter}
@@ -1287,8 +1328,7 @@ export default function Live({
                   }
                   onDragOver={handleDragOver}
                   onDrop={(e) => handleDrop(e, rowIndex, colIndex)}
-                  onClick={() => handleCellClick(rowIndex, colIndex)}
-                >
+                  onClick={() => handleCellClick(rowIndex, colIndex)}>
                   {isWordHighlight && letter ? (
                     <div className="text-xl font-bold">{letter}</div>
                   ) : (
@@ -1310,8 +1350,7 @@ export default function Live({
                               color: "#B5A16E",
                             }
                       }
-                      className="text-xl font-bold text-[#B5A16E]"
-                    >
+                      className="text-xl font-bold text-[#B5A16E]">
                       {letter}
                     </motion.div>
                   )}
@@ -1323,8 +1362,7 @@ export default function Live({
                         .map((player, idx) => (
                           <div
                             key={player.fid}
-                            className="w-3 h-3 rounded-full overflow-hidden"
-                          >
+                            className="w-3 h-3 rounded-full overflow-hidden">
                             <Image
                               src={formatAvatarUrl(player.avatarUrl || "")}
                               alt={player.displayName || player.username || ""}
@@ -1337,7 +1375,7 @@ export default function Live({
                   )}
                 </motion.div>
               );
-            })
+            }),
           )}
         </div>
       </div>
@@ -1353,26 +1391,22 @@ export default function Live({
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0, opacity: 0 }}
                 transition={{ duration: 0.2, delay: i * 0.05 }}
-                layout
-              >
+                layout>
                 <div
                   className={`w-10 h-10 bg-[#FFFDEB] border-2 border-[#E6E6E6] rounded-md uppercase flex flex-col items-center justify-center text-2xl font-bold text-[#B5A16E] shadow relative cursor-pointer ${
                     selectedLetter?.index === i ? "ring-2 ring-blue-400" : ""
                   }`}
                   draggable
                   onDragStart={(e) => handleDragStart(e, l, i)}
-                  onClick={() => handleLetterClick(l, i)}
-                >
+                  onClick={() => handleLetterClick(l, i)}>
                   <span
                     className={`text-2xl text-[#B5A16E] font-bold uppercase ${
                       l.value >= 10 ? "mr-1" : ""
-                    }`}
-                  >
+                    }`}>
                     {l.letter}
                   </span>
                   <span
-                    className={`absolute text-xs text-[#B5A16E] font-medium uppercase bottom-0 right-0.5`}
-                  >
+                    className={`absolute text-xs text-[#B5A16E] font-medium uppercase bottom-0 right-0.5`}>
                     {l.value}
                   </span>
                 </div>
@@ -1383,9 +1417,8 @@ export default function Live({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleShuffle}
-            className="w-10 h-10 bg-[#FFFDEB] border-2 border-[#E6E6E6] rounded-md flex items-center justify-center text-yellow-400 hover:bg-white/15 transition-colors shadow-sm"
-          >
-            <Shuffle className="w-6 h-6" />
+            className="w-10 h-10 bg-[#FFFDEB] border-2 border-[#E6E6E6] rounded-md flex items-center justify-center text-yellow-400 hover:bg-white/15 transition-colors shadow-sm">
+            <ShuffleIcon className="w-6 h-6" />
           </motion.button>
         </div>
 

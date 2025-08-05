@@ -1,5 +1,5 @@
 import { GameParticipant, User } from "@prisma/client";
-import { prisma } from "../client";
+import { prisma } from "@/lib/prisma/client";
 
 // Types
 export type CreateGameParticipantInput = {
@@ -20,7 +20,7 @@ export type UpdateGameParticipantInput = {
 
 // Create a new game participant
 export async function createGameParticipant(
-  input: CreateGameParticipantInput
+  input: CreateGameParticipantInput,
 ): Promise<GameParticipant> {
   try {
     return await prisma.gameParticipant.upsert({
@@ -53,7 +53,7 @@ export async function createGameParticipant(
 // Get a game participant by FID and Game
 export async function getGameParticipantByFidAndGameId(
   fid: number,
-  gameId: string
+  gameId: string,
 ): Promise<GameParticipant | null> {
   try {
     return await prisma.gameParticipant.findUnique({
@@ -70,7 +70,7 @@ export interface GameParticipantWithUser extends GameParticipant {
 
 // Get game participants by game ID
 export async function getGameParticipantsByGameId(
-  gameId: string
+  gameId: string,
 ): Promise<GameParticipantWithUser[]> {
   try {
     return await prisma.gameParticipant.findMany({
@@ -86,7 +86,7 @@ export async function getGameParticipantsByGameId(
 
 // Get game participants by user FID
 export async function getGameParticipantsByFid(
-  fid: number
+  fid: number,
 ): Promise<GameParticipant[]> {
   try {
     return await prisma.gameParticipant.findMany({
@@ -103,7 +103,7 @@ export async function getGameParticipantsByFid(
 // Update a game participant
 export async function updateGameParticipant(
   id: string,
-  input: UpdateGameParticipantInput
+  input: UpdateGameParticipantInput,
 ): Promise<GameParticipant> {
   try {
     return await prisma.gameParticipant.update({
@@ -118,7 +118,7 @@ export async function updateGameParticipant(
 // Delete a game participant
 export async function deleteGameParticipant(
   fid: number,
-  gameId: string
+  gameId: string,
 ): Promise<GameParticipant> {
   try {
     return await prisma.gameParticipant.delete({
@@ -132,7 +132,7 @@ export async function deleteGameParticipant(
 // Check if a user is already a participant in a game
 export async function isUserParticipantInGame(
   fid: number,
-  gameId: string
+  gameId: string,
 ): Promise<boolean> {
   try {
     const participant = await prisma.gameParticipant.findUnique({
@@ -151,7 +151,7 @@ export async function isUserParticipantInGame(
 
 // Get all winners for a game
 export async function getGameWinners(
-  gameId: string
+  gameId: string,
 ): Promise<GameParticipant[]> {
   try {
     return await prisma.gameParticipant.findMany({

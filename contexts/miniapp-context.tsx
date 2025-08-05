@@ -1,10 +1,10 @@
 "use client";
-import { FrameContext } from "@farcaster/frame-core/dist/context";
+
+import { type MiniAppContext as FarcasterMiniAppContext } from "@farcaster/miniapp-core/dist/context";
 import { sdk } from "@farcaster/miniapp-sdk";
 import {
   createContext,
   useCallback,
-  useContext,
   useEffect,
   useState,
   type ReactNode,
@@ -13,12 +13,14 @@ import MiniAppWalletProvider from "./miniapp-wallet-context";
 
 interface MiniAppContextType {
   isMiniAppReady: boolean;
-  context: FrameContext | null;
+  context: FarcasterMiniAppContext | null;
   setMiniAppReady: () => void;
   addMiniApp: () => Promise<unknown>;
 }
 
-const MiniAppContext = createContext<MiniAppContextType | undefined>(undefined);
+export const MiniAppContext = createContext<MiniAppContextType | undefined>(
+  undefined,
+);
 
 export function MiniAppProvider({
   addMiniAppOnLoad,
@@ -27,7 +29,7 @@ export function MiniAppProvider({
   addMiniAppOnLoad?: boolean;
   children: ReactNode;
 }) {
-  const [context, setContext] = useState<FrameContext | null>(null);
+  const [context, setContext] = useState<FarcasterMiniAppContext | null>(null);
   const [isMiniAppReady, setIsMiniAppReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,7 +37,7 @@ export function MiniAppProvider({
     try {
       const context = await sdk.context;
       if (context) {
-        setContext(context as FrameContext);
+        setContext(context as FarcasterMiniAppContext);
       } else {
         setError("Failed to load Farcaster context");
       }
@@ -64,13 +66,13 @@ export function MiniAppProvider({
       }
       return null;
     } catch (error) {
-      console.error("[error] adding frame", error);
+      console.error("[error] adding farcaster miniapp", error);
       return null;
     }
   }, []);
 
   useEffect(() => {
-    // on load, set the frame as ready
+    // on load, set the miniapp as ready
     if (isMiniAppReady && !context?.client?.added && addMiniAppOnLoad) {
       handleAddMiniApp();
     }
@@ -88,17 +90,8 @@ export function MiniAppProvider({
         setMiniAppReady,
         addMiniApp: handleAddMiniApp,
         context,
-      }}
-    >
+      }}>
       <MiniAppWalletProvider>{children}</MiniAppWalletProvider>
     </MiniAppContext.Provider>
   );
-}
-
-export function useMiniApp() {
-  const context = useContext(MiniAppContext);
-  if (context === undefined) {
-    throw new Error("useMiniApp must be used within a MiniAppProvider");
-  }
-  return context;
 }

@@ -1,9 +1,11 @@
-import { useMiniApp } from "@/contexts/miniapp-context";
 import sdk from "@farcaster/miniapp-sdk";
 import { User } from "@prisma/client";
+import ky from "ky";
+import posthog from "posthog-js";
 import { useCallback, useEffect, useState } from "react";
-import { useAccount } from "wagmi";
-import { useApiQuery } from "./use-api-query";
+import { useAuthCheck } from "./use-auth-check";
+import { useMiniApp } from "./use-miniapp";
+import { useUser } from "./use-user";
 
 export const useSignIn = ({
   autoSignIn = false,
@@ -12,23 +14,13 @@ export const useSignIn = ({
   autoSignIn?: boolean;
   onSuccess?: (user: User) => void;
 }) => {
-  const { context } = useMiniApp();
-  const [isSignedIn, setIsSignedIn] = useState(false);
-  const {
-    data: user,
-    isLoading: isLoadingNeynarUser,
-    refetch: refetchUser,
-  } = useApiQuery<User>({
-    url: "/api/users/me",
-    method: "GET",
-    isProtected: true,
-    queryKey: ["user"],
-    enabled: !!isSignedIn,
-  });
+  const { context, isMiniAppReady } = useMiniApp();
+  const { setUser } = useUser();
+  const { user: authUser, isAuthenticated } = useAuthCheck();
 
+  const [isSignedIn, setIsSignedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const { address } = useAccount();
 
   const handleSignIn = useCallback(async () => {
     try {
@@ -36,8 +28,18 @@ export const useSignIn = ({
       setError(null);
 
       if (!context) {
-        console.error("Not in mini app");
-        throw new Error("Not in mini app");
+        if (isMiniAppReady) {
+          console.error("Not in mini app");
+          throw new Error("No context found");
+        }
+        return;
+      }
+
+      if (isAuthenticated && authUser) {
+        setIsSignedIn(true);
+        setUser(authUser);
+        onSuccess?.(authUser);
+        return;
       }
 
       const { token } = await sdk.quickAuth.getToken();
@@ -46,46 +48,53 @@ export const useSignIn = ({
         throw new Error("Sign in failed");
       }
 
-      const res = await fetch("/api/auth/sign-in", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          token,
-          fid: context.user.fid,
-        }),
-      });
+      const referrerFid =
+        context.location?.type === "cast_embed"
+          ? context.location.cast.author.fid
+          : null;
 
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        console.error(errorData);
-        throw new Error(errorData.message || "Sign in failed");
+      const data = await ky
+        .post("/api/auth/sign-in", {
+          credentials: "include",
+          json: {
+            token,
+            fid: context.user.fid,
+            referrerFid,
+          },
+        })
+        .json<{ success: boolean; error?: string; user?: User }>();
+
+      if (!data.success) {
+        console.error("Sign in failed", data.error);
+        throw new Error(data.error ?? "Sign in failed");
+      }
+      if (!data.user) {
+        console.error("User not found");
+        throw new Error("User not found");
       }
 
-      const data = await res.json();
       setIsSignedIn(true);
-      refetchUser();
+      setUser(data.user);
       onSuccess?.(data.user);
+      posthog.identify(context.user.fid.toString());
       return data;
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Sign in failed";
+      console.error("Sign in failed", errorMessage);
       setError(errorMessage);
-      throw err;
     } finally {
       setIsLoading(false);
     }
-  }, [onSuccess, refetchUser, address]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [context]);
 
   useEffect(() => {
     // if autoSignIn is true, sign in automatically on mount
-    if (autoSignIn && context && address) {
-      if (!isSignedIn) {
-        handleSignIn();
-      }
+    if (autoSignIn && !isSignedIn) {
+      handleSignIn();
     }
-  }, [autoSignIn, handleSignIn, isSignedIn, context]);
+  }, [autoSignIn, handleSignIn, isSignedIn]);
 
-  return { signIn: handleSignIn, isSignedIn, isLoading, error, user };
+  return { signIn: handleSignIn, isSignedIn, isLoading, error };
 };

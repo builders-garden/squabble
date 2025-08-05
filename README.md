@@ -1,4 +1,5 @@
 # Squabble
+
 ## Farcaster Mini App Template w/ Base MiniKit
 
 This is a [Next.js](https://nextjs.org) starter kit bootstrapped from [Mini App Next Template](https://github.com/builders-garden/miniapp-next-template)
@@ -28,16 +29,16 @@ bun install
 
 The environment variables enable the following features:
 
-- Frame metadata - Sets up the Frame Embed that will be shown when you cast your frame
-- Account assocation - Allows users to add your frame to their account, enables notifications
+- Farcaster miniapp metadata - Sets up the MiniApp Embed that will be shown when you cast your miniapp
+- Account assocation - Allows users to add your miniapp to their account, enables notifications
 - Redis API keys - Enable Webhooks and background notifications for your application by storing users notification details
 
 ```bash
-# Required for Frame metadata
+# Required for Farcaster miniapp metadata
 NEXT_PUBLIC_URL=
 NEXT_PUBLIC_MINIKIT_PROJECT_ID=
 
-# Required to allow users to add your frame
+# Required to allow users to add your miniapp
 NEXT_PUBLIC_FARCASTER_HEADER=
 NEXT_PUBLIC_FARCASTER_PAYLOAD=
 NEXT_PUBLIC_FARCASTER_SIGNATURE=
@@ -65,15 +66,15 @@ npm run dev
 5. Generate your Farcaster Manifest variables
 
 - Follow these [instructions](https://miniapps.farcaster.xyz/docs/guides/publishing)
-- Visit [Manifest Tool](https://warpcast.com/~/developers/mini-apps/manifest)
+- Visit [Manifest Tool](https://farcaster.xyz/~/developers/mini-apps/manifest)
 - Paste your tunnel domain
 
 ## Template Features
 
-### Frame Configuration
+### Farcaster MiniApp Configuration
 
-- `.well-known/farcaster.json` endpoint configured for Frame metadata and account association
-- Frame metadata automatically added to page headers in `layout.tsx`
+- `.well-known/farcaster.json` endpoint configured for MiniApp metadata and account association
+- MiniApp metadata automatically added to page headers in `layout.tsx`
 
 ### Background Notifications
 
@@ -86,9 +87,9 @@ npm run dev
 The app is wrapped with `MiniKitProvider` in `providers.tsx`, configured with:
 
 - OnchainKit integration
-- Access to Frames context
+- Access to MiniApp context
 - Sets up Wagmi Connectors
-- Sets up Frame SDK listeners
+- Sets up MiniApp SDK listeners
 - Applies Safe Area Insets
 
 ### Dynamic Preview Images

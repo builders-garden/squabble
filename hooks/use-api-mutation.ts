@@ -1,5 +1,5 @@
-import { useMiniApp } from "@/contexts/miniapp-context";
 import { useMutation, UseMutationOptions } from "@tanstack/react-query";
+import ky from "ky";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
 
@@ -12,7 +12,7 @@ interface UseApiMutationOptions<TData, TVariables>
 }
 
 export const useApiMutation = <TData, TVariables = unknown>(
-  options: UseApiMutationOptions<TData, TVariables>
+  options: UseApiMutationOptions<TData, TVariables>,
 ) => {
   const {
     url,
@@ -26,14 +26,12 @@ export const useApiMutation = <TData, TVariables = unknown>(
     mutationFn: async (variables) => {
       const resolvedUrl = typeof url === "function" ? url(variables) : url;
       const resolvedBody = options.body ? options.body(variables) : null;
-      const response = await fetch(resolvedUrl, {
+      const response = await ky(resolvedUrl, {
         method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        ...(isProtected && {credentials: "include",
+        ...(isProtected && {
+          credentials: "include",
         }),
-        ...(resolvedBody ? { body: JSON.stringify(resolvedBody) } : {}),
+        ...(resolvedBody ? { json: resolvedBody } : {}),
       });
 
       if (!response.ok) {

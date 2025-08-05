@@ -1,3 +1,5 @@
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,8 +10,6 @@ import {
 } from "@/components/ui/dialog";
 import SquabbleButton from "@/components/ui/squabble-button";
 import { useCreateGame } from "@/hooks/use-create-game";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
 
 const BET_AMOUNTS = [
   { label: "Free", value: 0 },
@@ -87,9 +87,8 @@ export default function FarcasterPlay() {
                   amount.value === selectedAmount ||
                   (amount.value === null && showCustom)
                     ? "border-white bg-white/30"
-                    : "border-[#C8EFE3] bg-white/10 hover:bg-white/15"
-                }`}
-              >
+                    : "border-[#204c3f] bg-white/10 hover:bg-white/15"
+                }`}>
                 <div className="text-xl font-bold">{amount.label}</div>
               </button>
             ))}

@@ -1,10 +1,27 @@
+import { User } from "@prisma/client";
+import { useEffect, useState } from "react";
 import { useApiQuery } from "./use-api-query";
 
 export const useAuthCheck = () => {
-  return useApiQuery({
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const {
+    data: user,
+    error,
+    isPending,
+  } = useApiQuery<User>({
     url: "/api/auth/check",
     method: "GET",
-    isProtected: true,
     queryKey: ["auth-check"],
+    isProtected: true,
   });
+
+  useEffect(() => {
+    if (!isPending && !error && user) {
+      setIsAuthenticated(true);
+    } else {
+      setIsAuthenticated(false);
+    }
+  }, [isPending, error, user]);
+
+  return { user, isAuthenticated, isPending };
 };

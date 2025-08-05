@@ -1,20 +1,23 @@
 "use client";
 
-import { AudioProvider } from "@/contexts/audio-context";
-import { MiniAppProvider } from "@/contexts/miniapp-context";
-import { UserProvider } from "@/contexts/user-context";
-import { env } from "@/lib/env";
 import { DaimoPayProvider } from "@daimo/pay";
 import dynamic from "next/dynamic";
 import posthog from "posthog-js";
 import { PostHogProvider } from "posthog-js/react";
+import { AudioProvider } from "@/contexts/audio-context";
+import { MiniAppProvider } from "@/contexts/miniapp-context";
+import { UserProvider } from "@/contexts/user-context";
+import { env } from "@/lib/env";
 
 const ErudaProvider = dynamic(
-  () => import("../components/Eruda").then((c) => c.ErudaProvider),
-  { ssr: false }
+  () => import("./Eruda").then((c) => c.ErudaProvider),
+  { ssr: false },
 );
 
-if (typeof window !== "undefined" && env.NEXT_PUBLIC_POSTHOG_DISABLED !== "true") {
+if (
+  typeof window !== "undefined" &&
+  env.NEXT_PUBLIC_POSTHOG_DISABLED !== "true"
+) {
   posthog.init(env.NEXT_PUBLIC_POSTHOG_KEY, {
     // api_host: env.NEXT_PUBLIC_POSTHOG_HOST!,
     capture_pageview: false,

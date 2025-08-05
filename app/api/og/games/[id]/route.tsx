@@ -1,9 +1,10 @@
+/* eslint-disable @next/next/no-img-element */
+import { ImageResponse } from "next/og";
 import { env } from "@/lib/env";
 import { loadGoogleFont, loadImage } from "@/lib/og-utils";
 import { getGameById } from "@/lib/prisma/games";
 import { fetchTopUsers } from "@/lib/prisma/user";
 import { formatAvatarUrl } from "@/lib/utils";
-import { ImageResponse } from "next/og";
 
 // Force dynamic rendering to ensure fresh image generation on each request
 export const dynamic = "force-dynamic";
@@ -28,7 +29,7 @@ export async function GET(
     params: Promise<{
       id: string;
     }>;
-  }
+  },
 ) {
   try {
     // Extract the ID from the route parameters
@@ -38,15 +39,15 @@ export async function GET(
     const appUrl = env.NEXT_PUBLIC_URL;
 
     // Load the logo image from the public directory
-    const logoImage = await loadImage(`${appUrl}/images/squabble-cover.png`);
-    const usdcLogo = await loadImage(`${appUrl}/images/usdc-logo.png`);
-
-    const fontDataBold = await loadGoogleFont(
-      "Inter&weight=700",
-      "Spot Available! Ready! Not staked USDC Player Real-time scrabble game"
-    );
-
-    const game = await getGameById(id);
+    const [logoImage, usdcLogo, fontDataBold, game] = await Promise.all([
+      loadImage(`${appUrl}/images/squabble-cover.png`),
+      loadImage(`${appUrl}/images/usdc-logo.png`),
+      loadGoogleFont(
+        "Inter&weight=700",
+        "Spot Available! Ready! Not staked USDC Player Real-time scrabble game",
+      ),
+      getGameById(id),
+    ]);
 
     if (!game) {
       throw new Error("Game not found");
@@ -55,17 +56,17 @@ export async function GET(
     const { users: topUsers, totalCount } = await fetchTopUsers();
 
     // Load participant avatars
-    const participantAvatars = await Promise.all(
-      game.participants.slice(0, 6).map(async (participant) => {
-        try {
-          return participant.user.avatarUrl
-            ? await loadImage(formatAvatarUrl(participant.user.avatarUrl))
-            : null;
-        } catch (e) {
-          return null;
-        }
-      })
-    );
+    // const participantAvatars = await Promise.all(
+    //   game.participants.slice(0, 6).map(async (participant) => {
+    //     try {
+    //       return participant.user.avatarUrl
+    //         ? await loadImage(formatAvatarUrl(participant.user.avatarUrl))
+    //         : null;
+    //     } catch (e) {
+    //       return null;
+    //     }
+    //   }),
+    // );
 
     // Load top user avatars
     const topUserAvatars = await Promise.all(
@@ -77,7 +78,7 @@ export async function GET(
         } catch (e) {
           return null;
         }
-      })
+      }),
     );
 
     // Generate and return the image response with the composed elements
@@ -93,8 +94,7 @@ export async function GET(
             padding: "64px",
             color: "white",
             justifyContent: "space-between",
-          }}
-        >
+          }}>
           <div
             style={{
               display: "flex",
@@ -103,8 +103,7 @@ export async function GET(
               justifyContent: "center",
               gap: "48px",
               flex: 1,
-            }}
-          >
+            }}>
             <div
               style={{
                 display: "flex",
@@ -113,8 +112,7 @@ export async function GET(
                 justifyContent: "center",
                 textAlign: "center",
                 gap: "48px",
-              }}
-            >
+              }}>
               <img
                 src={logoImage}
                 alt="Squabble Logo"
@@ -126,34 +124,33 @@ export async function GET(
               />
 
               {game.betAmount > 0 && (
-                  <div
+                <div
+                  style={{
+                    display: "flex",
+                    backgroundColor: "rgba(255, 255, 255, 0.15)",
+                    padding: "16px 32px",
+                    borderRadius: "999px",
+                    border: "4px solid #ffffff",
+                    fontSize: "48px",
+                    fontFamily: "Inter",
+                    fontWeight: 900,
+                    color: "#ffffff",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                  }}>
+                  <img
+                    src={usdcLogo}
+                    alt="USDC"
+                    width="64"
+                    height="64"
                     style={{
-                      display: "flex",
-                      backgroundColor: "rgba(255, 255, 255, 0.15)",
-                      padding: "16px 32px",
-                      borderRadius: "999px",
-                      border: "4px solid #ffffff",
-                      fontSize: "48px",
-                      fontFamily: "Inter",
-                      fontWeight: 900,
-                      color: "#ffffff",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "8px",
+                      borderRadius: "50%",
                     }}
-                  >
-                    <img
-                      src={usdcLogo}
-                      alt="USDC"
-                      width="64"
-                      height="64"
-                      style={{
-                        borderRadius: "50%",
-                      }}
-                    />
-                    {game.betAmount} USDC
-                  </div>
-                )}
+                  />
+                  {game.betAmount} USDC
+                </div>
+              )}
             </div>
           </div>
 
@@ -167,8 +164,7 @@ export async function GET(
               marginTop: "auto",
               paddingTop: "48px",
               width: "100%",
-            }}
-          >
+            }}>
             {/* Top Users Avatars */}
             <div
               style={{
@@ -176,8 +172,7 @@ export async function GET(
                 alignItems: "center",
                 justifyContent: "center",
                 gap: "-24px",
-              }}
-            >
+              }}>
               {topUsers.slice(0, 5).map((user, index) => (
                 <div
                   key={user.fid}
@@ -193,8 +188,7 @@ export async function GET(
                     justifyContent: "center",
                     marginLeft: index > 0 ? "-12px" : "0",
                     zIndex: 10 - index,
-                  }}
-                >
+                  }}>
                   {user.avatarUrl && topUserAvatars[index] && (
                     <img
                       src={topUserAvatars[index] as string}
@@ -218,8 +212,7 @@ export async function GET(
                 fontFamily: "Inter",
                 fontWeight: 700,
                 color: "#C8EFE3",
-              }}
-            >
+              }}>
               +{Math.max(0, totalCount - 5)} players
             </div>
           </div>
@@ -236,7 +229,7 @@ export async function GET(
             weight: 700,
           },
         ],
-      }
+      },
     );
   } catch (e) {
     // Log and handle any errors during image generation

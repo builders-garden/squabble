@@ -9,46 +9,47 @@ datasource db {
 }
 
 model User {
-  fid Int @id
+  fid         Int      @id
   displayName String
-  username String @unique // Add unique index since usernames should be unique
-  avatarUrl String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  username    String   @unique // Add unique index since usernames should be unique
+  avatarUrl   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  referrerFid Int?
 
   participatedGames GameParticipant[]
 }
 
 model Game {
-  id        String   @id @default(uuid())
-  contractGameId Int? @unique // Numeric ID for smart contract interactions
-  status    GameStatus @default(PENDING)
-  betAmount Float
-  
-  totalFunds Float @default(0)
+  id             String     @id @default(uuid())
+  contractGameId Int?       @unique // Numeric ID for smart contract interactions
+  status         GameStatus @default(PENDING)
+  betAmount      Float
+
+  totalFunds     Float             @default(0)
   conversationId String?
-  participants GameParticipant[]
-  createdAt DateTime @default(now())
+  participants   GameParticipant[]
+  createdAt      DateTime          @default(now())
 
   @@index([status]) // Add index on status for filtering games
 }
 
 model GameParticipant {
-  id        String   @id @default(uuid())
-  fid       Int 
-  joined    Boolean  @default(false)
-  paid      Boolean  @default(false)
-  winner    Boolean  @default(false)
-  game      Game     @relation(fields: [gameId], references: [id])
-  gameId    String
+  id          String  @id @default(uuid())
+  fid         Int
+  joined      Boolean @default(false)
+  paid        Boolean @default(false)
+  winner      Boolean @default(false)
+  game        Game    @relation(fields: [gameId], references: [id])
+  gameId      String
   paymentHash String?
-  points Int @default(0)
+  points      Int     @default(0)
 
   user User @relation(fields: [fid], references: [fid])
 
+  @@unique([fid, gameId]) // Add unique constraint to prevent duplicate participants
   @@index([fid]) // Add index on fid for finding player's games
   @@index([gameId]) // Add index on gameId for finding game participants
-  @@unique([fid, gameId]) // Add unique constraint to prevent duplicate participants
 }
 
 enum GameStatus {
@@ -57,4 +58,3 @@ enum GameStatus {
   PLAYING
   FINISHED
 }
-

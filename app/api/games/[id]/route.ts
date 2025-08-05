@@ -2,22 +2,24 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma/client";
 
 export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
 
   try {
     const game = await prisma.game.findUnique({
       where: { id },
-      include: { participants: {
-        include: {
-          user: true,
+      include: {
+        participants: {
+          include: {
+            user: true,
+          },
+          orderBy: {
+            points: "desc",
+          },
         },
-        orderBy: {
-          points: "desc",
-        },
-      } },
+      },
     });
 
     if (!game) {
@@ -27,8 +29,8 @@ export async function GET(
     // Convert BigInt values to strings for JSON serialization
     const serializedGame = JSON.parse(
       JSON.stringify(game, (key, value) =>
-        typeof value === "bigint" ? value.toString() : value
-      )
+        typeof value === "bigint" ? value.toString() : value,
+      ),
     );
 
     return NextResponse.json(serializedGame);
@@ -36,7 +38,7 @@ export async function GET(
     console.error("Game fetch error:", error);
     return NextResponse.json(
       { error: "Failed to fetch game" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

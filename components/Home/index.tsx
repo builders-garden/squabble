@@ -1,11 +1,12 @@
 "use client";
 
-import { useAudio } from "@/contexts/audio-context";
-import { useMiniApp } from "@/contexts/miniapp-context";
-import { FARCASTER_CLIENT_FID } from "@/lib/constants";
 import { Volume2, VolumeX } from "lucide-react";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
+import { FarcasterLink } from "@/components/shared/farcaster-link";
+import { useAudio } from "@/contexts/audio-context";
+import { useMiniApp } from "@/hooks/use-miniapp";
+import { FARCASTER_CLIENT_FID } from "@/lib/constants";
 import CoinbaseWalletPlay from "./coinbase-wallet-play";
 import FarcasterPlay from "./farcaster-play";
 import Website from "./website";
@@ -29,8 +30,7 @@ export default function Home() {
       <button
         onClick={toggleMusic}
         className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-        aria-label={isMusicPlaying ? "Mute music" : "Unmute music"}
-      >
+        aria-label={isMusicPlaying ? "Mute music" : "Unmute music"}>
         {isMusicPlaying ? (
           <Volume2 size={16} color="white" />
         ) : (
@@ -50,8 +50,7 @@ export default function Home() {
               height={96}
             />
             <div
-              className={`${luckiestGuy.className} text-center text-4xl lg:text-6xl text-white tracking-wider`}
-            >
+              className={`${luckiestGuy.className} text-center text-4xl lg:text-6xl text-white tracking-wider`}>
               SQUABBLE
             </div>
           </div>
@@ -81,14 +80,12 @@ export default function Home() {
         {/* Footer */}
         <div className="text-white/80 text-xs lg:text-sm text-center w-full px-4 mt-8">
           Built with ❤️ by{" "}
-          <a
-            href="https://builders.garden"
+          <FarcasterLink
+            link="https://builders.garden"
             target="_blank"
-            rel="noopener noreferrer"
-            className="underline hover:text-white transition-colors"
-          >
-            builders.garden
-          </a>
+            text="builders.garden"
+            color="white"
+          />
         </div>
       </div>
     </div>

@@ -22,8 +22,7 @@ export default function Loading({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
-      className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-center p-4"
-    >
+      className="min-h-screen bg-[#1B7A6E] flex flex-col items-center justify-center p-4">
       <div className="flex flex-col items-center gap-4">
         <div className="flex flex-row items-center justify-center">
           <Image
@@ -34,8 +33,7 @@ export default function Loading({
             height={36}
           />
           <div
-            className={`${luckiestGuy.className} text-xl text-white tracking-wider`}
-          >
+            className={`${luckiestGuy.className} text-xl text-white tracking-wider`}>
             SQUABBLE
           </div>
         </div>

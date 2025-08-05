@@ -1,6 +1,6 @@
+import { Metadata } from "next";
 import HomePage from "@/components/pages/home";
 import { env } from "@/lib/env";
-import { Metadata } from "next";
 
 const appUrl = env.NEXT_PUBLIC_URL;
 
@@ -9,10 +9,8 @@ export async function generateMetadata({
 }: {
   params: { id: string };
 }): Promise<Metadata> {
-  const requestId = params.id;
-
   const imageUrl = `${appUrl}/images/feed.png`;
-  const frame = {
+  const farcasterMiniapp = {
     version: "next",
     imageUrl,
     button: {
@@ -39,7 +37,7 @@ export async function generateMetadata({
       ],
     },
     other: {
-      "fc:frame": JSON.stringify(frame),
+      "fc:miniapp": JSON.stringify(farcasterMiniapp),
     },
   };
 }

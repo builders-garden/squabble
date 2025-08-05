@@ -1,5 +1,5 @@
-import { getFarcasterManifest } from "@/lib/warpcast";
 import { NextResponse } from "next/server";
+import { getFarcasterManifest } from "@/lib/farcaster";
 
 export async function GET() {
   try {
@@ -9,7 +9,7 @@ export async function GET() {
     console.error("Error generating manifest:", error);
     return NextResponse.json(
       { error: (error as Error).message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

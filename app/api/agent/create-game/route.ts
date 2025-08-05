@@ -1,14 +1,14 @@
+import { NextRequest, NextResponse } from "next/server";
 import { trackEvent } from "@/lib/posthog/server";
 import { createGame, updateGame } from "@/lib/prisma/games";
 import { uuidToBigInt } from "@/lib/utils";
 import { createNewGame } from "@/lib/viem";
-import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
   if (!req.body) {
     return NextResponse.json(
       { error: "Request body is required" },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
       stakeAmount: stakeAmount,
       conversationId: conversationId,
     },
-    "agent"
+    "agent",
   );
 
   return NextResponse.json({

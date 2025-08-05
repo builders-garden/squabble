@@ -1,10 +1,20 @@
-import { useSocket } from "@/contexts/socket-context";
-import { Player } from "@/types/socket-events";
+import {
+  ConnectToLobbyEvent,
+  PlaceLetterEvent,
+  PlayerReadyEvent,
+  PlayerStakeConfirmedEvent,
+  PlayerStakeRefundedEvent,
+  RefreshAvailableLettersEvent,
+  RemoveLetterEvent,
+  StartGameEvent,
+  SubmitWordEvent,
+} from "@/types/socket";
+import { useSocket } from "./use-socket";
 
 export default function useSocketUtils() {
   const { emit, disconnect } = useSocket();
 
-  const connectToLobby = (player: Player, gameId: string) => {
+  const connectToLobby = ({ player, gameId }: ConnectToLobbyEvent) => {
     emit("connect_to_lobby", { player, gameId });
   };
 
@@ -12,41 +22,59 @@ export default function useSocketUtils() {
     disconnect();
   };
 
-  const playerReady = (player: Player, gameId: string) => {
+  const playerReady = ({ player, gameId }: PlayerReadyEvent) => {
     emit("player_ready", { player, gameId });
   };
 
-  const playerStakeConfirmed = (player: Player, gameId: string, paymentHash: string, payerAddress: string) => {
-    emit("player_stake_confirmed", { player, gameId, paymentHash, payerAddress });
+  const playerStakeConfirmed = ({
+    player,
+    gameId,
+    paymentHash,
+    payerAddress,
+  }: PlayerStakeConfirmedEvent) => {
+    emit("player_stake_confirmed", {
+      player,
+      gameId,
+      paymentHash,
+      payerAddress,
+    });
   };
 
-  const playerStakeRefunded = (player: Player, gameId: string, transactionHash: string) => {
+  const playerStakeRefunded = ({
+    player,
+    gameId,
+    transactionHash,
+  }: PlayerStakeRefundedEvent) => {
     emit("player_stake_refunded", { player, gameId, transactionHash });
   };
 
-  const startGame = (player: Player, gameId: string) => {
+  const startGame = ({ player, gameId }: StartGameEvent) => {
     emit("start_game", { player, gameId });
   };
 
-  const submitWord = (player: Player, gameId: string, word: string, path: {x: number, y: number}[], isNew: boolean, placedLetters: {letter: string, x: number, y: number}[]) => {
+  const submitWord = ({
+    player,
+    gameId,
+    word,
+    path,
+    isNew,
+    placedLetters,
+  }: SubmitWordEvent) => {
     emit("submit_word", { player, gameId, word, path, isNew, placedLetters });
   };
 
-  const placeLetter = (
-    player: Player,
-    gameId: string,
-    letter: string,
-    x: number,
-    y: number
-  ) => {
+  const placeLetter = ({ player, gameId, letter, x, y }: PlaceLetterEvent) => {
     emit("place_letter", { player, gameId, letter, x, y });
   };
 
-  const removeLetter = (player: Player, gameId: string, x: number, y: number) => {
+  const removeLetter = ({ player, gameId, x, y }: RemoveLetterEvent) => {
     emit("remove_letter", { player, gameId, x, y });
   };
-  
-  const refreshAvailableLetters = (playerId: number, gameId: string) => {
+
+  const refreshAvailableLetters = ({
+    playerId,
+    gameId,
+  }: RefreshAvailableLettersEvent) => {
     emit("refresh_available_letters", { playerId, gameId });
   };
 

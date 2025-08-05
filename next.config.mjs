@@ -1,5 +1,6 @@
-import createJiti from "jiti";
 import { fileURLToPath } from "node:url";
+import createJiti from "jiti";
+
 const jiti = createJiti(fileURLToPath(import.meta.url));
 
 // Import env here to validate during build. Using jiti@^1 we can import .ts files :)
@@ -35,6 +36,8 @@ const nextConfig = {
       },
     ];
   },
+  // This is required to support PostHog trailing slash API requests
+  skipTrailingSlashRedirect: true,
   webpack: (config) => {
     // Exclude LICENSE files and other non-JavaScript files from being processed
     config.module.rules.push({

@@ -1,9 +1,10 @@
+import { NextRequest, NextResponse } from "next/server";
 import { trackEvent } from "@/lib/posthog/server";
 import { prisma } from "@/lib/prisma/client";
 import { createGame, updateGame } from "@/lib/prisma/games";
+import { getUserByFid } from "@/lib/prisma/user";
 import { uuidToBigInt } from "@/lib/utils";
 import { createNewGame } from "@/lib/viem";
-import { NextRequest, NextResponse } from "next/server";
 
 export async function GET() {
   try {
@@ -20,7 +21,7 @@ export async function GET() {
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to fetch latest game" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -29,9 +30,18 @@ export async function POST(req: NextRequest) {
   const { betAmount } = await req.json();
   const fid = req.headers.get("x-user-fid")!;
 
+  if (!fid)
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
+
+  const user = await getUserByFid(Number(fid));
+  if (!user) {
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  }
+
   const game = await createGame({
     betAmount: parseFloat(betAmount),
   });
+  console.log("Game created:", game);
 
   const gameId = game.id;
   const stakeAmount = game.betAmount;
@@ -57,7 +67,7 @@ export async function POST(req: NextRequest) {
       gameId: game.id,
       stakeAmount: stakeAmount,
     },
-    fid
+    fid,
   );
 
   return NextResponse.json({

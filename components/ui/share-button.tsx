@@ -1,13 +1,13 @@
+import sdk from "@farcaster/miniapp-sdk";
+import { CopyIcon, ShareIcon } from "lucide-react";
+import Image from "next/image";
+import { toast } from "sonner";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import sdk from "@farcaster/miniapp-sdk";
-import { Copy, Share } from "@solar-icons/react";
-import Image from "next/image";
-import { toast } from "sonner";
+} from "./dropdown-menu";
 
 interface ShareButtonProps {
   text?: string;
@@ -18,7 +18,7 @@ interface ShareButtonProps {
 
 export default function ShareButton({
   text = "Share",
-  icon = <Share size={16} color="white" />,
+  icon = <ShareIcon size={16} color="white" />,
   customUrl,
   customCastText,
 }: ShareButtonProps) {
@@ -36,7 +36,7 @@ export default function ShareButton({
         {
           position: "top-left",
           duration: 5000,
-        }
+        },
       );
     } catch (error) {
       console.error("Error copying link:", error);
@@ -51,7 +51,7 @@ export default function ShareButton({
         {
           position: "top-left",
           duration: 5000,
-        }
+        },
       );
     }
   };
@@ -86,7 +86,7 @@ export default function ShareButton({
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleCopyLink}>
           <div className="flex items-center gap-2">
-            <Copy size={16} color="black" />
+            <CopyIcon size={16} color="black" />
             <p className="text-black text-sm">Copy link</p>
           </div>
         </DropdownMenuItem>

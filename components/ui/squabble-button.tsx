@@ -39,10 +39,9 @@ export default function SquabbleButton({
         "w-full font-bold text-3xl rounded-xl px-12 py-4 relative",
         getVariantStyles(),
         disabled || isLoading ? "opacity-50" : "",
-        className
+        className,
       )}
-      onClick={onClick}
-    >
+      onClick={onClick}>
       {isLoading ? (
         <div className="flex items-center justify-center gap-3">
           <div className="w-6 h-6 border-2 border-current border-t-transparent rounded-full animate-spin" />

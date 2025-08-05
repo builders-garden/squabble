@@ -1,4 +1,4 @@
-import { env } from "../env";
+import { env } from "@/lib/env";
 
 export function checkAgentSecret(req: Request) {
   const headerSecret = req.headers.get("x-agent-secret");

@@ -1,6 +1,6 @@
-import { GameWithParticipants } from "@/hooks/use-fetch-game";
 import { Game, GameStatus } from "@prisma/client";
-import { prisma } from "../client";
+import { GameWithParticipants } from "@/hooks/use-fetch-game";
+import { prisma } from "@/lib/prisma/client";
 
 // Create a new game
 export async function createGame(data: {
@@ -8,33 +8,19 @@ export async function createGame(data: {
   conversationId?: string;
   contractGameId?: number;
 }): Promise<Game> {
-  // Build the game data object explicitly to avoid undefined values
-
-  console.log("betAmount", data.betAmount);
-  const gameData: any = {
-    betAmount: data.betAmount,
-    status: GameStatus.PENDING,
-  };
-
-  // Only add optional fields if they have values
-  if (data.conversationId !== undefined) {
-    gameData.conversationId = data.conversationId;
-  }
-
-  if (data.contractGameId !== undefined) {
-    gameData.contractGameId = data.contractGameId;
-  }
-
   return prisma.game.create({
     data: {
-      ...gameData,
+      betAmount: data.betAmount,
+      status: GameStatus.PENDING,
+      conversationId: data.conversationId ?? null,
+      contractGameId: data.contractGameId ?? null,
     },
   });
 }
 
 // Get a game by ID
 export async function getGameById(
-  id: string
+  id: string,
 ): Promise<GameWithParticipants | null> {
   return prisma.game.findUnique({
     where: { id },
@@ -70,13 +56,7 @@ export async function getGames(filters?: {
 // Update a game
 export async function updateGame(
   id: string,
-  data: {
-    status?: GameStatus;
-    betAmount?: number;
-    totalFunds?: number;
-    conversationId?: string;
-    contractGameId?: number;
-  }
+  data: Partial<Game>,
 ): Promise<Game> {
   return prisma.game.update({
     where: { id },

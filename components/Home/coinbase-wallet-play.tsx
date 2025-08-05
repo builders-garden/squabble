@@ -9,8 +9,7 @@ export default function CoinbaseWalletPlay() {
   return (
     <div className="bg-white/10 backdrop-blur-sm p-4 lg:p-6 rounded-lg border border-white/20 w-full">
       <h3
-        className={`${luckiestGuy.className} text-xl lg:text-2xl text-white mb-3`}
-      >
+        className={`${luckiestGuy.className} text-xl lg:text-2xl text-white mb-3`}>
         How to Play
       </h3>
       <ul className="text-white space-y-2 text-sm lg:text-base">
