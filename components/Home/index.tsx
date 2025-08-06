@@ -5,12 +5,14 @@ import { Volume2, VolumeX } from "lucide-react";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
 import { useEffect } from "react";
+import { basePreconf } from "viem/chains";
 import { useAccount, useConnect } from "wagmi";
 import { coinbaseWallet } from "wagmi/connectors";
 import { FarcasterLink } from "@/components/shared/farcaster-link";
 import { useAudio } from "@/contexts/audio-context";
-import { useMiniAppWallet } from "@/contexts/miniapp-wallet-context";
+import { useWalletDetector } from "@/contexts/wallet-detector-context";
 import { useMiniApp } from "@/hooks/use-miniapp";
+import { useSignIn } from "@/hooks/use-sign-in";
 import { FARCASTER_CLIENT_FID } from "@/lib/constants";
 import CoinbaseWalletPlay from "./coinbase-wallet-play";
 import FarcasterPlay from "./farcaster-play";
@@ -22,23 +24,27 @@ const luckiestGuy = Luckiest_Guy({
 });
 
 export default function Home() {
+  const { signIn } = useSignIn({
+    autoSignIn: true,
+  });
   const { context, isMiniAppReady } = useMiniApp();
   const { isMusicPlaying, toggleMusic } = useAudio();
   const { isConnected } = useAccount();
   const { connect } = useConnect();
-  const { isCoinbaseWallet } = useMiniAppWallet();
+  const { isCoinbaseWallet } = useWalletDetector();
 
   useEffect(() => {
     if (!isConnected) {
       console.log("connecting wallet");
       if (isCoinbaseWallet) {
         connect({
+          chainId: basePreconf.id,
           connector: coinbaseWallet({
             appName: "Squabble",
           }),
         });
       } else if (context) {
-        connect({ connector: miniAppConnector() });
+        connect({ chainId: basePreconf.id, connector: miniAppConnector() });
       }
     }
   }, [isConnected, context, isCoinbaseWallet, connect]);

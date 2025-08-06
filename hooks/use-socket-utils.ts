@@ -9,13 +9,14 @@ import {
   StartGameEvent,
   SubmitWordEvent,
 } from "@/types/socket";
+import { ClientToServerSocketEvents } from "@/types/socket/socket.enum";
 import { useSocket } from "./use-socket";
 
 export default function useSocketUtils() {
   const { emit, disconnect } = useSocket();
 
   const connectToLobby = ({ player, gameId }: ConnectToLobbyEvent) => {
-    emit("connect_to_lobby", { player, gameId });
+    emit(ClientToServerSocketEvents.CONNECT_TO_LOBBY, { player, gameId });
   };
 
   const disconnectFromLobby = () => {
@@ -23,7 +24,7 @@ export default function useSocketUtils() {
   };
 
   const playerReady = ({ player, gameId }: PlayerReadyEvent) => {
-    emit("player_ready", { player, gameId });
+    emit(ClientToServerSocketEvents.PLAYER_READY, { player, gameId });
   };
 
   const playerStakeConfirmed = ({
@@ -32,7 +33,7 @@ export default function useSocketUtils() {
     paymentHash,
     payerAddress,
   }: PlayerStakeConfirmedEvent) => {
-    emit("player_stake_confirmed", {
+    emit(ClientToServerSocketEvents.PLAYER_STAKE_CONFIRMED, {
       player,
       gameId,
       paymentHash,
@@ -45,11 +46,15 @@ export default function useSocketUtils() {
     gameId,
     transactionHash,
   }: PlayerStakeRefundedEvent) => {
-    emit("player_stake_refunded", { player, gameId, transactionHash });
+    emit(ClientToServerSocketEvents.PLAYER_STAKE_REFUNDED, {
+      player,
+      gameId,
+      transactionHash,
+    });
   };
 
   const startGame = ({ player, gameId }: StartGameEvent) => {
-    emit("start_game", { player, gameId });
+    emit(ClientToServerSocketEvents.START_GAME, { player, gameId });
   };
 
   const submitWord = ({
@@ -60,22 +65,38 @@ export default function useSocketUtils() {
     isNew,
     placedLetters,
   }: SubmitWordEvent) => {
-    emit("submit_word", { player, gameId, word, path, isNew, placedLetters });
+    emit(ClientToServerSocketEvents.SUBMIT_WORD, {
+      player,
+      gameId,
+      word,
+      path,
+      isNew,
+      placedLetters,
+    });
   };
 
   const placeLetter = ({ player, gameId, letter, x, y }: PlaceLetterEvent) => {
-    emit("place_letter", { player, gameId, letter, x, y });
+    emit(ClientToServerSocketEvents.PLACE_LETTER, {
+      player,
+      gameId,
+      letter,
+      x,
+      y,
+    });
   };
 
   const removeLetter = ({ player, gameId, x, y }: RemoveLetterEvent) => {
-    emit("remove_letter", { player, gameId, x, y });
+    emit(ClientToServerSocketEvents.REMOVE_LETTER, { player, gameId, x, y });
   };
 
   const refreshAvailableLetters = ({
     playerId,
     gameId,
   }: RefreshAvailableLettersEvent) => {
-    emit("refresh_available_letters", { playerId, gameId });
+    emit(ClientToServerSocketEvents.REFRESH_AVAILABLE_LETTERS, {
+      playerId,
+      gameId,
+    });
   };
 
   return {

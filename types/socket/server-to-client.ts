@@ -1,4 +1,6 @@
+import { GameStatus } from "@prisma/client";
 import { Player } from "./player";
+import { ServerToClientSocketEvents } from "./socket.enum";
 
 export interface PlayerJoinedEvent {
   player: Player;
@@ -6,19 +8,8 @@ export interface PlayerJoinedEvent {
 }
 
 export interface PlayerLeftEvent {
-  playerId: number;
+  player: Player;
   gameId: string;
-}
-
-export interface GameUpdateEvent {
-  gameId: string;
-  players: Array<Player>;
-  status: "pending" | "ready" | "finished";
-}
-
-export interface GameFullEvent {
-  gameId: string;
-  players: Array<Player>;
 }
 
 export interface GameStartedEvent {
@@ -28,6 +19,28 @@ export interface GameStartedEvent {
   players: Array<Player>;
   startTime: number;
   endTime: number;
+}
+
+export interface GameUpdateEvent {
+  gameId: string;
+  players: Array<Player>;
+  status: GameStatus;
+}
+
+export interface GameLoadingEvent {
+  gameId: string;
+  title: string;
+  body: string;
+}
+
+export interface GameEndedEvent {
+  gameId: string;
+  players: Array<Player>;
+}
+
+export interface GameFullEvent {
+  gameId: string;
+  players: Array<Player>;
 }
 
 export interface RefreshedAvailableLettersEvent {
@@ -48,7 +61,7 @@ export interface LetterPlacedEvent {
 
 export interface LetterRemovedEvent {
   gameId: string;
-  playerId: Player;
+  player: Player;
   position: {
     x: number;
     y: number;
@@ -67,17 +80,12 @@ export interface WordSubmittedEvent {
   board: string[][];
 }
 
-export interface ConflictResolutionEvent {
+export interface WordNotValidEvent {
   gameId: string;
-  conflictType: "word" | "position";
-  resolution: "accepted" | "rejected";
-  details: {
-    word?: string;
-    position?: {
-      x: number;
-      y: number;
-    };
-  };
+  player: Player;
+  word: string;
+  board: string[][];
+  path: Array<{ x: number; y: number }>;
 }
 
 export interface ScoreUpdateEvent {
@@ -92,25 +100,6 @@ export interface TimerTickEvent {
   timeRemaining: number;
 }
 
-export interface GameEndedEvent {
-  gameId: string;
-  players: Array<Player>;
-}
-
-export interface GameLoadingEvent {
-  gameId: string;
-  title: string;
-  body: string;
-}
-
-export interface WordNotValidEvent {
-  gameId: string;
-  player: Player;
-  word: string;
-  board: string[][];
-  path: Array<{ x: number; y: number }>;
-}
-
 export interface AdjacentWordsNotValidEvent {
   gameId: string;
   player: Player;
@@ -121,20 +110,19 @@ export interface AdjacentWordsNotValidEvent {
 
 // Type map for all events
 export type ServerToClientEvents = {
-  player_joined: PlayerJoinedEvent;
-  player_left: PlayerLeftEvent;
-  game_update: GameUpdateEvent;
-  game_started: GameStartedEvent;
-  letter_placed: LetterPlacedEvent;
-  letter_removed: LetterRemovedEvent;
-  word_submitted: WordSubmittedEvent;
-  conflict_resolution: ConflictResolutionEvent;
-  score_update: ScoreUpdateEvent;
-  timer_tick: TimerTickEvent;
-  game_ended: GameEndedEvent;
-  refreshed_available_letters: RefreshedAvailableLettersEvent;
-  word_not_valid: WordNotValidEvent;
-  adjacent_words_not_valid: AdjacentWordsNotValidEvent;
-  game_loading: GameLoadingEvent;
-  game_full: GameFullEvent;
+  [ServerToClientSocketEvents.PLAYER_JOINED]: PlayerJoinedEvent;
+  [ServerToClientSocketEvents.PLAYER_LEFT]: PlayerLeftEvent;
+  [ServerToClientSocketEvents.GAME_UPDATE]: GameUpdateEvent;
+  [ServerToClientSocketEvents.GAME_STARTED]: GameStartedEvent;
+  [ServerToClientSocketEvents.LETTER_PLACED]: LetterPlacedEvent;
+  [ServerToClientSocketEvents.LETTER_REMOVED]: LetterRemovedEvent;
+  [ServerToClientSocketEvents.WORD_SUBMITTED]: WordSubmittedEvent;
+  [ServerToClientSocketEvents.SCORE_UPDATE]: ScoreUpdateEvent;
+  [ServerToClientSocketEvents.TIMER_TICK]: TimerTickEvent;
+  [ServerToClientSocketEvents.GAME_ENDED]: GameEndedEvent;
+  [ServerToClientSocketEvents.REFRESHED_AVAILABLE_LETTERS]: RefreshedAvailableLettersEvent;
+  [ServerToClientSocketEvents.WORD_NOT_VALID]: WordNotValidEvent;
+  [ServerToClientSocketEvents.ADJACENT_WORDS_NOT_VALID]: AdjacentWordsNotValidEvent;
+  [ServerToClientSocketEvents.GAME_LOADING]: GameLoadingEvent;
+  [ServerToClientSocketEvents.GAME_FULL]: GameFullEvent;
 };

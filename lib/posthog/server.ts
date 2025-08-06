@@ -10,7 +10,7 @@ export const trackEvent = (
   properties: Record<string, unknown>,
   distinctId?: string,
 ) => {
-  if (env.NEXT_PUBLIC_POSTHOG_DISABLED === "true") {
+  if (!!env.NEXT_PUBLIC_POSTHOG_DISABLED) {
     return;
   }
   console.log("[POSTHOG] Tracking event", event, properties);

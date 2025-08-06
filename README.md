@@ -36,7 +36,6 @@ The environment variables enable the following features:
 ```bash
 # Required for Farcaster miniapp metadata
 NEXT_PUBLIC_URL=
-NEXT_PUBLIC_MINIKIT_PROJECT_ID=
 
 # Required to allow users to add your miniapp
 NEXT_PUBLIC_FARCASTER_HEADER=

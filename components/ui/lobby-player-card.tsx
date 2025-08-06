@@ -23,7 +23,10 @@ export default function LobbyPlayerCard({
       }`}>
       <div className="relative">
         <UserAvatar
-          avatarUrl={formatAvatarUrl(player.avatarUrl!)}
+          avatarUrl={
+            player.avatarUrl ? formatAvatarUrl(player.avatarUrl) : undefined
+          }
+          username={player.username}
           size="md"
           className={`border-2 ${
             isCurrentPlayer ? "border-blue-300" : "border-[#C8EFE3]"

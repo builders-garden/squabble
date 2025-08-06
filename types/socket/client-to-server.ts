@@ -1,4 +1,5 @@
 import { Player } from "./player";
+import { ClientToServerSocketEvents } from "./socket.enum";
 
 export interface ConnectToLobbyEvent {
   player: Player;
@@ -58,13 +59,13 @@ export interface RefreshAvailableLettersEvent {
 }
 
 export type ClientToServerEvents = {
-  connect_to_lobby: ConnectToLobbyEvent;
-  player_ready: PlayerReadyEvent;
-  player_stake_confirmed: PlayerStakeConfirmedEvent;
-  player_stake_refunded: PlayerStakeRefundedEvent;
-  start_game: StartGameEvent;
-  submit_word: SubmitWordEvent;
-  place_letter: PlaceLetterEvent;
-  remove_letter: RemoveLetterEvent;
-  refresh_available_letters: RefreshAvailableLettersEvent;
+  [ClientToServerSocketEvents.CONNECT_TO_LOBBY]: ConnectToLobbyEvent;
+  [ClientToServerSocketEvents.PLAYER_READY]: PlayerReadyEvent;
+  [ClientToServerSocketEvents.PLAYER_STAKE_CONFIRMED]: PlayerStakeConfirmedEvent;
+  [ClientToServerSocketEvents.PLAYER_STAKE_REFUNDED]: PlayerStakeRefundedEvent;
+  [ClientToServerSocketEvents.START_GAME]: StartGameEvent;
+  [ClientToServerSocketEvents.SUBMIT_WORD]: SubmitWordEvent;
+  [ClientToServerSocketEvents.PLACE_LETTER]: PlaceLetterEvent;
+  [ClientToServerSocketEvents.REMOVE_LETTER]: RemoveLetterEvent;
+  [ClientToServerSocketEvents.REFRESH_AVAILABLE_LETTERS]: RefreshAvailableLettersEvent;
 };

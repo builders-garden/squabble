@@ -14,11 +14,17 @@ export const POST = async (req: NextRequest) => {
     token: farcasterToken,
     fid: contextFid,
   } = await req.json();
-  if (!farcasterToken || !contextFid)
+
+  if (!farcasterToken || !contextFid) {
+    console.error("Invalid arguments", {
+      farcasterToken,
+      contextFid,
+    });
     return NextResponse.json(
       { success: false, error: "Invalid arguments" },
       { status: 400 },
     );
+  }
 
   let fid;
   let isValidSignature;

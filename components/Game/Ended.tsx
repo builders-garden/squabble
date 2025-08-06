@@ -5,6 +5,7 @@ import { LogOutIcon } from "lucide-react";
 import { motion } from "motion/react";
 import { Luckiest_Guy } from "next/font/google";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import SquabbleButton from "@/components/ui/squabble-button";
 import UserAvatar from "@/components/ui/user-avatar";
@@ -26,8 +27,13 @@ export default function Ended({
   game: GameWithParticipants;
   refetchGame: () => void;
 }) {
+  const router = useRouter();
+
   const handleExitGame = async () => {
     await sdk.actions.close();
+  };
+  const handleGoHome = async () => {
+    router.push("/");
   };
 
   // Determine which data source to use
@@ -98,7 +104,12 @@ export default function Ended({
               </div>
               <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center overflow-hidden">
                 <UserAvatar
-                  avatarUrl={formatAvatarUrl(player.avatarUrl || "")}
+                  avatarUrl={
+                    player.avatarUrl
+                      ? formatAvatarUrl(player.avatarUrl)
+                      : undefined
+                  }
+                  username={player.username}
                   size="md"
                 />
               </div>
@@ -124,6 +135,12 @@ export default function Ended({
             variant="primary"
             disabled={false}
             onClick={handleExitGame}
+          />
+          <SquabbleButton
+            text="Go Home"
+            variant="outline"
+            disabled={false}
+            onClick={handleGoHome}
           />
         </div>
       </div>
@@ -179,6 +196,12 @@ export default function Ended({
             variant="primary"
             disabled={false}
             onClick={handleExitGame}
+          />
+          <SquabbleButton
+            text="Go Home"
+            variant="outline"
+            disabled={false}
+            onClick={handleGoHome}
           />
         </div>
       </div>
@@ -247,7 +270,12 @@ export default function Ended({
             <div className="text-lg text-white font-bold w-8">{index + 1}</div>
             <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center overflow-hidden">
               <UserAvatar
-                avatarUrl={formatAvatarUrl(player.user.avatarUrl || "")}
+                avatarUrl={
+                  player.user.avatarUrl
+                    ? formatAvatarUrl(player.user.avatarUrl)
+                    : undefined
+                }
+                username={player.user.username}
                 size="md"
               />
             </div>
@@ -273,6 +301,12 @@ export default function Ended({
           variant="primary"
           disabled={false}
           onClick={handleExitGame}
+        />
+        <SquabbleButton
+          text="Go Home"
+          variant="outline"
+          disabled={false}
+          onClick={handleGoHome}
         />
       </div>
     </motion.div>

@@ -4,11 +4,11 @@ import { farcasterMiniApp as miniAppConnector } from "@farcaster/miniapp-wagmi-c
 import { GameStatus } from "@prisma/client";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef } from "react";
+import { basePreconf } from "viem/chains";
 import { useAccount, useConnect } from "wagmi";
 import { coinbaseWallet } from "wagmi/connectors";
 import { GameProvider, useGame } from "@/contexts/game-context";
-import { useMiniAppWallet } from "@/contexts/miniapp-wallet-context";
-import { SocketProvider } from "@/contexts/socket-context";
+import { useWalletDetector } from "@/contexts/wallet-detector-context";
 import useFetchGame from "@/hooks/use-fetch-game";
 import { useMiniApp } from "@/hooks/use-miniapp";
 import { useSignIn } from "@/hooks/use-sign-in";
@@ -29,7 +29,7 @@ function GameContent({ id }: { id: string }) {
   const { data: game, refetch: refetchGame } = useFetchGame(id);
   const { address, isConnected } = useAccount();
   const { connect } = useConnect();
-  const { isCoinbaseWallet } = useMiniAppWallet();
+  const { isCoinbaseWallet } = useWalletDetector();
   const hasConnectedToLobby = useRef(false);
   const { user } = useUser();
   const {
@@ -37,19 +37,22 @@ function GameContent({ id }: { id: string }) {
     isLoading: isSignInLoading,
     error: signInError,
     signIn,
-  } = useSignIn({});
+  } = useSignIn({
+    autoSignIn: true,
+  });
 
   useEffect(() => {
     if (!isConnected) {
       console.log("connecting wallet");
       if (isCoinbaseWallet) {
         connect({
+          chainId: basePreconf.id,
           connector: coinbaseWallet({
             appName: "Squabble",
           }),
         });
       } else if (context) {
-        connect({ connector: miniAppConnector() });
+        connect({ chainId: basePreconf.id, connector: miniAppConnector() });
       }
     }
   }, [isConnected, context, isCoinbaseWallet, connect]);
@@ -251,10 +254,8 @@ function GameContent({ id }: { id: string }) {
 
 export default function GamePage({ id }: { id: string }) {
   return (
-    <SocketProvider>
-      <GameProvider gameId={id}>
-        <GameContent id={id} />
-      </GameProvider>
-    </SocketProvider>
+    <GameProvider gameId={id}>
+      <GameContent id={id} />
+    </GameProvider>
   );
 }

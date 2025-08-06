@@ -61,7 +61,7 @@ export default function Lobby({
   stakeAmount: string;
 }) {
   const connections = useConnections();
-  console.log(connections);
+  console.log("connections", connections);
   const { isMusicPlaying, toggleMusic } = useAudio();
   const {
     playerStakeConfirmed,
@@ -77,7 +77,7 @@ export default function Lobby({
   } = useSendCalls({
     mutation: {
       onSuccess: (data) => {
-        console.log(data);
+        console.log("callsHash", data);
       },
     },
   });
@@ -149,7 +149,7 @@ export default function Lobby({
     // onchain call to get stake back using wagmi
     try {
       setIsRefunding(true);
-      console.log(capabilities);
+      console.log("capabilities", capabilities);
       const calls = await sendCalls({
         calls: [
           {
@@ -161,7 +161,7 @@ export default function Lobby({
         ],
         capabilities,
       });
-      console.log(calls);
+      console.log("calls", calls);
     } catch (error) {
       console.error(error);
       toast.custom(
@@ -184,7 +184,7 @@ export default function Lobby({
 
   useEffect(() => {
     if (currentPlayer && callsHash) {
-      console.log(callsHash);
+      console.log("found callsHash", callsHash);
       playerStakeRefunded({
         player: currentPlayer,
         gameId,
@@ -271,7 +271,7 @@ export default function Lobby({
           <div className="font-medium text-xl text-white">Players in Lobby</div>
           {context?.client.clientFid === FARCASTER_CLIENT_FID && (
             <ShareButton
-              customUrl={`https://squabble.lol/games/${gameId}`}
+              customUrl={`${env.NEXT_PUBLIC_URL}/games/${gameId}`}
               customCastText={
                 parseFloat(stakeAmount) > 0
                   ? `🎲 Play Squabble with me, buy-in is $${stakeAmount}!`

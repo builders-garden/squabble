@@ -1,12 +1,15 @@
 import Image from "next/image";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 
 export default function UserAvatar({
   avatarUrl,
+  username,
   size,
   className,
 }: {
-  avatarUrl: string;
+  avatarUrl?: string;
+  username?: string;
   size: "xs" | "sm" | "md" | "lg" | "xl";
   className?: string;
 }) {
@@ -24,13 +27,25 @@ export default function UserAvatar({
               : "",
         className,
       )}>
-      <Image
-        src={avatarUrl}
-        alt="Viewer"
-        fill
-        sizes="100px"
-        className="object-cover w-full h-full"
-      />
+      {avatarUrl ? (
+        <Image
+          src={avatarUrl}
+          alt="Viewer"
+          fill
+          sizes="100px"
+          className="object-cover w-full h-full"
+        />
+      ) : username ? (
+        <Avatar key={username} className="size-4">
+          <AvatarFallback>
+            {username
+              .split("")
+              .map((x) => x[0])
+              .join("")
+              .toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+      ) : null}
     </div>
   );
 }

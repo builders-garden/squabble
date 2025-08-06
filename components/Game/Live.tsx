@@ -1231,7 +1231,10 @@ export default function Live({
                 {i + 1}
               </div>
               <UserAvatar
-                avatarUrl={formatAvatarUrl(p.avatarUrl || "")}
+                avatarUrl={
+                  p.avatarUrl ? formatAvatarUrl(p.avatarUrl) : undefined
+                }
+                username={p.username}
                 size="xs"
                 className={`${
                   p.fid === user?.fid ? "border-blue-300" : "border-[#C8EFE3]"

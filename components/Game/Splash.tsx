@@ -12,17 +12,9 @@ const luckiestGuy = Luckiest_Guy({
 });
 
 export default function Splash() {
-  const { isSignedIn, signIn } = useSignIn({});
-
-  useEffect(() => {
-    if (!isSignedIn) {
-      const timer = setTimeout(() => {
-        signIn();
-      }, 5000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [isSignedIn, signIn]);
+  const { isSignedIn } = useSignIn({
+    autoSignIn: true,
+  });
 
   return (
     <motion.div

@@ -9,7 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import MiniAppWalletProvider from "./miniapp-wallet-context";
+import WalletDetectorProvider from "./wallet-detector-context";
 
 interface MiniAppContextType {
   isMiniAppReady: boolean;
@@ -35,18 +35,19 @@ export function MiniAppProvider({
 
   const setMiniAppReady = useCallback(async () => {
     try {
+      await sdk.actions.ready();
+      setIsMiniAppReady(true);
+
       const context = await sdk.context;
       if (context) {
         setContext(context as FarcasterMiniAppContext);
       } else {
         setError("Failed to load Farcaster context");
       }
-      await sdk.actions.ready();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to initialize SDK");
       console.error("SDK initialization error:", err);
-    } finally {
-      setIsMiniAppReady(true);
+      setError(err instanceof Error ? err.message : "Failed to initialize SDK");
+      setIsMiniAppReady(false);
     }
   }, []);
 
@@ -91,7 +92,7 @@ export function MiniAppProvider({
         addMiniApp: handleAddMiniApp,
         context,
       }}>
-      <MiniAppWalletProvider>{children}</MiniAppWalletProvider>
+      <WalletDetectorProvider>{children}</WalletDetectorProvider>
     </MiniAppContext.Provider>
   );
 }

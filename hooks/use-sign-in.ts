@@ -36,9 +36,11 @@ export const useSignIn = ({
       }
 
       if (isAuthenticated && authUser) {
+        console.log("Already signed in", authUser);
         setIsSignedIn(true);
         setUser(authUser);
         onSuccess?.(authUser);
+        posthog.identify(authUser.fid.toString());
         return;
       }
 
@@ -87,7 +89,7 @@ export const useSignIn = ({
       setIsLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [context]);
+  }, [context, authUser]);
 
   useEffect(() => {
     // if autoSignIn is true, sign in automatically on mount

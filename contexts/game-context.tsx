@@ -10,6 +10,7 @@ import { useUser } from "@/hooks/use-user";
 import { formatAvatarUrl } from "@/lib/utils";
 import {
   AdjacentWordsNotValidEvent,
+  EventCallback,
   GameEndedEvent,
   GameFullEvent,
   GameLoadingEvent,
@@ -19,12 +20,15 @@ import {
   LetterRemovedEvent,
   Player,
   PlayerJoinedEvent,
+  PlayerLeftEvent,
   RefreshedAvailableLettersEvent,
   ScoreUpdateEvent,
+  ServerToClientEvents,
   TimerTickEvent,
   WordNotValidEvent,
   WordSubmittedEvent,
 } from "@/types/socket";
+import { ServerToClientSocketEvents } from "@/types/socket/socket.enum";
 import { useAudio } from "./audio-context";
 
 interface GameContextType {
@@ -105,7 +109,9 @@ export function GameProvider({
     connectToLobby({
       player: {
         fid: user.fid,
+        username: user.username,
         displayName: user.displayName,
+        avatarUrl: user.avatarUrl,
         address,
       },
       gameId,
@@ -130,10 +136,50 @@ export function GameProvider({
 
   useEffect(() => {
     const eventHandlers = {
-      player_joined: (event: PlayerJoinedEvent) => {
-        // TODO: add Toast with new player that joined
+      [ServerToClientSocketEvents.PLAYER_JOINED]: (
+        event: PlayerJoinedEvent,
+      ) => {
+        console.log("RECEIVED player_joined", event.player);
+        toast.custom((id) => (
+          <div className="flex items-center gap-4 p-2 bg-white rounded-lg shadow-lg animate-bounce border-2 border-[#C8EFE3]">
+            {event.player.avatarUrl ? (
+              <Image
+                src={formatAvatarUrl(event.player.avatarUrl)}
+                width={40}
+                height={40}
+                alt={event.player.displayName || event.player.username || ""}
+                className="w-10 h-10 rounded-full border-4 border-[#C8EFE3] object-cover shadow-sm"
+              />
+            ) : null}
+            <div className="flex flex-col">
+              <span className="font-bold text-xl text-[#7B5A2E]">
+                {event.player.displayName} joined the game! 🎉
+              </span>
+            </div>
+          </div>
+        ));
       },
-      game_full: (event: GameFullEvent) => {
+      [ServerToClientSocketEvents.PLAYER_LEFT]: (event: PlayerLeftEvent) => {
+        toast.custom((id) => (
+          <div className="flex items-center gap-4 p-2 bg-white rounded-lg shadow-lg animate-bounce border-2 border-[#C8EFE3]">
+            {event.player.avatarUrl ? (
+              <Image
+                src={formatAvatarUrl(event.player.avatarUrl)}
+                width={40}
+                height={40}
+                alt={event.player.displayName || event.player.username || ""}
+                className="w-10 h-10 rounded-full border-4 border-[#C8EFE3] object-cover shadow-sm"
+              />
+            ) : null}
+            <div className="flex flex-col">
+              <span className="font-bold text-xl text-[#7B5A2E]">
+                {event.player.displayName} left the game! 😢
+              </span>
+            </div>
+          </div>
+        ));
+      },
+      [ServerToClientSocketEvents.GAME_FULL]: (event: GameFullEvent) => {
         if (!user) {
           console.warn("Cannot set game state to full: User not signed in");
           return;
@@ -145,35 +191,39 @@ export function GameProvider({
           setGameState("full");
         }
       },
-      game_update: (event: GameUpdateEvent) => {
+      [ServerToClientSocketEvents.GAME_UPDATE]: (event: GameUpdateEvent) => {
         console.log("RECEIVED game_update", event.players);
         setPlayers(event.players.filter((p) => p.fid));
       },
-      game_started: (event: GameStartedEvent) => {
+      [ServerToClientSocketEvents.GAME_STARTED]: (event: GameStartedEvent) => {
         setGameState("live");
         setBoard(event.board);
         setTimeRemaining(event.timeRemaining);
       },
-      refreshed_available_letters: (event: RefreshedAvailableLettersEvent) => {
+      [ServerToClientSocketEvents.REFRESHED_AVAILABLE_LETTERS]: (
+        event: RefreshedAvailableLettersEvent,
+      ) => {
         if (!user || (event.playerId && event.playerId !== user.fid)) return;
         const availableLetters = event.players.find(
           (p) => p.fid.toString() === user.fid.toString(),
         )?.availableLetters;
         setAvailableLetters(availableLetters || []);
       },
-      timer_tick: (event: TimerTickEvent) => {
+      [ServerToClientSocketEvents.TIMER_TICK]: (event: TimerTickEvent) => {
         setTimeRemaining(event.timeRemaining);
       },
-      game_loading: (event: GameLoadingEvent) => {
+      [ServerToClientSocketEvents.GAME_LOADING]: (event: GameLoadingEvent) => {
         setGameState("loading");
         setLoadingTitle(event.title);
         setLoadingBody(event.body);
       },
-      game_ended: (event: GameEndedEvent) => {
+      [ServerToClientSocketEvents.GAME_ENDED]: (event: GameEndedEvent) => {
         setPlayers(event.players.filter((p) => p.fid));
         setGameState("ended");
       },
-      letter_placed: (event: LetterPlacedEvent) => {
+      [ServerToClientSocketEvents.LETTER_PLACED]: (
+        event: LetterPlacedEvent,
+      ) => {
         setLetterPlacers((prev) => {
           const newLetterPlacers = { ...prev };
           const key = `${event.position.x}-${event.position.y}`;
@@ -186,14 +236,18 @@ export function GameProvider({
           return newLetterPlacers;
         });
       },
-      letter_removed: (event: LetterRemovedEvent) => {
+      [ServerToClientSocketEvents.LETTER_REMOVED]: (
+        event: LetterRemovedEvent,
+      ) => {
         setLetterPlacers((prev) => {
           const newLetterPlacers = { ...prev };
           delete newLetterPlacers[`${event.position.x}-${event.position.y}`];
           return newLetterPlacers;
         });
       },
-      word_submitted: (event: WordSubmittedEvent) => {
+      [ServerToClientSocketEvents.WORD_SUBMITTED]: (
+        event: WordSubmittedEvent,
+      ) => {
         const eventId = `${event.gameId}-${event.words.join()}-${Date.now()}`;
         if (processedEvents.has(eventId)) return;
         processedEvents.add(eventId);
@@ -258,7 +312,9 @@ export function GameProvider({
           },
         );
       },
-      word_not_valid: (event: WordNotValidEvent) => {
+      [ServerToClientSocketEvents.WORD_NOT_VALID]: (
+        event: WordNotValidEvent,
+      ) => {
         setLetterPlacers((prev) => {
           const newLetterPlacers = { ...prev };
           // Clear all letter placers for this player
@@ -290,7 +346,9 @@ export function GameProvider({
           );
         }
       },
-      adjacent_words_not_valid: (event: AdjacentWordsNotValidEvent) => {
+      [ServerToClientSocketEvents.ADJACENT_WORDS_NOT_VALID]: (
+        event: AdjacentWordsNotValidEvent,
+      ) => {
         setLetterPlacers((prev) => {
           const newLetterPlacers = { ...prev };
           event.path.forEach((position) => {
@@ -321,7 +379,7 @@ export function GameProvider({
           );
         }
       },
-      score_update: (event: ScoreUpdateEvent) => {
+      [ServerToClientSocketEvents.SCORE_UPDATE]: (event: ScoreUpdateEvent) => {
         setPlayers((prev) => {
           const newPlayers = [...prev];
           const playerIndex = newPlayers.findIndex(
@@ -333,18 +391,25 @@ export function GameProvider({
           return newPlayers.filter((p) => p.fid);
         });
       },
+    } satisfies {
+      [K in ServerToClientSocketEvents]: EventCallback<ServerToClientEvents[K]>;
     };
 
-    // Subscribe to all events
-    Object.entries(eventHandlers).forEach(([event, handler]) => {
-      subscribe(event as any, handler);
-    });
-
-    return () => {
-      Object.entries(eventHandlers).forEach(([event, handler]) => {
-        unsubscribe(event as any, handler);
+    const registerHandlers = <K extends ServerToClientSocketEvents>(handlers: {
+      [P in K]: EventCallback<ServerToClientEvents[P]>;
+    }) => {
+      (Object.keys(handlers) as K[]).forEach((event) => {
+        subscribe(event, handlers[event]);
       });
+      return () => {
+        (Object.keys(handlers) as K[]).forEach((event) => {
+          unsubscribe(event, handlers[event]);
+        });
+      };
     };
+
+    const cleanup = registerHandlers(eventHandlers);
+    return cleanup;
   }, [
     subscribe,
     unsubscribe,

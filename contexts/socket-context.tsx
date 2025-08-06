@@ -67,12 +67,10 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
     }
 
     // Add callback to listeners registry if not already present
-    (
-      listeners.current[event] as Array<EventCallback<ServerToClientEvents[T]>>
-    ).push(callback);
+    listeners.current[event].push(callback);
 
     // If socket is connected, ensure we have a listener attached
-    if (socket.current && socket.current.connected) {
+    if (socket.current?.connected) {
       const existingListeners = socket.current.listeners(event);
       if (existingListeners.length === 0) {
         socket.current.on(event as any, (data: any) => {
