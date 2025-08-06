@@ -1,10 +1,9 @@
 # Squabble
 
-## Farcaster Mini App Template w/ Base MiniKit
+## Farcaster Mini App Template
 
 This is a [Next.js](https://nextjs.org) starter kit bootstrapped from [Mini App Next Template](https://github.com/builders-garden/miniapp-next-template)
 
-- [MiniKit](https://docs.base.org/builderkits/minikit/overview)
 - [Farcaster Mini Apps](https://miniapps.xyz)
 - [OnchainKit Documentation](https://docs.base.org/builderkits/onchainkit/getting-started)
 - [Tailwind CSS](https://tailwindcss.com)
