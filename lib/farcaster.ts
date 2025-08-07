@@ -13,6 +13,8 @@ export async function getFarcasterManifest() {
     noindex = false;
   } else if (appUrl.includes("ngrok") || appUrl.includes("tunnel")) {
     miniappName = "Squabble Local";
+  } else if (appUrl.includes("dev.squabble.lol")) {
+    miniappName = "Squabble Dev";
   }
   return {
     accountAssociation: {
