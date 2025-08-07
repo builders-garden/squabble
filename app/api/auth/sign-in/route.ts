@@ -29,8 +29,8 @@ export const POST = async (req: NextRequest) => {
 
   let fid;
   let isValidSignature;
-  const weekInMs = 7 * 24 * 60 * 60 * 1000;
-  let expirationTime = new Date(Date.now() + weekInMs); // 7 days in milliseconds
+  const monthInMs = 30 * 24 * 60 * 60 * 1000;
+  let expirationTime = new Date(Date.now() + monthInMs); // 30 days in milliseconds
 
   // Verify signature matches custody address and auth address
   try {
@@ -41,8 +41,8 @@ export const POST = async (req: NextRequest) => {
     isValidSignature = !!payload;
     fid = payload.sub;
     expirationTime = payload.exp
-      ? new Date(Number(payload.exp) * 1000 + weekInMs)
-      : new Date(Date.now() + weekInMs);
+      ? new Date(Number(payload.exp) * 1000 + monthInMs)
+      : new Date(Date.now() + monthInMs);
   } catch (e) {
     if (e instanceof Errors.InvalidTokenError) {
       console.error("Invalid token", e);
@@ -92,7 +92,7 @@ export const POST = async (req: NextRequest) => {
     httpOnly: true,
     secure: true,
     sameSite: "none",
-    maxAge: 7 * 24 * 60 * 60, // 7 days
+    maxAge: monthInMs / 1000, // 30 days in seconds
     path: "/",
   });
 

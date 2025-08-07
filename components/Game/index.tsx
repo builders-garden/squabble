@@ -123,7 +123,9 @@ function GameContent({ id }: { id: string }) {
   );
 
   // if we arent in a miniapp, show the website and redirect to a farcaster client
-  if (!context || !isMiniAppReady) {
+  const isFromBrowser =
+    (!context && isMiniAppReady) || (!context && !isMiniAppReady);
+  if (isFromBrowser) {
     return <GameWebsite gameId={id} />;
   }
 

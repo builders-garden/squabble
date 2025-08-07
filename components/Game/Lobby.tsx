@@ -10,12 +10,7 @@ import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { basePreconf } from "viem/chains";
-import {
-  useAccount,
-  useCapabilities,
-  useConnections,
-  useSendCalls,
-} from "wagmi";
+import { useAccount, useCapabilities, useSendCalls } from "wagmi";
 import Chip from "@/components/ui/chip";
 import LobbyPlayerCard from "@/components/ui/lobby-player-card";
 import LobbySpotAvailableCard from "@/components/ui/lobby-spot-available-card";
@@ -60,8 +55,6 @@ export default function Lobby({
   contractGameId: string;
   stakeAmount: string;
 }) {
-  const connections = useConnections();
-  console.log("connections", connections);
   const { isMusicPlaying, toggleMusic } = useAudio();
   const {
     playerStakeConfirmed,

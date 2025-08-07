@@ -15,14 +15,20 @@ export const useSignIn = ({
   onSuccess?: (user: User) => void;
 }) => {
   const { context, isMiniAppReady } = useMiniApp();
-  const { setUser } = useUser();
-  const { user: authUser, isAuthenticated } = useAuthCheck();
+  const { user, setUser } = useUser();
+  const {
+    user: authUser,
+    isAuthenticated,
+    isPending: isAuthCheckPending,
+  } = useAuthCheck();
 
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSignIn = useCallback(async () => {
+    if (isSignedIn && user) return;
+
     try {
       setIsLoading(true);
       setError(null);
@@ -92,11 +98,10 @@ export const useSignIn = ({
   }, [context, authUser]);
 
   useEffect(() => {
-    // if autoSignIn is true, sign in automatically on mount
-    if (autoSignIn && !isSignedIn) {
+    if (autoSignIn && !isSignedIn && !isAuthCheckPending) {
       handleSignIn();
     }
-  }, [autoSignIn, handleSignIn, isSignedIn]);
+  }, [autoSignIn, handleSignIn, isSignedIn, isAuthCheckPending]);
 
   return { signIn: handleSignIn, isSignedIn, isLoading, error };
 };

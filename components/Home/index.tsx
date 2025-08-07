@@ -49,7 +49,9 @@ export default function Home() {
     }
   }, [isConnected, context, isCoinbaseWallet, connect]);
 
-  if (!context || !isMiniAppReady) {
+  const isFromBrowser =
+    (!context && isMiniAppReady) || (!context && !isMiniAppReady);
+  if (isFromBrowser) {
     return <Website />;
   }
 
@@ -88,7 +90,7 @@ export default function Home() {
             Real-time Scrabble-like word game with buy-ins.
           </p>
 
-          {context.client.clientFid === FARCASTER_CLIENT_FID ? (
+          {context?.client.clientFid === FARCASTER_CLIENT_FID ? (
             <FarcasterPlay />
           ) : (
             <CoinbaseWalletPlay />

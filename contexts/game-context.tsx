@@ -124,9 +124,9 @@ export function GameProvider({
       const userInPlayers = players.find(
         (p) => p.fid.toString() === user.fid.toString(),
       );
+      console.log("userInPlayers", userInPlayers);
       if (userInPlayers) {
         console.log("User already in game");
-        return;
       } else if (players.length < 6) {
         handleConnectToLobby();
       }
@@ -140,53 +140,70 @@ export function GameProvider({
         event: PlayerJoinedEvent,
       ) => {
         console.log("RECEIVED player_joined", event.player);
-        toast.custom((id) => (
-          <div className="flex items-center gap-4 p-2 bg-white rounded-lg shadow-lg animate-bounce border-2 border-[#C8EFE3]">
-            {event.player.avatarUrl ? (
-              <Image
-                src={formatAvatarUrl(event.player.avatarUrl)}
-                width={40}
-                height={40}
-                alt={event.player.displayName || event.player.username || ""}
-                className="w-10 h-10 rounded-full border-4 border-[#C8EFE3] object-cover shadow-sm"
-              />
-            ) : null}
-            <div className="flex flex-col">
-              <span className="font-bold text-xl text-[#7B5A2E]">
-                {event.player.displayName} joined the game! 🎉
-              </span>
+        toast.custom(
+          (id) => (
+            <div className="flex items-center gap-4 p-2 bg-white rounded-lg shadow-lg animate-bounce border-2 border-[#C8EFE3]">
+              {event.player.avatarUrl ? (
+                <Image
+                  src={formatAvatarUrl(event.player.avatarUrl)}
+                  width={40}
+                  height={40}
+                  alt={event.player.displayName || event.player.username || ""}
+                  className="w-10 h-10 rounded-full border-4 border-[#C8EFE3] object-cover shadow-sm"
+                />
+              ) : null}
+              <div className="flex flex-col">
+                <span className="font-bold text-lg text-[#7B5A2E]">
+                  {event.player.displayName} joined the game! 🎉
+                </span>
+              </div>
             </div>
-          </div>
-        ));
+          ),
+          {
+            id: `player-joined-${event.player.fid}`,
+            position: "top-center",
+            duration: 5000,
+            className: "!p-2",
+          },
+        );
       },
       [ServerToClientSocketEvents.PLAYER_LEFT]: (event: PlayerLeftEvent) => {
-        toast.custom((id) => (
-          <div className="flex items-center gap-4 p-2 bg-white rounded-lg shadow-lg animate-bounce border-2 border-[#C8EFE3]">
-            {event.player.avatarUrl ? (
-              <Image
-                src={formatAvatarUrl(event.player.avatarUrl)}
-                width={40}
-                height={40}
-                alt={event.player.displayName || event.player.username || ""}
-                className="w-10 h-10 rounded-full border-4 border-[#C8EFE3] object-cover shadow-sm"
-              />
-            ) : null}
-            <div className="flex flex-col">
-              <span className="font-bold text-xl text-[#7B5A2E]">
-                {event.player.displayName} left the game! 😢
-              </span>
+        toast.custom(
+          (id) => (
+            <div className="flex items-center gap-4 p-2 bg-white rounded-lg shadow-lg animate-bounce border-2 border-[#C8EFE3]">
+              {event.player.avatarUrl ? (
+                <Image
+                  src={formatAvatarUrl(event.player.avatarUrl)}
+                  width={40}
+                  height={40}
+                  alt={event.player.displayName || event.player.username || ""}
+                  className="w-10 h-10 rounded-full border-4 border-[#C8EFE3] object-cover shadow-sm"
+                />
+              ) : null}
+              <div className="flex flex-col">
+                <span className="font-bold text-lg text-[#7B5A2E]">
+                  {event.player.displayName} left the game! 😢
+                </span>
+              </div>
             </div>
-          </div>
-        ));
+          ),
+          {
+            id: `player-left-${event.player.fid}`,
+            position: "top-center",
+            duration: 5000,
+            className: "!p-2",
+          },
+        );
       },
       [ServerToClientSocketEvents.GAME_FULL]: (event: GameFullEvent) => {
         if (!user) {
           console.warn("Cannot set game state to full: User not signed in");
           return;
         }
-        const userInPlayers = players.find(
+        const userInPlayers = event.players.find(
           (p) => p.fid.toString() === user.fid.toString(),
         );
+        console.log("userInPlayers", userInPlayers);
         if (!userInPlayers) {
           setGameState("full");
         }

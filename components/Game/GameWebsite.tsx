@@ -4,6 +4,7 @@ import Link from "next/link";
 import { BaseIcon, FarcasterIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { env } from "@/lib/env";
+import { cn } from "@/lib/utils";
 
 const luckiestGuy = Luckiest_Guy({
   weight: "400",
@@ -60,7 +61,9 @@ export default function GameWebsite({ gameId }: GameWebsiteProps) {
                 Farcaster
               </PlayButton>
 
-              <PlayButton href={`https://squabble.lol/games/${gameId}`}>
+              <PlayButton
+                href={`https://squabble.lol/games/${gameId}`}
+                disabled={true}>
                 <BaseIcon className="w-4 h-4" />
                 Base
               </PlayButton>
@@ -132,14 +135,20 @@ export default function GameWebsite({ gameId }: GameWebsiteProps) {
 const PlayButton = ({
   children,
   href,
+  disabled = false,
 }: {
   children: React.ReactNode;
   href: string;
+  disabled?: boolean;
 }) => {
   return (
     <Button
       variant="outline"
-      className="px-4 py-2 rounded-md min-w-[120px] flex flex-row items-center gap-2"
+      className={cn(
+        "px-4 py-2 rounded-md min-w-[120px] flex flex-row items-center gap-2",
+        disabled && "opacity-50 cursor-not-allowed",
+      )}
+      disabled={disabled}
       asChild>
       <Link href={href} target="_blank" rel="noopener noreferrer">
         {children}
