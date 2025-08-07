@@ -7,6 +7,17 @@ export const OG_IMAGE_SIZE = {
   height: 400,
 };
 
+export const ADMIN_FIDS = [
+  4461, // lemon
+  5698, // caso
+  262800, // mide
+  189636, // bianco
+  16286, // frank
+  215293, // blackicon
+  592677, // BG
+  1044451, // BETTTR 🙏
+];
+
 export const SQUABBLE_CONTRACT_ADDRESS =
   "0x8b02765fc0afA9aAC34B82322201FCD506Fb2bd8";
 export const SQUABBLE_CONTRACT_ABI = [

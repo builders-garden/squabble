@@ -1,6 +1,8 @@
 import { GameStatus } from "@prisma/client";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { env } from "@/lib/env";
+import { ADMIN_FIDS } from "./constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -53,3 +55,10 @@ export function uuidToBigInt(uuid: string): bigint {
 
   return BigInt("0x" + safeHex);
 }
+
+export const userIsNotAdminAndIsNotProduction = (fid: number): boolean => {
+  return (
+    env.NEXT_PUBLIC_URL !== "https://squabble.lol" &&
+    !ADMIN_FIDS.includes(Number(fid))
+  );
+};

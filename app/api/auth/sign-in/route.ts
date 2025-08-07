@@ -3,6 +3,7 @@ import * as jose from "jose";
 import { NextRequest, NextResponse } from "next/server";
 import { env } from "@/lib/env";
 import { getOrCreateUserFromFid } from "@/lib/prisma/user";
+import { userIsNotAdminAndIsNotProduction } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -50,11 +51,20 @@ export const POST = async (req: NextRequest) => {
     console.error("Error verifying token", e);
   }
 
-  if (!isValidSignature || !fid || isNaN(Number(fid)) || fid !== contextFid)
+  if (!isValidSignature || !fid || isNaN(Number(fid)) || fid !== contextFid) {
+    console.error("Invalid token for fid", fid, "contextFid", contextFid);
     return NextResponse.json(
       { success: false, error: "Invalid token" },
       { status: 401 },
     );
+  }
+
+  if (userIsNotAdminAndIsNotProduction(Number(fid))) {
+    console.error("User is not admin and this is not production", {
+      fid,
+    });
+    return NextResponse.json({ message: "Unauthorized env" }, { status: 403 });
+  }
 
   // Generate JWT token
   const secret = new TextEncoder().encode(env.JWT_SECRET);
