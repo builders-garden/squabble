@@ -49,7 +49,7 @@ export default function Website() {
                 Farcaster
               </PlayButton>
 
-              <PlayButton href="https://squabble.lol">
+              <PlayButton href="https://squabble.lol" disabled>
                 <BaseIcon className="w-4 h-4" />
                 Base
               </PlayButton>
@@ -121,14 +121,17 @@ export default function Website() {
 const PlayButton = ({
   children,
   href,
+  disabled = false,
 }: {
   children: React.ReactNode;
   href: string;
+  disabled?: boolean;
 }) => {
   return (
     <Button
       variant="outline"
       className="px-4 py-2 rounded-md min-w-[120px] flex flex-row items-center gap-2"
+      disabled={disabled}
       asChild>
       <Link href={href} target="_blank" rel="noopener noreferrer">
         {children}
