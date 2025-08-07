@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { BaseIcon, FarcasterIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
+import { env } from "@/lib/env";
 
 const luckiestGuy = Luckiest_Guy({
   weight: "400",
@@ -44,7 +45,7 @@ export default function Website() {
               Play Now
             </h3>
             <div className="flex flex-row gap-2 ">
-              <PlayButton href="https://farcaster.xyz/miniapps/rbT1cmfnn2Yo/squabble">
+              <PlayButton href={env.NEXT_PUBLIC_MINI_APP_URL}>
                 <FarcasterIcon className="w-4 h-4" />
                 Farcaster
               </PlayButton>
