@@ -97,7 +97,10 @@ export function GameProvider({
   const { user } = useUser();
 
   const handleConnectToLobby = async () => {
-    hasConnectedToLobby.current = true;
+    if (hasConnectedToLobby.current) {
+      console.log("Already connected to lobby - skipping duplicate connect");
+      return;
+    }
     if (!user?.fid) {
       console.warn("Cannot connect to lobby: User not signed in");
       return;
@@ -106,6 +109,10 @@ export function GameProvider({
       console.warn("Cannot connect to lobby: User not connected to wallet");
       return;
     }
+
+    // Mark as connected to prevent duplicate attempts
+    hasConnectedToLobby.current = true;
+
     connectToLobby({
       player: {
         fid: user.fid,
@@ -119,20 +126,27 @@ export function GameProvider({
   };
 
   useEffect(() => {
-    if (user) {
+    // Attempt to connect to lobby once we have both the signed-in user and a connected wallet address.
+    // We also re-run if the wallet address changes (e.g. user connects their wallet after the page loaded).
+    if (user && address) {
       // Check if user is already in the game
       const userInPlayers = players.find(
         (p) => p.fid.toString() === user.fid.toString(),
       );
-      console.log("userInPlayers", userInPlayers);
       if (userInPlayers) {
         console.log("User already in game");
       } else if (players.length < 6) {
         handleConnectToLobby();
       }
+    } else {
+      // Debug helpers for missing prerequisites
+      if (!user)
+        console.warn("Cannot connect to lobby: user not signed-in yet");
+      if (!address)
+        console.warn("Cannot connect to lobby: wallet not connected yet");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, players]);
+  }, [user, address, players]);
 
   useEffect(() => {
     const eventHandlers = {
