@@ -15,7 +15,6 @@ model User {
   avatarUrl   String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  referrerFid Int?
 
   participatedGames GameParticipant[]
 }
