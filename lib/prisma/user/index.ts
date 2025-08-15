@@ -1,7 +1,7 @@
-import { User } from "@prisma/client";
 import { fetchUserFromNeynar } from "@/lib/neynar";
 import { prisma } from "@/lib/prisma/client";
 import { formatAvatarUrl } from "@/lib/utils";
+import { User } from "@prisma/client";
 
 // Create or update a user
 export const createOrUpdateUser = async ({
@@ -23,14 +23,12 @@ export const createOrUpdateUser = async ({
       displayName,
       username,
       avatarUrl: formatAvatarUrl(avatarUrl),
-      referrerFid,
     },
     create: {
       fid,
       displayName,
       username,
       avatarUrl: formatAvatarUrl(avatarUrl),
-      referrerFid,
     },
   });
 };
@@ -60,7 +58,6 @@ export const getOrCreateUserFromFid = async (
       username: userFromNeynar.username,
       displayName: userFromNeynar.display_name,
       avatarUrl: userFromNeynar.pfp_url || "",
-      referrerFid: referrerFid ? referrerFid : undefined,
     });
 
     return dbUser;
