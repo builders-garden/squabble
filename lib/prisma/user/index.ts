@@ -9,13 +9,11 @@ export const createOrUpdateUser = async ({
   displayName,
   username,
   avatarUrl,
-  referrerFid,
 }: {
   fid: number;
   displayName: string;
   username: string;
   avatarUrl: string;
-  referrerFid?: number;
 }) => {
   return await prisma.user.upsert({
     where: { fid },
@@ -45,7 +43,6 @@ export const createOrUpdateUser = async ({
  */
 export const getOrCreateUserFromFid = async (
   fid: number,
-  referrerFid?: number,
 ): Promise<User> => {
   if (!fid) throw new Error("Fid is required");
   const user = await getUserByFid(fid);

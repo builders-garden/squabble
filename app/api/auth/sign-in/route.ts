@@ -11,7 +11,6 @@ const quickAuthClient = createClient();
 
 export const POST = async (req: NextRequest) => {
   const {
-    referrerFid,
     token: farcasterToken,
     fid: contextFid,
   } = await req.json();
@@ -79,7 +78,6 @@ export const POST = async (req: NextRequest) => {
 
   const user = await getOrCreateUserFromFid(
     Number(fid),
-    referrerFid ? Number(referrerFid) : undefined,
   );
 
   // Create the response

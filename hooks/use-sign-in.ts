@@ -56,10 +56,10 @@ export const useSignIn = ({
         throw new Error("Sign in failed");
       }
 
-      const referrerFid =
-        context.location?.type === "cast_embed"
-          ? context.location.cast.author.fid
-          : null;
+      // const referrerFid =
+      //   context.location?.type === "cast_embed"
+      //     ? context.location.cast.author.fid
+      //     : null;
 
       const data = await ky
         .post("/api/auth/sign-in", {
@@ -67,7 +67,7 @@ export const useSignIn = ({
           json: {
             token,
             fid: context.user.fid,
-            referrerFid,
+            // referrerFid,
           },
         })
         .json<{ success: boolean; error?: string; user?: User }>();
