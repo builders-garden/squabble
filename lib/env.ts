@@ -22,6 +22,10 @@ export const env = createEnv({
     NEXT_PUBLIC_FARCASTER_HEADER: z.string().min(1),
     NEXT_PUBLIC_FARCASTER_PAYLOAD: z.string().min(1),
     NEXT_PUBLIC_FARCASTER_SIGNATURE: z.string().min(1),
+    // base.dev app id
+    NEXT_PUBLIC_BASE_APP_ID: z.string().min(1),
+    NEXT_PUBLIC_BASE_BUILDER_ADDRESS: z.string().min(1),
+    // backend
     NEXT_PUBLIC_SOCKET_URL: z.string().min(1),
     NEXT_PUBLIC_DAIMO_PAY_ID: z.string().min(1),
     NEXT_PUBLIC_POSTHOG_KEY: z.string().min(1),
@@ -41,6 +45,9 @@ export const env = createEnv({
     NEXT_PUBLIC_FARCASTER_PAYLOAD: process.env.NEXT_PUBLIC_FARCASTER_PAYLOAD,
     NEXT_PUBLIC_FARCASTER_SIGNATURE:
       process.env.NEXT_PUBLIC_FARCASTER_SIGNATURE,
+    NEXT_PUBLIC_BASE_APP_ID: process.env.NEXT_PUBLIC_BASE_APP_ID,
+    NEXT_PUBLIC_BASE_BUILDER_ADDRESS:
+      process.env.NEXT_PUBLIC_BASE_BUILDER_ADDRESS,
     NEXT_PUBLIC_SOCKET_URL: process.env.NEXT_PUBLIC_SOCKET_URL,
     NEXT_PUBLIC_DAIMO_PAY_ID: process.env.NEXT_PUBLIC_DAIMO_PAY_ID,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,

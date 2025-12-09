@@ -22,6 +22,9 @@ export async function getFarcasterManifest() {
       payload: env.NEXT_PUBLIC_FARCASTER_PAYLOAD,
       signature: env.NEXT_PUBLIC_FARCASTER_SIGNATURE,
     },
+    baseBuilder: {
+      ownerAddress: env.NEXT_PUBLIC_BASE_BUILDER_ADDRESS,
+    },
     miniapp: {
       version: "1",
       name: miniappName,
@@ -42,7 +45,9 @@ export async function getFarcasterManifest() {
       ogDescription: "Outspell your friends, in real time.", // 100 characters, summarize core benefits in 1-2 lines
       screenshotUrls: [
         // 1284 x 2778, visual previews of the app, max 3 screenshots
-        `${appUrl}/images/feed.png`,
+        `${appUrl}/images/screenshots/1.webp`,
+        `${appUrl}/images/screenshots/2.webp`,
+        `${appUrl}/images/screenshots/3.webp`,
       ],
       heroImageUrl: `${appUrl}/images/feed.png`, // 1200 x 630px (1.91:1), promotional display image on top of the mini app store
       ogImageUrl: `${appUrl}/images/feed.png`, // 1200 x 630px (1.91:1), promotional image, same as app hero image

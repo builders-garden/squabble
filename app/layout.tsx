@@ -5,12 +5,16 @@ import "./globals.css";
 import { Suspense } from "react";
 import { preconnect } from "react-dom";
 import { Toaster } from "sonner";
+import { env } from "@/lib/env";
 
 const rubik = Rubik({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Squabble",
   description: "Outspell your friends, in real time.",
+  other: {
+    "base:appId": env.NEXT_PUBLIC_BASE_APP_ID,
+  },
 };
 
 export default function RootLayout({
