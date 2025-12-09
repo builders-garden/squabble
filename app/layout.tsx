@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   title: "Squabble",
   description: "Outspell your friends, in real time.",
   other: {
-    "base:appId": env.NEXT_PUBLIC_BASE_APP_ID,
+    "base:app_id": env.NEXT_PUBLIC_BASE_APP_ID,
   },
 };
 
